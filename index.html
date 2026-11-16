@@ -2582,9 +2582,13 @@ for(const k of ["vocab","vnew","saved","savedSent","tests","best","tries","days"
 for(const k of ["custom","customDel"]) if(!Array.isArray(state[k])) state[k]=[];
 
 let dbRef=null, saving=Promise.resolve(), dirty=false;
+// 本機儲存狀態顯示（離線版／GitHub 版沒有雲端同步）
+function localNote(){ const el=$("syncNote"); if(!el||dbRef) return; const t=state.updatedAt?new Date(state.updatedAt):null;
+  el.textContent="已自動儲存在這台裝置的瀏覽器"+(t?"（最後儲存 "+(t.getMonth()+1)+"/"+t.getDate()+" "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")+"）":"")+"；換裝置請用「備份與還原」"; }
 function save(){
   state.updatedAt=Date.now();
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){ toast("無法儲存進度：瀏覽器可能是無痕模式"); }
+  if(!window.claude) localNote();
   if(!dbRef || dirty) return;
   dirty=true;
   saving = saving.then(async()=>{
@@ -2612,6 +2616,12 @@ function mergeRemote(r){
 // ===================== 語音：播放 =====================
 let tts=null, dict=null, listening=false;
 let dictInfo="pending";
+// Safari／iPhone：語音辨識須由點按啟動、不支援 continuous 穩定運作、且不能同時錄音
+// iPhone Safari 須在第一次點按時「解鎖」語音播放
+let ttsUnlocked=false;
+function unlockTTS(){ if(ttsUnlocked||!("speechSynthesis" in window)) return; ttsUnlocked=true; try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); speechSynthesis.getVoices(); }catch(e){} }
+["touchend","click"].forEach(ev=>document.addEventListener(ev,unlockTTS,{once:false,passive:true,capture:true}));
+const IS_SAFARI=/^((?!chrome|android|crios|fxios|edg).)*safari/i.test(navigator.userAgent)||/iP(hone|ad|od)/.test(navigator.userAgent);
 const diagTxt=e=>`<br><span class="muted" style="font-size:11px">診斷：收音來源 ${dict?(dict.kind==="web"?"瀏覽器":"Claude"):"無"}（${dictInfo}）${e?"，代碼 "+esc(String(e.code||e.message||e)):""}</span>`;
 const NOMIC_MSG=`無法開啟麥克風收音。請確認：① 用 <b>Chrome 或 Edge</b> 開啟（iPhone 用 Safari）；② 網址列左側圖示 → 麥克風設為「允許」後重新整理；③ Windows 設定 → 隱私權與安全性 → 麥克風，允許桌面應用程式使用；④ 需連上網路。`;
 // 瀏覽器內建語音辨識（Web Speech API）包成與 Claude dictation 相同的介面，作為備援
@@ -2622,7 +2632,7 @@ function wsDict(){
     onPartial:f=>h.p=f, onFinal:f=>h.f=f, onState:f=>h.s=f,
     start(){ return new Promise((res,rej)=>{ let ok=false;
       try{ rec=new SR(); }catch(e){ rej({code:"error"}); return; }
-      rec.lang="en-US"; rec.interimResults=true; rec.continuous=true; rec.maxAlternatives=1;
+      rec.lang="en-US"; rec.interimResults=true; rec.continuous=!IS_SAFARI; rec.maxAlternatives=1;
       rec.onstart=()=>{ ok=true; h.s&&h.s({state:"listening"}); res(); };
       rec.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) h.f&&h.f({text:r[0].transcript}); else interim+=r[0].transcript; } h.p&&h.p({text:interim}); };
       rec.onerror=ev=>{ const c=(ev.error==="not-allowed"||ev.error==="service-not-allowed")?"not_granted":ev.error||"error"; if(!ok) rej({code:c}); };
@@ -2659,7 +2669,9 @@ function wireDict(d){
 function speakFallback(text,rate){
   return new Promise(res=>{
     if(!("speechSynthesis" in window)){ res(false); return; }
-    speechSynthesis.cancel();
+    // iPhone Safari：cancel 後立刻 speak 會被吞掉，只在播放中才 cancel；並先 resume
+    if(speechSynthesis.speaking||speechSynthesis.pending) speechSynthesis.cancel();
+    try{ speechSynthesis.resume(); }catch(e){}
     const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=rate;
     const v=pickBrowserVoice();
     if(v) u.voice=v;
@@ -2901,7 +2913,7 @@ async function run(){
   stopAll(); const t=tok, c=deck[ci]; if(!c) return;
   if(c.type==="intro"){ st="show"; render(); countdown(2500); return; }
   if(c.type==="word"){ st="playing"; render(); await speak(c.v.w,false); if(t!==tok) return; await sleep(400); if(t!==tok) return; st="show"; render(); countdown(3200); return; }
-  if(lesson.cloze&&dict&&!opt.nomic&&!c._played&&clozeIdx(c.s.en).size){ c._played=true; c._html=null; if(dict.kind==="web"){ startListen(true); return; } st="turn"; render(); return; }
+  if(lesson.cloze&&dict&&!opt.nomic&&!c._played&&clozeIdx(c.s.en).size){ c._played=true; c._html=null; if(dict.kind==="web"&&!IS_SAFARI){ startListen(true); return; } st="turn"; render(); return; }
   st="playing"; c._html=null; c._got=null; c._rounds=0; render();
   const hlStop=karaoke(c.s.en);
   await speak(c.s.en,false); hlStop();
@@ -2909,7 +2921,7 @@ async function run(){
   if(opt.nomic){ st="quiet"; render(); return; }
   if(!dict){ st="self"; render(); return; }
   // 瀏覽器收音（離線版／GitHub 版）播完自動開始收音；Claude 收音規定須由使用者點按
-  if(dict.kind==="web"){ startListen(true); return; }
+  if(dict.kind==="web"&&!IS_SAFARI){ startListen(true); return; }
   st="turn"; render();
 }
 // 播放時依估計速度讓單字依序亮起（語音服務沒有提供逐字時間，為估算值）
@@ -2927,7 +2939,7 @@ function startListen(auto){
   micLive=false;
   { const c=deck[ci]; if(c&&c._got&&c._got.size){ liveMark(sentBox,c.s.en,"",c._got); const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字，請唸白色的部分（只唸白色的字也可以）</span>`; } }
   const lastStart=dict.start();
-  if(dict.kind==="web") recStart(deck[ci]);
+  if(dict.kind==="web"&&!IS_SAFARI) recStart(deck[ci]);
   lastStart.then(()=>{ setTimeout(()=>{ if(listening&&!micLive&&!finalText&&!partialText){ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span class="muted" style="font-size:13px">還沒收到聲音：請確認瀏覽器已允許麥克風（網址列左側鎖頭圖示），並使用電腦 Chrome／Edge 或 Claude 桌面 App。</span>`; } },4000); }).catch(()=>{});
   lastStart.catch(e=>{ listening=false; clearTimers();
     if(e&&e.code==="not_granted"){ st="turn"; setTimeout(()=>{ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">麥克風未被允許。${NOMIC_MSG}</span>${diagTxt(e)}`; },0); }
@@ -2952,7 +2964,7 @@ async function finishListen(){
     // 繼續聆聽白色（未唸對）的字，直到全部變藍；瀏覽器收音可自動接續，Claude 收音需再按一次
     c._rounds=(c._rounds||0)+1;
     const msg=sentBox&&sentBox.querySelector(".msg");
-    if(dict&&dict.kind==="web"&&!opt.nomic&&c._rounds<8){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">繼續聆聽中…請唸白色的字</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
+    if(dict&&dict.kind==="web"&&!IS_SAFARI&&!opt.nomic&&c._rounds<8){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">繼續聆聽中…請唸白色的字</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
     else if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字，按麥克風再唸白色的部分</span>`;
   }
 }
@@ -3453,7 +3465,8 @@ $("syncNote").textContent="僅存本機";
 
 // ===================== Claude 能力（有則啟用） =====================
 (async()=>{
-  if(!window.claude||!claude.use){ dictInfo="standalone"; const w=wsDict(); if(w) wireDict(w); return; }
+  if(!window.claude||!claude.use){ dictInfo="standalone"; const w=wsDict(); if(w) wireDict(w);
+    localNote(); try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(e){} return; }
   claude.use("tts").then(t=>{ if(t) tts=t; }).catch(()=>{});
   claude.use("sample").then(s=>{ if(s) sampleFn=s; }).catch(()=>{});
   claude.use("dictation").then(d=>{ dictInfo=d?"claude":"claude=null"; if(d) wireDict(d); else if(!dict){ const w=wsDict(); if(w) wireDict(w); } }).catch(()=>{ if(!dict){ const w=wsDict(); if(w) wireDict(w); } });
