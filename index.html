@@ -32,6 +32,11 @@ input,textarea{width:100%;font:inherit;border:1px solid var(--line);border-radiu
 .list .it:last-child{border:0}
 .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:#f2f4f7;color:#111;padding:9px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:50}
 .toast.on{opacity:.95}
+.nomicBtn{position:relative;margin-right:8px;color:#9aa3b2}
+.nomicBtn svg{width:24px;height:24px}
+.nomicBtn.on{background:#3a2a1c;color:#ffa36b;box-shadow:0 0 0 2px #ffa36b inset}
+.nomicBtn .nmlab{position:absolute;top:56px;right:-6px;white-space:nowrap;font-size:11px;color:#9aa3b2;background:#1b1d23;border-radius:10px;padding:2px 8px}
+.nomicBtn.on .nmlab{color:#ffa36b}
 .circ{width:52px;height:52px;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:#24272f;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 14px rgba(0,0,0,.4)}
 .circ svg{width:26px;height:26px;fill:currentColor}
 /* ---- 分頁列 ---- */
@@ -236,6 +241,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
     <div class="lh">
       <button class="circ" id="btnClose" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6z"/></svg></button>
       <div style="flex:1;text-align:center"><b id="lTitle"></b><div><button class="rateBtn" style="min-height:30px;padding:2px 12px;font-size:13px;border-radius:20px;margin-top:4px">語速 1x</button></div></div>
+      <button class="circ nomicBtn" id="btnNoMic" aria-label="無法說話" title="無法說話？（免開麥克風）"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-5.6-1.5L15 9.1V11M5 11a7 7 0 0 0 11.6 5.3M19 11a7 7 0 0 1-.6 2.8M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="nmlab">無法說話？</span></button>
       <button class="circ" id="btnSet" aria-label="設定"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6h-4l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L4.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></button>
     </div>
     <div class="segs" id="segs"><i><u></u></i><i><u></u></i><i><u></u></i></div>
@@ -385,7 +391,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <h2>說明</h2>
       <ul class="muted" style="padding-left:18px;margin:0">
         <li>評分：把語音辨識結果與原句逐字比對，算出唸對的字數比例；唸對的字會變藍色，沒變色的字代表沒被正確辨識。</li>
-        <li>離線版：用 Chrome／Edge 的語音辨識收音評分（需連網），第一次會詢問麥克風權限，請按「允許」。學習紀錄存在這台裝置的瀏覽器，可用下方「備份與還原」搬到其他裝置。</li>
+        <li>離線版：用 Chrome／Edge 的語音辨識收音評分（需連網），第一次會詢問麥克風權限，請選「造訪這個網站時允許」。學習紀錄存在這台裝置的瀏覽器，可用下方「備份與還原」搬到其他裝置。</li>
         <li>進度同步：<span id="syncNote">載入中…</span></li>
       </ul>
     </div>
@@ -2417,6 +2423,21 @@ function wsDict(){
       try{ rec.start(); }catch(e){ rej({code:"error"}); } }); },
     stop(){ return new Promise(r=>{ if(!rec){ r(); return; } const t=setTimeout(r,800); rec.addEventListener("end",()=>{ clearTimeout(t); r(); },{once:true}); try{ rec.stop(); }catch(e){ clearTimeout(t); r(); } }); } };
 }
+// 錄下使用者的聲音（離線版／一般網頁可用；Claude 網頁沙箱會被擋，則改顯示辨識文字）
+let recMR=null, recChunks=[], recStream=null, recFor=null;
+function recStart(card){
+  recFor=card; recChunks=[];
+  if(!navigator.mediaDevices||!window.MediaRecorder) return;
+  const go=s=>{ recStream=s; try{ recMR=new MediaRecorder(s); }catch(e){ return; } recMR.ondataavailable=e=>{ if(e.data&&e.data.size) recChunks.push(e.data); };
+    recMR.onstop=()=>{ if(recFor&&recChunks.length){ if(recFor._audio) URL.revokeObjectURL(recFor._audio); recFor._audio=URL.createObjectURL(new Blob(recChunks,{type:recMR.mimeType||"audio/webm"})); } }; recMR.start(); };
+  if(recStream&&recStream.active) go(recStream); else navigator.mediaDevices.getUserMedia({audio:true}).then(go).catch(()=>{ recMR=null; });
+}
+function recStop(){ try{ if(recMR&&recMR.state!=="inactive") recMR.stop(); }catch(e){} }
+let mineAudio=null;
+function playMine(c){
+  if(c&&c._audio){ if(mineAudio){ mineAudio.pause(); } mineAudio=new Audio(c._audio); mineAudio.playbackRate=1; mineAudio.play().catch(()=>toast("無法播放錄音")); return true; }
+  return false;
+}
 function wireDict(d){
   dict=d;
   const inLesson=()=>document.body.classList.contains("lesson");
@@ -2504,19 +2525,23 @@ function lcsMatch(a,b){
   return hit;
 }
 // 回傳 {sc, html}
-function scoreText(en, spoken){
+// got：之前幾次已唸對的字（索引集合），會累計保留成藍色
+function scoreText(en, spoken, got){
   const disp=en.split(/\s+/), units=disp.map(w=>norm(w));
   const target=units.flat(), hit=lcsMatch(target,norm(spoken));
-  let k=0; const html=disp.map((w,idx)=>{ const n=units[idx].length; const ok=n===0||hit.slice(k,k+n).every(Boolean); k+=n; return `<span class="w wd ${ok?"ok":"no"}" data-k="${idx}">${esc(w)}</span>`; }).join(" ");
-  return {sc:Math.round(100*hit.filter(Boolean).length/Math.max(1,target.length)), html};
+  const okIdx=new Set(got||[]); let k=0, total=0;
+  disp.forEach((w,idx)=>{ const n=units[idx].length; if(n>0){ total++; if(hit.slice(k,k+n).every(Boolean)) okIdx.add(idx); } k+=n; });
+  const html=disp.map((w,idx)=>{ const ok=units[idx].length===0||okIdx.has(idx); return `<span class="w wd ${ok?"ok":"no"}" data-k="${idx}">${esc(w)}</span>`; }).join(" ");
+  const okN=[...okIdx].filter(i=>units[i]&&units[i].length>0).length;
+  return {sc:Math.round(100*okN/Math.max(1,total)), html, okIdx};
 }
 function recordScore(s,sc){
   state.best[s.id]=Math.max(state.best[s.id]||0,sc); state.tries[s.id]=(state.tries[s.id]||0)+1; day().n++; flushTime(); save();
 }
 // 收音中即時標示：已唸對的字轉藍色（只標對的，不即時標錯）
-function liveMark(box,en,said){ if(!box) return; const el=box.querySelector(".en"); if(!el) return;
+function liveMark(box,en,said,got){ if(!box) return; const el=box.querySelector(".en"); if(!el) return;
   const disp=en.split(/\s+/), units=disp.map(w=>norm(w)), hit=lcsMatch(units.flat(),norm(said||""));
-  let k=0; el.querySelectorAll(".wd").forEach((sp,idx)=>{ const n=(units[idx]||[]).length; const ok=n>0&&hit.slice(k,k+n).every(Boolean); k+=n; sp.classList.toggle("live",ok); }); }
+  let k=0; el.querySelectorAll(".wd").forEach((sp,idx)=>{ const n=(units[idx]||[]).length; const ok=(n>0&&hit.slice(k,k+n).every(Boolean))||(got&&got.has(idx)); k+=n; sp.classList.toggle("live",!!ok); }); }
 // 複習挖空（比照 Speak Review）：挑句中較長的實詞遮成灰框，唸對才顯示
 const STOPW=new Set("the a an to of in on at for and or but is are was were be been am i you he she it we they my your his her our their this that with from by as do does did not no so very".split(" "));
 function clozeIdx(en){ const ws=en.split(/\s+/); if(ws.length<2) return new Set();
@@ -2588,8 +2613,8 @@ const isSaved = id => !!(state.saved[id]&&state.saved[id].on);
 function statusHtml(){
   const c=deck[ci]; if(!c||c.type!=="sent") return "<span></span>";
   const s=c.s, sc=sess[s.id];
-  const m={playing:["","播放中"], turn:["on",MIC+"點麥克風開口說"], listen:["on",MIC+"請開口說"], scoring:["","評分中…"], self:["warn","無法收音"],
-    pass:["ok",(sess["self:"+s.id]?"✓ 自評通過":"✓ "+((sc??0)>=100?"很讚！":(sc??0)>=90?"很好！":"對！")+" "+(sc??"")+" 分")], fail:["warn","✕ 不太對 "+(sc??"")+" 分"], paused:["","暫停中"]}[st];
+  const m={playing:["","播放中"], turn:["on",MIC+"點麥克風開口說"], listen:["on",MIC+"請開口說"], scoring:["","評分中…"], self:["warn","無法收音"], quiet:["","免開麥克風・按「通過」"],
+    pass:["ok",(sess["self:"+s.id]?(opt.nomic?"✓ 通過":"✓ 自評通過"):"✓ "+((sc??0)>=100?"很讚！":(sc??0)>=90?"很好！":"對！")+" "+(sc??"")+" 分")], fail:["warn","✕ 不太對 "+(sc??"")+" 分"], paused:["","暫停中"]}[st];
   if(m&&(st==="turn"||st==="fail"||st==="self")) return `<button class="st ${m[0]} stbtn" data-act="mic">${m[1]}</button>`;
   if(m&&st==="listen") return `<button class="st ${m[0]} stbtn" data-act="micstop">${m[1]}</button>`;
   return m?`<span class="st ${m[0]}">${m[1]}</span>`:"<span></span>";
@@ -2612,13 +2637,13 @@ function render(){
   } else {
     const s=c.s;
     h=`<div class="lc sent ${st==="listen"?"listen":""} ${st==="pass"&&!sess["self:"+s.id]?"passed":""}" data-i="${ci}"><div class="lc-top"><span class="muted" style="min-width:40px;text-align:left">${deckSentNo()}</span>${statusHtml()}<button class="ic ${isSavedSent(s.id)?"on":""}" data-act="savesent" aria-label="收藏句子">${isSavedSent(s.id)?SV_ON:SV_ICON}</button></div>
-      <div class="lc-mid"><div class="en${s.en.split(/\s+/).length<=3?" short":""}">${wordsHtml(s.en, lesson.cloze&&dict&&st!=="pass"&&st!=="self"?clozeIdx(s.en):null)}</div>${opt.zh?`<div class="zh">${esc(s.zh)}</div>`:""}<div class="heard"></div><div class="msg">${st==="self"?`<span class="muted" style="font-size:13px">${NOMIC_MSG}</span>`:st==="turn"&&!micEver?`<span class="muted" style="font-size:13px">按下方藍色麥克風開始說；第一次會詢問是否允許使用麥克風，請按允許。</span>`:""}</div></div>
+      <div class="lc-mid"><div class="en${s.en.split(/\s+/).length<=3?" short":""}">${wordsHtml(s.en, lesson.cloze&&dict&&!opt.nomic&&st!=="pass"&&st!=="self"&&st!=="quiet"?clozeIdx(s.en):null)}</div>${opt.zh?`<div class="zh">${esc(s.zh)}</div>`:""}<div class="heard"></div><div class="msg">${st==="self"?`<span class="muted" style="font-size:13px">${NOMIC_MSG}</span>`:st==="turn"&&!micEver?`<span class="muted" style="font-size:13px">按下方藍色麥克風開始說；第一次會詢問是否允許使用麥克風，請按允許。</span>`:""}</div></div>
       ${(st==="pass"||st==="fail")&&!sess["self:"+s.id]?`<div class="lc-aud"><button data-act="model">${SPK} 例子</button><button data-act="mine"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/><path d="M18 5a6 6 0 0 1 0 8M20.5 2.5a9.5 9.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> 您唸的</button></div>`:""}
-      <div class="lc-bot">${st==="self"?`<button class="pri" data-act="trymic">${MIC.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 口說練習</button>`:""}<button data-act="again">${ICON.again.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 再來一次</button></div></div>`;
+      <div class="lc-bot">${st==="quiet"?`<button class="pri" data-act="selfok">✓ 通過</button>`:""}${st==="self"?`<button class="pri" data-act="trymic">${MIC.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 口說練習</button>`:""}<button data-act="again">${ICON.again.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 再來一次</button></div></div>`;
   }
   $("pCard").innerHTML=h; sentBox=$("pCard");
   if(c.type==="sent" && c._html){ sentBox.querySelector(".en").innerHTML=c._html; sentBox.querySelector(".heard").textContent=c._heard||""; }
-  const idle = st==="paused" || st==="self" || ((st==="pass"||st==="show")&&!cdTimer);
+  const idle = st==="paused" || st==="self" || st==="quiet" || ((st==="pass"||st==="show")&&!cdTimer);
   const icon = st==="listen"?"stop" : (st==="turn"||st==="fail")?"mic" : idle?"play" : "pause";
   $("btnMain").innerHTML=ICON[icon]; $("btnMain").classList.toggle("rec",st==="listen");
   $("btnPrev").disabled=ci===0;
@@ -2640,12 +2665,13 @@ function renderEnd(){
   $("btnMain").innerHTML=ICON.again; $("btnMain").classList.remove("rec");
   [...$("segs").children].forEach(seg=>seg.firstChild.style.width="100%");
 }
-function clearTimers(){ clearTimeout(cdTimer); clearTimeout(silTimer); clearTimeout(maxTimer); cdTimer=silTimer=maxTimer=null; $("btnNext").classList.remove("counting"); }
+let autoTimer=null;
+function clearTimers(){ clearTimeout(autoTimer); clearTimeout(cdTimer); clearTimeout(silTimer); clearTimeout(maxTimer); cdTimer=silTimer=maxTimer=null; $("btnNext").classList.remove("counting"); }
 function stopAll(){ tok++; clearTimers(); stopSpeech(); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } }
 function go(i,auto){
   stopAll(); sel=null;
   ci=Math.max(0,Math.min(i,deck.length)); st="paused";
-  const c=deck[ci]; if(c&&c.type==="sent"){ c._html=null; c._heard=""; }
+  const c=deck[ci]; if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=null; c._rounds=0; }
   render(); if(auto&&deck[ci]) run();
 }
 // 使用者要求：一律不自動跳下一張，只能手動按「下一句」
@@ -2658,13 +2684,15 @@ async function run(){
   stopAll(); const t=tok, c=deck[ci]; if(!c) return;
   if(c.type==="intro"){ st="show"; render(); countdown(2500); return; }
   if(c.type==="word"){ st="playing"; render(); await speak(c.v.w,false); if(t!==tok) return; await sleep(400); if(t!==tok) return; st="show"; render(); countdown(3200); return; }
-  if(lesson.cloze&&dict&&!c._played&&clozeIdx(c.s.en).size){ c._played=true; c._html=null; st="turn"; render(); return; }
-  st="playing"; c._html=null; render();
+  if(lesson.cloze&&dict&&!opt.nomic&&!c._played&&clozeIdx(c.s.en).size){ c._played=true; c._html=null; if(dict.kind==="web"){ startListen(true); return; } st="turn"; render(); return; }
+  st="playing"; c._html=null; c._got=null; c._rounds=0; render();
   const hlStop=karaoke(c.s.en);
   await speak(c.s.en,false); hlStop();
   if(t!==tok) return;
+  if(opt.nomic){ st="quiet"; render(); return; }
   if(!dict){ st="self"; render(); return; }
-  // 語音辨識規定須由使用者點按才能開始收音，播完後改為等使用者按麥克風
+  // 瀏覽器收音（離線版／GitHub 版）播完自動開始收音；Claude 收音規定須由使用者點按
+  if(dict.kind==="web"){ startListen(true); return; }
   st="turn"; render();
 }
 // 播放時依估計速度讓單字依序亮起（語音服務沒有提供逐字時間，為估算值）
@@ -2680,7 +2708,9 @@ function startListen(auto){
   if(!dict) return;
   clearTimers(); finalText=""; partialText=""; listening=true; st="listen"; { const c=deck[ci]; if(c){ c._html=null; c._heard=""; } } render();
   micLive=false;
+  { const c=deck[ci]; if(c&&c._got&&c._got.size){ liveMark(sentBox,c.s.en,"",c._got); const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字，請唸白色的部分（只唸白色的字也可以）</span>`; } }
   const lastStart=dict.start();
+  if(dict.kind==="web") recStart(deck[ci]);
   lastStart.then(()=>{ setTimeout(()=>{ if(listening&&!micLive&&!finalText&&!partialText){ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span class="muted" style="font-size:13px">還沒收到聲音：請確認瀏覽器已允許麥克風（網址列左側鎖頭圖示），並使用電腦 Chrome／Edge 或 Claude 桌面 App。</span>`; } },4000); }).catch(()=>{});
   lastStart.catch(e=>{ listening=false; clearTimers();
     if(e&&e.code==="not_granted"){ st="turn"; setTimeout(()=>{ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">麥克風未被允許。${NOMIC_MSG}</span>${diagTxt(e)}`; },0); }
@@ -2689,25 +2719,32 @@ function startListen(auto){
   const n=deck[ci].s.en.split(/\s+/).length;
   maxTimer=setTimeout(finishListen, 5000+800*n);
 }
-function showHeard(){ const el=sentBox&&sentBox.querySelector(".heard"); if(!el) return; const t=(finalText+" "+partialText).trim(); el.textContent=t?"聽到："+t:""; const c=deck[ci]; if(c&&c.s) liveMark(sentBox,c.s.en,t); }
+function showHeard(){ const el=sentBox&&sentBox.querySelector(".heard"); if(!el) return; const t=(finalText+" "+partialText).trim(); el.textContent=t?"聽到："+t:""; const c=deck[ci]; if(c&&c.s) liveMark(sentBox,c.s.en,t,c._got); }
 function bumpSilence(){ if(!listening) return; clearTimeout(silTimer); silTimer=setTimeout(finishListen,2500); }
 async function finishListen(){
   if(!listening) return;
   listening=false; clearTimeout(silTimer); clearTimeout(maxTimer); st="scoring"; render();
+  recStop();
   const t=tok; try{ await dict.stop(); }catch(e){} if(t!==tok) return;
   const said=(finalText+" "+partialText).trim(), c=deck[ci];
   if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"; return; }
-  const {sc,html}=scoreText(c.s.en,said); sess[c.s.id]=sc; recordScore(c.s,sc);
+  const {sc,html,okIdx}=scoreText(c.s.en,said,c._got); c._got=okIdx; sess[c.s.id]=sc; recordScore(c.s,sc);
   c._html=html; c._heard="聽到："+said;
   st= sc>=passOf(c.s) ? "pass" : "fail"; render();
-  if(st==="pass") countdown(3000);
+  if(st==="fail"){
+    // 繼續聆聽白色（未唸對）的字，直到全部變藍；瀏覽器收音可自動接續，Claude 收音需再按一次
+    c._rounds=(c._rounds||0)+1;
+    const msg=sentBox&&sentBox.querySelector(".msg");
+    if(dict&&dict.kind==="web"&&!opt.nomic&&c._rounds<8){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">繼續聆聽中…請唸白色的字</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
+    else if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字，按麥克風再唸白色的部分</span>`;
+  }
 }
 function selfOk(){ const c=deck[ci]; sess[c.s.id]=passOf(c.s); sess["self:"+c.s.id]=1; recordScore(c.s,passOf(c.s)); st="pass"; render(); countdown(1500); }
 function mainBtn(){
   if(!deck[ci]){ openLesson(lesson); return; }
   if(st==="listen"){ finishListen(); return; }
   if(st==="turn"||st==="fail"){ if(dict) startListen(false); return; }
-  if(st==="paused" || st==="self" || ((st==="pass"||st==="show")&&!cdTimer)){ run(); return; }
+  if(st==="paused" || st==="self" || st==="quiet" || ((st==="pass"||st==="show")&&!cdTimer)){ run(); return; }
   stopAll(); st="paused"; render();
 }
 function lessonClick(e){
@@ -2717,9 +2754,11 @@ function lessonClick(e){
   const a=b.dataset.act, c=deck[ci];
   if(a==="again") run();
   else if(a==="model"){ const k=c&&c.s; if(k){ const hl=karaoke(k.en); speak(k.en,false).then(hl); } }
-  else if(a==="mine"){ const el=sentBox&&sentBox.querySelector(".heard"); if(el){ el.classList.toggle("show"); } }
+  else if(a==="mine"){ const el=sentBox&&sentBox.querySelector(".heard"); if(el){ el.classList.add("show"); el.style.display="block"; el.animate&&el.animate([{opacity:.3},{opacity:1}],{duration:400}); }
+    if(!playMine(c)) toast("這個環境無法錄音，下方顯示的是電腦聽到的句子"); }
   else if(a==="mic"){ if(!dict){ const w=wsDict(); if(w) wireDict(w); } if(dict) startListen(false); else { const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">${NOMIC_MSG}</span>`; } }
   else if(a==="micstop") finishListen();
+  else if(a==="selfok"){ if(c&&c.type==="sent") selfOk(); }
   else if(a==="trymic"){ if(!dict){ const w=wsDict(); if(w) wireDict(w); } if(dict) startListen(false); else { const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">${NOMIC_MSG}</span>`; } }
   else if(a==="sayword") speak(c.v.w,false);
   else if(a==="saveword"){ const on=!isSaved(c.v.id); state.saved[c.v.id]={on,t:Date.now()}; save(); render(); toast(on?"已儲存":"已取消儲存"); }
@@ -2729,7 +2768,7 @@ function lessonClick(e){
   else if(a==="mwmore") startMyWordsReview();
   else if(a==="home"){ const mw=lesson.key==="mywords"; closeLesson(); if(mw) show("vocab"); }
 }
-function closeLesson(){ stopAll(); document.body.classList.remove("lesson"); show("home"); }
+function closeLesson(){ try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show("home"); }
 
 // ===================== 選字存入「我的單字庫」 =====================
 let sel=null;
@@ -3114,6 +3153,11 @@ $("sheet").onclick=e=>{ const lv=e.target.closest("[data-lv]"); if(lv){ setLevel
   const sv=e.target.closest("[data-sv]"); if(sv){ const [a,k,id]=sv.dataset.sv.split("|"); svAction(a,k,id); } };
 $("btnClose").onclick=closeLesson;
 $("btnSet").onclick=settingsSheet;
+function syncNoMic(){ $("btnNoMic").classList.toggle("on",!!opt.nomic); $("btnNoMic").querySelector(".nmlab").textContent=opt.nomic?"免開麥克風":"無法說話？"; }
+$("btnNoMic").onclick=()=>{ opt.nomic=!opt.nomic; state.opt={...opt}; save(); syncNoMic();
+  toast(opt.nomic?"已切換：免開麥克風，聽完按「通過」即可":"已恢復：開口說並由麥克風評分");
+  const c=deck[ci]; if(c&&c.type==="sent"){ stopAll(); if(opt.nomic){ st="quiet"; render(); } else { c._played=true; st="paused"; render(); run(); } } };
+syncNoMic();
 $("btnMain").onclick=mainBtn;
 $("btnPrev").onclick=()=>go(ci-1,true);
 $("btnNext").onclick=()=>go(ci+1,true);
