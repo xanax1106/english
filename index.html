@@ -168,6 +168,16 @@ body.lesson .selbar,body.studying .selbar{bottom:16px!important}
 /* ---- 單字卡 ---- */
 .fc-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}
 .fc-word{font-size:36px;font-weight:800;line-height:1.2;word-break:break-word}
+.vmicbar{display:flex;align-items:center;gap:12px;margin:4px 0 6px;flex-wrap:wrap}
+.vmic{display:inline-flex;align-items:center;gap:6px;background:var(--pri);color:#fff;border:0;border-radius:22px;padding:8px 16px;font-weight:700;min-height:40px}
+.vmic svg{width:20px;height:20px;fill:currentColor}
+.vmic.sm{margin-top:10px;padding:6px 12px;font-size:14px;min-height:34px;background:#2a3150;color:#c9d4ff}
+.vmic.rec{background:#2a1d22;color:var(--bad)}
+.vmicres{font-size:14px;color:#9aa3b2}
+.vmicres.ok{color:#5b8cff;font-weight:700}
+.vmicres.no{color:#ffa36b}
+.fc-word.ok,.fc-ex.ok{color:#5b8cff}
+.fc-ex .wd.live,.fc-word .wd.live{color:#5b8cff}
 .fc-icons{display:flex;gap:2px;flex-shrink:0}
 .ic{border:0;background:none;padding:8px;min-height:44px;min-width:44px;color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
 .ic svg{width:26px;height:26px;fill:currentColor}
@@ -183,6 +193,10 @@ body.lesson .selbar,body.studying .selbar{bottom:16px!important}
 .fc-exzh{color:var(--sub);margin-top:4px}
 .syn{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:18px;padding:6px 12px 6px 4px;margin-bottom:8px;background:#1a1d24;width:100%;text-align:left}
 .syn b{display:block;font-size:17px}
+.syn .syntx{flex:1;cursor:pointer}
+.syn .synsv{color:#9aa3b2}
+.syn .synsv.on{color:var(--pri2)}
+.syn .synsv svg{width:22px;height:22px}
 .syn span{color:var(--sub);font-size:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .rate{font-weight:700;line-height:1.3;background:none;border:1.5px solid}
@@ -278,13 +292,14 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
           <button class="ic" id="btnFSave" aria-label="收藏"><svg viewBox="0 0 24 24"><path id="saveShape" d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
         </div>
       </div>
+      <div class="vmicbar"><button class="vmic" id="btnFMic"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span>唸唸看</span></button><div class="vmicres" id="fMicRes"></div></div>
       <div class="fc-lab">翻譯</div>
       <div class="fc-zh" id="fZh"></div>
       <div id="fExpBox"><div class="fc-lab">單字解釋</div><div class="fc-exp" id="fExp"></div></div>
       <div id="fExBox">
         <div class="fc-lab">例句</div>
         <div class="fc-box"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;align-items:flex-start">
-          <div><div class="fc-ex" id="fEx"></div><div class="fc-exzh" id="fExZh"></div></div>
+          <div><div class="fc-ex" id="fEx"></div><div class="fc-exzh" id="fExZh"></div><button class="vmic sm" id="btnFExMic"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span>唸例句</span></button><div class="vmicres" id="fExMicRes"></div></div>
           <button class="ic sm" id="btnFEx" aria-label="播放例句"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         </div></div>
       </div>
@@ -487,48 +502,72 @@ At first, my fingers hurt a lot after practice.|一開始練完後手指很痛�
 Now I practice for twenty minutes every evening.|現在我每天傍晚練二十分鐘。
 I can already play a few simple songs.|我已經會彈幾首簡單的歌了。
 My goal is to play at my friend's wedding.|我的目標是在朋友的婚禮上表演。
+I watch online videos to learn new songs.|我看網路影片學新歌。
+My son sometimes plays the piano with me.|我兒子有時會和我一起彈琴。
+Playing music helps me forget about work stress.|彈奏音樂讓我忘掉工作壓力。
 #d2-2|下雨天|A Rainy Day
 It was raining so hard this morning that I stayed home.|今天早上雨下得很大，所以我待在家。
 I made a cup of tea and read a book.|我泡了一杯茶，看了一本書。
 In the afternoon, I called my parents to say hello.|下午我打電話問候父母。
 They told me to take care and not get sick.|他們要我好好照顧自己、別感冒了。
 Sometimes a quiet day at home is just what I need.|有時候在家安靜的一天，正是我需要的。
+I also cleaned my room and organized my closet.|我也打掃了房間、整理了衣櫃。
+In the evening, I cooked a simple dinner for myself.|傍晚我替自己煮了簡單的晚餐。
+I went to bed early and slept very well.|我早早上床，睡得很好。
 #t2-1|機場的狀況|A Problem at the Airport
 When I arrived in Tokyo, my luggage didn't come out.|我抵達東京時，行李沒有出來。
 I went to the counter to report the problem.|我到櫃檯登記這個問題。
 The staff asked me to fill out a form.|工作人員請我填一份表格。
 They promised to deliver the bag to my hotel.|他們答應會把行李送到我的飯店。
 Luckily, it arrived the next morning.|幸好隔天早上就送到了。
+I bought a toothbrush and a clean shirt at a convenience store.|我在便利商店買了牙刷和一件乾淨的襯衫。
+The airline paid for the things I needed that night.|航空公司支付了我那晚需要的東西。
+Next time, I'll pack some clothes in my carry-on bag.|下次我會在隨身行李裡放些衣服。
 #t2-2|問路|Asking for Directions
 Excuse me, could you tell me how to get to the museum?|不好意思，請問博物館怎麼走？
 Go straight and turn left at the second corner.|直走，在第二個路口左轉。
 Is it far from here, or can I walk?|離這裡遠嗎？還是可以用走的？
 It's about ten minutes on foot.|走路大約十分鐘。
 Thank you so much for your help.|非常謝謝你的幫忙。
+Is there a place to buy tickets near the entrance?|入口附近有地方買票嗎？
+What time does the museum close today?|博物館今天幾點關門？
+Is there a discount for seniors or students?|老人或學生有優惠嗎？
 #m2-1|說明新的血壓藥|Explaining a New Medicine
 Your doctor has prescribed a new medicine for your blood pressure.|醫師為您開了一個新的血壓藥。
 Please take one tablet every morning after breakfast.|請每天早餐後吃一顆。
 If you feel dizzy, sit down and rest for a while.|如果覺得頭暈，請坐下休息一下。
 Please check your blood pressure at home every day.|請每天在家量血壓。
 Bring your records with you on your next visit.|下次回診請帶著血壓紀錄。
+Please try to take it at the same time every day.|請盡量每天在同一時間服用。
+Don't stop taking it without talking to your doctor first.|沒有先和醫師討論，請不要自行停藥。
+If you have any questions, please call the pharmacy.|如果有任何問題，請打電話給藥局。
 #m2-2|眼藥水的用法|Using Eye Drops
 First, wash your hands with soap and water.|首先，用肥皂和清水洗手。
 Tilt your head back and pull down your lower eyelid.|頭往後仰，拉下下眼瞼。
 Put one drop into your eye without touching the tip of the bottle.|點一滴到眼睛裡，瓶口不要碰到眼睛。
 Close your eye gently for about one minute.|輕輕閉上眼睛約一分鐘。
 If you use two kinds of drops, wait about five minutes between them.|如果使用兩種眼藥水，中間請間隔約五分鐘。
+Throw away the bottle one month after you open it.|開封一個月後請丟掉這瓶藥。
+Please don't share your eye drops with other people.|請不要和別人共用眼藥水。
+If your eyes become red or painful, please see your doctor.|如果眼睛變紅或疼痛，請回診。
 #w2-1|專案進度報告|A Project Update
 Thank you all for coming to today's meeting.|謝謝大家來參加今天的會議。
 I'd like to give you a quick update on our project.|我想簡單報告專案的進度。
 We finished the first stage last Friday.|我們上週五完成了第一階段。
 However, the second stage is a little behind schedule.|不過，第二階段的進度有點落後。
 We need two more weeks to complete it.|我們還需要兩週才能完成。
+The main reason is that a key supplier delivered late.|主要原因是一家重要供應商延遲交貨。
+We've already found a backup supplier to avoid future delays.|我們已經找到備用供應商，避免以後延誤。
+Please let me know if you have any questions.|如果有任何問題，請告訴我。
 #w2-2|會議改期|Rescheduling a Meeting
 I'm afraid I can't make it to the meeting tomorrow.|恐怕我明天無法出席會議。
 I have to attend a training course in the morning.|我早上必須參加一個訓練課程。
 Could we move the meeting to Thursday afternoon?|我們可以把會議改到週四下午嗎？
 I'll send everyone the updated agenda by email.|我會用電子郵件把更新後的議程寄給大家。
 Sorry for the inconvenience, and thank you for understanding.|造成不便很抱歉，謝謝大家體諒。
+If Thursday doesn't work, Friday morning is also fine.|如果星期四不行，星期五早上也可以。
+Please reply by the end of today so I can book the room.|請在今天下班前回覆，好讓我預訂會議室。
+I'll prepare the materials we need before the meeting.|我會在會議前準備好需要的資料。
 #d3-1|成年後學英文|Learning English as an Adult
 I've been learning English for a while, but speaking is still hard for me.|我學英文一段時間了，但口說對我來說還是很難。
 I can understand most of what I read, but I often freeze when I have to talk.|我讀得懂大部分的內容，但要開口時常常會卡住。
@@ -536,6 +575,9 @@ So I decided to practice speaking out loud for a few minutes every day.|所以�
 At first it felt strange to talk to my phone, but now I'm used to it.|一開始對著手機說話感覺很怪，但現在已經習慣了。
 I've noticed that I make fewer mistakes when I speak slowly and clearly.|我發現說得慢一點、清楚一點時，錯誤會比較少。
 My next goal is to have a short conversation with a foreign visitor.|我的下一個目標是和外國訪客進行一段簡短的對話。
+I also listen to English podcasts on my way to work every morning.|我每天早上上班途中也會聽英文 Podcast。
+When I don't know how to say something, I try to explain it in simpler words.|不知道怎麼說時，我會試著用比較簡單的字解釋。
+Little by little, I'm becoming more confident about speaking English in public.|一點一點地，我對在公開場合說英文越來越有自信。
 #d3-2|鄉間小旅行|A Trip to the Countryside
 Last weekend, my wife and I took a short trip to a small town in the mountains.|上週末，我和太太到山上的一個小鎮短暫旅行。
 We stayed at a family-run guesthouse with a beautiful view of the valley.|我們住在一間家庭經營、看得到美麗山谷的民宿。
@@ -543,6 +585,9 @@ In the morning, the owner served us a simple breakfast made with local vegetable
 After breakfast, we walked along a quiet path next to a small river.|早餐後，我們沿著小河旁一條安靜的小路散步。
 It was much cooler there than in the city, and the air was very fresh.|那裡比城市涼爽得多，空氣也很新鮮。
 We both agreed that we should come back again next spring.|我們都同意明年春天要再來一次。
+In the afternoon, we visited a small tea farm and learned how tea is made.|下午我們參觀了一座小茶園，了解茶是怎麼製成的。
+The owner let us taste several kinds of tea and explained the differences.|老闆讓我們品嚐了好幾種茶，並說明它們的差別。
+We bought two boxes of tea as gifts for our parents and colleagues.|我們買了兩盒茶，當作送給爸媽和同事的禮物。
 #t3-1|班機取消|A Canceled Flight
 Our flight to Singapore was canceled because of a typhoon.|我們飛往新加坡的班機因為颱風取消了。
 We went to the airline counter and asked them to help us find another flight.|我們到航空公司櫃檯，請他們幫忙找其他班機。
@@ -550,6 +595,9 @@ The earliest seat available was on a flight leaving the next afternoon.|最早�
 The airline gave us a hotel room near the airport and some meal coupons.|航空公司提供我們機場附近的飯店房間和一些餐券。
 I called our hotel in Singapore to change our booking by one night.|我打電話給新加坡的飯店，把訂房延後一晚。
 In the end, the delay was stressful, but everything worked out fine.|雖然延誤讓人很有壓力，但最後一切都順利解決了。
+While we waited, we explored the area near the airport and found a nice local restaurant.|等待時，我們逛了機場附近，找到一家不錯的在地餐廳。
+Our travel insurance also covered some of the extra costs caused by the delay.|我們的旅遊保險也負擔了延誤造成的部分額外費用。
+Since then, I always check the weather forecast a few days before an international trip.|從那之後，出國前幾天我都會先看天氣預報。
 #t3-2|租車|Renting a Car
 We'd like to rent a small car for three days, starting tomorrow morning.|我們想從明天早上開始，租一台小車三天。
 Could you tell me what documents I need, and whether insurance is included?|可以告訴我需要哪些證件，以及是否含保險嗎？
@@ -557,6 +605,9 @@ You'll need your passport, an international driving permit, and a credit card.|�
 We also ask for a deposit, which will be returned when you bring the car back.|我們也會收取押金，還車時會退還給您。
 Please return the car with a full tank of gas to avoid an extra charge.|請加滿油再還車，以免產生額外費用。
 If you have any problems on the road, call the number on this card.|路上如果有任何問題，請撥打這張卡片上的電話。
+Before we leave, could you show me how to use the navigation system in English?|出發前，可以教我怎麼把導航系統設成英文嗎？
+We'll take some photos of the car first, just to record any scratches.|我們先幫車子拍幾張照片，記錄一下有沒有刮痕。
+If we're going to be late returning the car, should we call you in advance?|如果還車會晚到，需要先打電話給你嗎？
 #m3-1|定量噴霧吸入器的使用|Using an Inhaler
 Today I'll show you how to use this inhaler, and then you can try it yourself.|今天我示範這個吸入器怎麼用，然後請您自己試一次。
 First, shake the inhaler well and breathe out slowly and completely.|首先，把吸入器搖勻，再慢慢把氣完全吐出。
@@ -564,6 +615,9 @@ Put the mouthpiece between your lips and breathe in slowly and deeply as you pre
 Hold your breath for about ten seconds, and then breathe out slowly.|閉氣大約十秒，再慢慢吐氣。
 If you need a second puff, wait about one minute before you take it.|如果需要吸第二下，請等大約一分鐘再吸。
 If your inhaler contains a steroid, rinse your mouth with water and spit it out after use.|如果您的吸入器含有類固醇，使用後請用清水漱口並吐掉。
+Please check the counter on the inhaler so you know when it's almost empty.|請看吸入器上的計數器，就知道快用完了。
+Clean the mouthpiece once a week with a dry cloth, unless the instructions say otherwise.|除非說明書另有指示，每週用乾布擦一次吸嘴。
+Bring your inhaler to your next visit, and I'll check your technique again.|下次回診請帶著吸入器，我再幫您確認使用方式。
 #m3-2|胰島素筆的保存|Storing Insulin Pens
 Please keep unopened insulin pens in the refrigerator, but do not freeze them.|未開封的胰島素筆請冷藏，但不可冷凍。
 The pen you are using can usually be kept at room temperature for a limited time.|正在使用的筆通常可以在室溫下保存一段有限的時間。
@@ -571,6 +625,9 @@ Please write the opening date on the pen and check the package insert for how lo
 Keep it away from direct sunlight, and do not leave it in a hot car.|請避免陽光直射，也不要放在高溫的車內。
 Use a new needle every time, and put used needles in a hard container.|每次都使用新針頭，用過的針頭放進硬質容器。
 If the insulin looks cloudy when it should be clear, do not use it.|如果原本應該澄清的胰島素看起來混濁，請不要使用。
+When traveling, keep your insulin in your carry-on bag, not in checked luggage.|旅行時，請把胰島素放在隨身行李，不要託運。
+Always carry some candy with you in case your blood sugar becomes too low.|請隨身帶些糖果，以防血糖過低。
+Please bring your blood sugar records to your next visit so the doctor can review them.|下次回診請帶血糖紀錄，讓醫師查看。
 #w3-1|報告改善成果|Presenting Results
 Before we begin, I'd like to briefly review what we discussed last time.|開始之前，我想簡單回顧上次討論的內容。
 We agreed to try a new workflow to reduce the waiting time at the pharmacy.|我們同意試行新的流程，來縮短藥局的等候時間。
@@ -578,6 +635,9 @@ According to the data, the average waiting time has decreased by about fifteen p
 However, the waiting time is still long during the busiest hours in the morning.|不過，早上最忙的時段等候時間仍然很長。
 I think we should focus on improving the process during those peak hours.|我認為我們應該著重改善尖峰時段的流程。
 Let me share my screen and walk you through the details.|讓我分享螢幕，帶大家看一下細節。
+On the next slide, you can see how the waiting time changed each month.|下一張投影片可以看到每個月等候時間的變化。
+We also asked some patients for feedback, and most of them were satisfied with the change.|我們也詢問了一些病人的意見，大多數對改變感到滿意。
+I'd like to hear your ideas on how we can make the process even better.|我想聽聽大家對於如何讓流程更好的想法。
 #w3-2|處理意見分歧|Handling a Disagreement
 I understand your concern, but we also need to consider the cost of the new system.|我理解您的顧慮，但我們也要考慮新系統的成本。
 One of the main challenges is that we don't have enough staff on night shifts.|主要的挑戰之一是夜班人力不足。
@@ -585,6 +645,9 @@ Could you clarify what you mean by a more flexible schedule?|可以說明您所�
 I think both ideas have good points, so let's look at them more carefully.|我覺得兩個想法都有優點，我們再仔細看看。
 We haven't reached a decision yet, so let's discuss it again next week.|我們還沒做出決定，下週再討論一次。
 In the meantime, could everyone send me their suggestions by Friday?|在這期間，可以請大家在週五前把建議寄給我嗎？
+I'd also like to invite a staff member from the night shift to join the next meeting.|我也想邀請一位夜班同仁參加下次會議。
+That way, we can hear directly from the people who will be affected by the change.|這樣我們就能直接聽到受影響同仁的意見。
+Thank you all for sharing your honest opinions today.|謝謝大家今天坦誠分享意見。
 #d4-1|找到平衡|Finding Balance
 As I get older, I've realized that it's important to find a balance between work and family.|隨著年紀增長，我體會到在工作和家庭之間取得平衡很重要。
 For many years, I spent long hours at the hospital and rarely had time for myself.|多年來，我在醫院工作很長的時間，很少有屬於自己的時間。
@@ -657,12 +720,18 @@ Could you make one of them less spicy?|其中一碗可以做小辣嗎？
 How long will it take to be ready?|大概多久會好？
 It'll be about fifteen minutes, so please have a seat.|大約十五分鐘，請先坐一下。
 Can I pay with my phone, or is it cash only?|可以用手機付款嗎？還是只收現金？
+Do you have any side dishes to go with the noodles?|有沒有可以搭配麵的小菜？
+I'll take some cucumbers and a plate of dried tofu.|我要一份小黃瓜和一盤豆干。
+Could you put the soup in a separate bag, please?|可以把湯另外裝一袋嗎？
 #f2-2|換貨|Exchanging an Item
 I bought this shirt yesterday, but it's too small.|我昨天買了這件襯衫，但太小了。
 Could I exchange it for a larger size?|可以換大一號嗎？
 Do you have the receipt with you?|您有帶收據嗎？
 Yes, here it is. I haven't worn it.|有，在這裡。我還沒穿過。
 Great, I'll get you a medium from the back.|好的，我去後面幫您拿一件 M 號。
+If you don't have my size, can I get a refund?|如果沒有我的尺寸，可以退款嗎？
+We can refund it to your card within three days.|我們可以在三天內退到您的卡上。
+Please try it on first to make sure it fits.|請先試穿看看合不合身。
 #f3-1|週末上市場|Weekend Grocery Shopping
 Every Saturday morning, I go to the traditional market near my house.|每週六早上，我會去家附近的傳統市場。
 The vegetables there are fresher and cheaper than in the supermarket.|那裡的蔬菜比超市新鮮又便宜。
@@ -670,6 +739,9 @@ I usually buy fruit, fish, and enough vegetables for the whole week.|我通常�
 The lady at the fruit stand always gives me a little extra.|水果攤的阿姨總是會多送我一點。
 I try to bring my own shopping bags to reduce plastic waste.|我盡量自備購物袋，減少塑膠垃圾。
 After shopping, I often stop for a bowl of hot soy milk.|買完菜後，我常會停下來喝碗熱豆漿。
+Prices at the market have gone up a lot this year, especially for vegetables.|今年市場的價格漲了很多，尤其是蔬菜。
+Sometimes I compare prices at a few stands before I decide what to buy.|有時候我會先比較幾個攤位的價格，再決定買什麼。
+Shopping at the market is also a good chance to chat with my neighbors.|去市場買菜也是跟鄰居聊天的好機會。
 #f3-2|餐廳訂位|Booking a Restaurant
 Hello, I'd like to book a table for six people this Friday evening.|您好，我想訂這週五晚上六個人的位子。
 We're celebrating my mother's birthday, so a quiet table would be great.|我們要幫母親慶生，安靜一點的位子會比較好。
@@ -677,6 +749,9 @@ Is it possible to bring our own birthday cake?|可以自己帶生日蛋糕嗎？
 Yes, but there is a small service charge for cutting the cake.|可以，但切蛋糕會收一點服務費。
 That's fine. Could you also prepare a high chair for a child?|沒問題。也可以準備一張兒童椅嗎？
 Sure. Your table is booked for seven o'clock under the name Chen.|好的，已用陳先生的名字訂好七點的位子。
+My father doesn't eat beef, so could you suggest a few other dishes?|我父親不吃牛肉，可以推薦幾道其他的菜嗎？
+We'd also like to order a fruit plate for dessert after the meal.|我們也想在餐後點一盤水果當甜點。
+If anything changes, I'll call you at least one day in advance.|如果有任何變動，我至少會提前一天打電話給您。
 #f4-1|網購的麻煩|A Problem with Online Shopping
 Last week, I ordered a new rice cooker online because it was on sale.|上週因為特價，我在網路上訂了一台新電鍋。
 When the package arrived, I noticed that the box was damaged and the lid was cracked.|包裹送到時，我發現箱子破損、蓋子也裂了。
@@ -707,12 +782,18 @@ I'm in a hurry, so please take the fastest route.|我在趕時間，請走最快
 How much will it cost to get there?|到那裡大概多少錢？
 Can you stop here? This is fine.|可以停這裡嗎？這裡就好。
 Keep the change, and thank you for the ride.|不用找了，謝謝您載我。
+Could you turn down the air conditioning a little?|可以把冷氣調小一點嗎？
+Do you know a faster way to avoid the traffic?|你知道避開車潮的更快路線嗎？
+Could I have a receipt for this ride, please?|可以給我這趟車的收據嗎？
 #g2-2|塞車|Stuck in Traffic
 Sorry, I'm going to be about twenty minutes late.|抱歉，我大概會遲到二十分鐘。
 There was an accident, and the traffic is terrible.|發生了車禍，交通非常糟。
 Please start the meeting without me.|請先開始會議，不用等我。
 I'll call you as soon as I find a parking space.|我一找到停車位就打給你。
 Next time, I'll leave home a little earlier.|下次我會早一點出門。
+The police are directing traffic, so it should be clear soon.|警察正在指揮交通，應該很快就會通了。
+Could you send me the meeting notes later today?|今天晚點可以把會議紀錄傳給我嗎？
+I'm really sorry for making everyone wait.|真的很抱歉讓大家久等了。
 #g3-1|颱風天|A Typhoon Day
 A typhoon is coming, so the government has announced that schools and offices will be closed.|颱風要來了，政府宣布停班停課。
 Before the storm arrived, we bought water, instant noodles, and batteries.|暴風雨來之前，我們買了水、泡麵和電池。
@@ -720,6 +801,9 @@ We also moved the plants inside and checked that all the windows were closed.|�
 The wind was so strong that we could hear it all night.|風大到我們整晚都聽得見。
 Luckily, the power only went out for about an hour.|幸好只停電大約一小時。
 The next morning, the streets were covered with leaves and broken branches.|隔天早上，街上滿是落葉和斷枝。
+Some trees had fallen on the road, so cars couldn't pass for several hours.|有些樹倒在路上，所以車子好幾個小時無法通行。
+Our neighbors and I worked together to clean the street in front of our building.|我和鄰居一起清理大樓前的街道。
+I was glad that everyone in our community was safe after the storm.|很慶幸暴風雨過後社區裡每個人都平安。
 #g3-2|騎機車上班|Riding a Scooter to Work
 Like many people in Taiwan, I ride a scooter to work every day.|和許多台灣人一樣，我每天騎機車上班。
 It's much faster than taking the bus, especially during rush hour.|比搭公車快多了，尤其是尖峰時段。
@@ -727,6 +811,9 @@ However, I always have to check the weather before I leave home.|不過，出門
 On rainy days, I wear a raincoat and ride more slowly.|下雨天時，我會穿雨衣，騎得比較慢。
 I also make sure to wear my helmet and follow the traffic rules.|我也一定戴安全帽並遵守交通規則。
 Finding a parking space near the hospital can be difficult in the morning.|早上要在醫院附近找車位可能很難。
+In summer, the sun is very strong, so I wear long sleeves and sunglasses.|夏天太陽很大，所以我會穿長袖、戴太陽眼鏡。
+I take my scooter for a check-up every six months to make sure it's safe.|我每六個月帶機車去保養，確保安全。
+Some of my colleagues have started taking the bus to reduce air pollution.|有些同事開始改搭公車，以減少空氣污染。
 #g4-1|迷路的經驗|Getting Lost
 Last month, I drove to a friend's new house in a part of the city I didn't know well.|上個月，我開車去朋友的新家，那一區我不太熟。
 My phone's GPS lost its signal, and suddenly I had no idea where I was.|手機的 GPS 沒了訊號，我突然完全不知道自己在哪裡。
@@ -757,12 +844,18 @@ We're having a small barbecue at our house.|我們家要辦一個小型烤肉。
 You're welcome to bring your family along.|歡迎帶家人一起來。
 Could you let me know by Thursday?|可以在星期四前告訴我嗎？
 Great, I'm looking forward to seeing you.|太好了，期待見到你。
+Do you or your kids have any food allergies?|你或孩子有對什麼食物過敏嗎？
+We'll prepare some grilled vegetables for anyone who doesn't eat meat.|我們會為不吃肉的人準備一些烤蔬菜。
+There's free parking right across the street.|對街就有免費停車位。
 #h2-2|分擔家事|Sharing Housework
 In our family, everyone helps with the housework.|在我們家，每個人都會幫忙做家事。
 I usually do the dishes after dinner.|我通常負責晚餐後洗碗。
 My wife does the laundry, and my son takes out the trash.|太太洗衣服，兒子負責倒垃圾。
 On Sundays, we clean the house together.|星期天我們一起打掃家裡。
 It's tiring, but the house feels much nicer afterward.|雖然很累，但打掃完家裡感覺舒服多了。
+We made a chart so everyone knows their tasks.|我們做了一張表，讓大家知道各自的工作。
+When someone is busy, the others help out.|有人忙的時候，其他人就會幫忙。
+Working together also gives us more time to relax.|一起分工也讓我們有更多時間休息。
 #h3-1|我的鄰居|My Neighbors
 We've lived in the same apartment building for more than ten years.|我們在同一棟公寓住了十多年。
 Our neighbors are friendly, and we often chat when we meet in the elevator.|鄰居都很友善，在電梯遇到時常會聊天。
@@ -770,6 +863,9 @@ When we go on vacation, the family next door takes care of our plants.|我們去
 In return, we sometimes share fruit or homemade dumplings with them.|作為回報，我們有時會分他們水果或自己包的水餃。
 Last year, we organized a small party for everyone on our floor.|去年，我們為同一層樓的住戶辦了一場小派對。
 Having good neighbors makes daily life much easier and more pleasant.|有好鄰居讓日常生活輕鬆愉快得多。
+When the elevator was broken last month, our neighbor helped me carry heavy boxes upstairs.|上個月電梯故障時，鄰居幫我把重箱子搬上樓。
+The elderly lady downstairs often gives us vegetables from her small garden.|樓下的老太太常把她小菜園種的菜送給我們。
+I hope my children will also learn to be kind and helpful to their neighbors.|希望我的孩子也能學會對鄰居親切、樂於助人。
 #h3-2|婉拒邀請|Declining an Invitation
 Thank you so much for inviting me to your daughter's wedding.|非常謝謝你邀請我參加你女兒的婚禮。
 Unfortunately, I have to work that day and can't change my schedule.|很可惜那天我要上班，沒辦法調班。
@@ -777,6 +873,9 @@ I'm really sorry that I won't be able to join you.|很抱歉沒辦法參加。
 I'd like to send a small gift to congratulate the couple.|我想送個小禮物祝賀新人。
 Could you send me some photos after the ceremony?|婚禮結束後可以傳些照片給我嗎？
 Let's get together for dinner sometime next month to celebrate.|我們下個月找時間一起吃飯慶祝吧。
+Please tell your daughter that I wish them a long and happy life together.|請轉告你女兒，祝他們白頭偕老、幸福美滿。
+If there's anything I can do to help before the wedding, just let me know.|婚禮前如果有我能幫忙的，儘管告訴我。
+Thank you again for thinking of me, and I hope everything goes perfectly.|再次謝謝你想到我，祝一切順利完美。
 #h4-1|家族團聚|A Family Reunion
 During the Lunar New Year holiday, our whole family gathers at my parents' house in the countryside.|農曆新年期間，全家人都會回到鄉下父母家團聚。
 It's the only time of the year when all my brothers and sisters are together.|這是一年中唯一兄弟姊妹都到齊的時候。
@@ -807,12 +906,18 @@ I also have a runny nose and a slight fever.|我還流鼻水，有點發燒。
 I'm going to see a doctor after work today.|我今天下班後要去看醫生。
 I should drink more water and get some rest.|我應該多喝水、多休息。
 Hopefully I'll feel better by the weekend.|希望週末前會好一點。
+My colleague says honey and warm water help a sore throat.|同事說蜂蜜加溫水對喉嚨痛有幫助。
+I'll wear a mask so I don't spread it to others.|我會戴口罩，免得傳染給別人。
+If it gets worse, I'll take a day off.|如果變嚴重，我就請一天假。
 #l2-2|我的嗜好|My Hobby
 In my free time, I enjoy taking photos of birds.|空閒時我喜歡拍鳥。
 I often go to the river early in the morning.|我常常一大早去河邊。
 You need a lot of patience to get a good picture.|要拍到好照片需要很有耐心。
 Last month, I joined a photography club.|上個月我加入了一個攝影社。
 We share our photos and give each other advice.|我們互相分享照片並給彼此建議。
+My favorite bird is the kingfisher because of its bright colors.|我最喜歡翠鳥，因為牠的顏色很鮮豔。
+I'm saving money to buy a better camera lens.|我在存錢買更好的鏡頭。
+Next spring, the club is planning a trip to Kenting.|明年春天，社團打算去墾丁。
 #l3-1|健康檢查|A Health Check-up
 Every year, I have a full health check-up at the hospital.|我每年都在醫院做一次全身健康檢查。
 The night before, I'm not allowed to eat or drink anything after midnight.|檢查前一晚，午夜過後不能吃喝任何東西。
@@ -820,6 +925,9 @@ In the morning, they check my blood pressure, take a blood sample, and do an X-r
 A few weeks later, the doctor explains the results to me in detail.|幾週後，醫師會詳細向我說明結果。
 Most of my results are normal, but she always reminds me to exercise more regularly.|大部分結果都正常，但醫師總是提醒我要更規律地運動。
 Regular check-ups help me notice small problems before they become serious.|定期檢查讓我在小問題變嚴重前就能發現。
+This year, the doctor suggested that I reduce salt and eat more vegetables.|今年醫師建議我少吃鹽、多吃蔬菜。
+I've started walking for thirty minutes after dinner at least four times a week.|我開始每週至少四次在晚餐後走路三十分鐘。
+My wife and I now go for our check-ups together, which makes it less stressful.|現在我和太太一起去健檢，比較沒那麼有壓力。
 #l3-2|週末追劇|Binge-watching on the Weekend
 On rainy weekends, I sometimes stay home and watch a TV series all day.|下雨的週末，我有時會整天待在家追劇。
 My favorite shows are medical dramas, although they're not always realistic.|我最喜歡醫療劇，雖然內容不一定寫實。
@@ -827,6 +935,9 @@ Watching with English subtitles is also a good way to practice listening.|開英
 I write down useful expressions in a notebook and try to use them later.|我會把實用的說法記在筆記本裡，之後試著用用看。
 My wife says I watch too much TV, so I try to limit it to two episodes.|太太說我看太多電視了，所以我盡量限制在兩集。
 After that, we usually go out for a walk if the rain has stopped.|之後如果雨停了，我們通常會出去散步。
+Last weekend, I finished a drama about a young doctor working in a busy emergency room.|上週末我看完一部關於年輕醫師在忙碌急診室工作的劇。
+Some of the medical terms were difficult, so I looked them up in a dictionary.|有些醫學用語很難，所以我查了字典。
+I recommended the series to my colleagues, and now we talk about it at lunch.|我把這部劇推薦給同事，現在午餐時都會聊它。
 #l4-1|開始慢跑|Starting to Jog
 Last year, I decided to start jogging because I was spending too much time sitting at my desk.|去年，因為坐在辦公桌前的時間太長，我決定開始慢跑。
 At first, I could only run for five minutes before I had to stop and catch my breath.|一開始，我只能跑五分鐘就得停下來喘口氣。
@@ -857,12 +968,18 @@ Do you have any time available in the afternoon?|下午有空的時段嗎？
 We have an opening at two thirty.|兩點半有一個空檔。
 Great. Please put it under the name Chen.|太好了，請用陳的名字登記。
 Please call us if you need to change the time.|如果需要改時間，請打電話給我們。
+Could you tell me how much a haircut costs?|可以告訴我剪髮多少錢嗎？
+Do I need to pay a deposit when I book?|預約時需要先付訂金嗎？
+I'd also like to ask about coloring my hair.|我也想問一下染髮的事。
 #c2-2|更改預約|Rescheduling
 I'm calling to change my appointment on Monday.|我打來是要更改週一的預約。
 Something came up at work, and I can't make it.|工作上臨時有事，我沒辦法去。
 Would Wednesday at the same time work for you?|改到週三同一時間可以嗎？
 Yes, that's perfect. Thank you for your help.|可以，太好了，謝謝幫忙。
 We'll send you a text message to confirm.|我們會傳簡訊給您確認。
+Do I need to bring anything with me?|我需要帶什麼東西嗎？
+Please arrive ten minutes early to check in.|請提早十分鐘到場報到。
+If you're late, we may have to shorten your time.|如果您遲到，時間可能需要縮短。
 #c3-1|打客服電話|Calling Customer Service
 I'm calling because my internet connection has been very slow for three days.|我打來是因為我家網路已經慢了三天。
 I've already restarted the router, but it didn't help at all.|我已經重新啟動路由器，但一點幫助也沒有。
@@ -870,6 +987,9 @@ The agent asked for my account number and checked the line from the office.|客�
 She said there was a problem in our area and it would be fixed tonight.|她說我們這一區有問題，今晚會修好。
 I asked if they could give us a discount on this month's bill.|我問他們這個月的帳單能不能打折。
 They agreed to take ten percent off, which was a nice surprise.|他們同意打九折，讓我很驚喜。
+Before hanging up, the agent gave me a reference number for my complaint.|掛電話前，客服人員給了我這次申訴的案件編號。
+She also told me to call back if the problem wasn't fixed by tomorrow.|她也說如果明天前沒修好，就再打電話來。
+The next morning, the connection was fast again, and I could finally work from home.|隔天早上網路又變快了，我終於可以在家工作。
 #c3-2|電話留言|Leaving a Voicemail
 Hi, this is Chen from the pharmacy. I'm returning your call from this morning.|嗨，我是藥局的陳，回覆您今天早上的來電。
 I'm sorry I missed you. I was in a meeting until eleven.|抱歉沒接到，我開會開到十一點。
@@ -877,6 +997,9 @@ About your question, the medicine you asked about is now back in stock.|關於�
 You can pick it up any time before six o'clock today.|您今天六點前隨時可以來領。
 If that time doesn't work, please call me back at this number.|如果那個時間不方便，請回撥這個號碼給我。
 Thank you, and have a nice afternoon.|謝謝，祝您下午愉快。
+Please remember to bring your health insurance card when you come.|來的時候請記得帶健保卡。
+If someone else is picking it up for you, please give them your card too.|如果請別人代領，也請把卡交給他。
+You can also reach the pharmacy by email if that's more convenient.|如果比較方便，也可以用電子郵件聯絡藥局。
 #c4-1|視訊會議的問題|Trouble on a Video Call
 Sorry, could you repeat that? Your voice keeps breaking up on my end.|抱歉，可以再說一次嗎？您的聲音在我這邊一直斷斷續續。
 I think the connection is unstable, so I'm going to turn off my camera for a moment.|我想連線不太穩，所以我先暫時關掉鏡頭。
@@ -907,12 +1030,18 @@ I try to stay inside during the middle of the day.|中午時段我盡量待在�
 When I go out, I always wear a hat and sunscreen.|我出門時一定戴帽子、擦防曬。
 It's important to drink plenty of water in this weather.|這種天氣多喝水很重要。
 I can't wait for the cooler weather in autumn.|我等不及秋天涼爽的天氣了。
+I turn on the fan at night to save electricity.|晚上我開電風扇來省電。
+On weekends, we sometimes go to the beach in the evening.|週末傍晚我們有時會去海邊。
+Cold watermelon is the best snack on a hot day.|冰西瓜是炎熱天氣最好的點心。
 #e2-2|看天氣預報|Checking the Forecast
 Let me check the weather forecast before we leave.|出發前我先看一下天氣預報。
 It says there's a seventy percent chance of rain this afternoon.|預報說今天下午有百分之七十的機率會下雨。
 Maybe we should bring raincoats just in case.|也許我們該帶雨衣以防萬一。
 The temperature will drop a lot tonight.|今晚氣溫會下降很多。
 Don't forget to take a warm jacket with you.|別忘了帶件保暖的外套。
+If it rains too hard, we can visit the museum instead.|如果雨太大，我們可以改去博物館。
+I'll put an extra umbrella in the car.|我會在車上多放一把傘。
+Let's check the forecast again before we go out tonight.|今晚出門前我們再看一次預報。
 #e3-1|換季|Changing Seasons
 In Pingtung, winter is short, but the mornings can still be surprisingly cold.|在屏東，冬天很短，但早上還是可能冷得出乎意料。
 I usually wear a jacket in the morning and take it off by noon.|我通常早上穿外套，到中午就脫掉。
@@ -920,6 +1049,9 @@ When the seasons change, many people around me catch colds.|換季的時候，�
 I try to get enough sleep and eat more fruit during this time.|這段時間我盡量睡飽、多吃水果。
 The dry air also makes my skin itchy, so I use more lotion.|乾燥的空氣也讓我的皮膚發癢，所以我會多擦乳液。
 Even so, I enjoy the cool breeze and the clear blue sky.|即便如此，我還是很享受涼爽的微風和晴朗的藍天。
+On weekends, I like to take my bicycle to the riverside park.|週末我喜歡騎腳踏車去河濱公園。
+Autumn is also the best season for flying kites with children.|秋天也是和孩子放風箏最好的季節。
+I always look forward to this time of year because the weather is so comfortable.|我總是期待一年中的這個時候，因為天氣好舒服。
 #e3-2|下雨天的通勤|A Rainy Commute
 It started pouring just as I was about to leave the house this morning.|今天早上正要出門時，突然下起大雨。
 The roads were flooded in some places, so traffic moved very slowly.|有些地方路面淹水，所以車流移動得很慢。
@@ -927,6 +1059,9 @@ I decided to take a taxi instead of riding my scooter.|我決定搭計程車，�
 Even with an umbrella, my shoes and pants got completely wet.|即使撐了傘，我的鞋子和褲子還是全濕了。
 Luckily, I keep an extra pair of socks in my office.|幸好我在辦公室放了一雙備用襪子。
 Next time, I'll check the weather radar before I leave home.|下次出門前，我會先看氣象雷達圖。
+When I arrived at the hospital, several colleagues were also soaking wet.|我到醫院時，好幾位同事也全身濕透。
+We laughed about it and helped each other dry our things with paper towels.|我們笑成一團，互相用紙巾把東西擦乾。
+By lunchtime, the rain had stopped and the sun was shining again.|到了午餐時間，雨已經停了，太陽又出來了。
 #e4-1|極端天氣|Extreme Weather
 In recent years, we've experienced more heat waves and heavy rainstorms than before.|近年來，我們經歷的熱浪和豪大雨比以前更多。
 Many scientists believe that these changes are connected to global warming.|許多科學家認為這些變化與全球暖化有關。
@@ -957,12 +1092,18 @@ If I were you, I'd take a few days off.|如果我是你，我會請幾天假。
 Maybe you should talk to your manager about the workload.|也許你應該和主管談談工作量。
 It's important to take care of yourself first.|先照顧好自己很重要。
 Let me know if there's anything I can do to help.|有任何我能幫忙的地方請告訴我。
+Have you tried going to bed a little earlier?|你試過早一點睡嗎？
+A short walk at lunch might also help you relax.|午餐時散步一下也可能幫助你放鬆。
+Don't worry, I'm sure things will get better soon.|別擔心，我相信情況很快就會好轉。
 #o2-2|表達失望|Expressing Disappointment
 I was really looking forward to the concert this weekend.|我一直很期待這週末的音樂會。
 Unfortunately, it was canceled because of the typhoon.|很可惜，因為颱風取消了。
 I'm a little disappointed, but I understand the reason.|我有點失望，但我能理解原因。
 I hope they'll announce a new date soon.|希望他們很快宣布新日期。
 Until then, I'll just listen to their songs at home.|在那之前，我就在家聽他們的歌吧。
+My friends and I had already booked a hotel.|我和朋友已經訂好了飯店。
+Luckily, the hotel let us cancel without a fee.|幸好飯店讓我們免費取消。
+Maybe we'll plan a short trip somewhere else instead.|也許我們改去別的地方小旅行。
 #o3-1|禮貌地表達不同意見|Disagreeing Politely
 I see your point, but I have a slightly different opinion on this issue.|我理解你的觀點，但我對這個議題有稍微不同的看法。
 In my experience, patients prefer clear instructions rather than long explanations.|依我的經驗，病人比較喜歡清楚的指示，而不是冗長的說明。
@@ -970,6 +1111,9 @@ Maybe we could try both methods and see which one works better.|也許我們可�
 I'm open to other ideas if anyone has a better suggestion.|如果有人有更好的建議，我很樂意聽。
 What matters most is that we choose what's best for the patients.|最重要的是我們選擇對病人最好的做法。
 Let's collect some feedback first and then make a decision together.|我們先收集一些回饋，再一起做決定。
+For example, a simple picture can sometimes explain more than a long paragraph.|例如，一張簡單的圖有時比一長段文字說明得更清楚。
+I'd be happy to prepare a short sample so we can compare the two versions.|我很樂意準備一份簡短的範例，讓我們比較兩個版本。
+Thank you for listening, and I really appreciate everyone's different points of view.|謝謝大家聆聽，我很感謝每個人提出不同的觀點。
 #o3-2|說說感受|Talking About Feelings
 To be honest, I felt quite nervous before my first English presentation.|說實話，我第一次英文簡報前相當緊張。
 My hands were shaking, and I was worried that I would forget my words.|我的手在發抖，很擔心會忘詞。
@@ -977,6 +1121,9 @@ Once I started speaking, though, I slowly began to relax.|不過一開口之後�
 A few colleagues told me afterward that my presentation was easy to understand.|之後幾位同事告訴我，我的簡報很容易理解。
 That made me feel proud and much more confident about speaking English.|這讓我感到驕傲，對說英文也更有信心了。
 Now I'm actually looking forward to my next chance to present.|現在我其實很期待下一次報告的機會。
+I've learned that being nervous is normal, and it doesn't mean I'm not prepared.|我學到緊張是正常的，並不代表我沒有準備好。
+Now I practice out loud several times before any important presentation.|現在我在重要簡報前都會先大聲練習好幾次。
+I'd like to encourage my staff to try speaking English at meetings too.|我也想鼓勵同仁在會議中試著說英文。
 #o4-1|聊一部電影|Discussing a Movie
 I watched a film last night that made me think about my own family.|我昨晚看了一部電影，讓我想到自己的家人。
 It tells the story of a father who works so hard that he misses his children growing up.|它講述一位父親工作太忙，錯過孩子成長的故事。
@@ -1007,12 +1154,18 @@ I clicked "Forgot password" and checked my email.|我按了「忘記密碼」，
 The website sent me a link to reset it.|網站寄給我一個重設密碼的連結。
 This time I chose a stronger password with numbers and symbols.|這次我設了一個有數字和符號、比較強的密碼。
 I also turned on two-step verification for extra security.|我也開啟了兩步驟驗證，增加安全性。
+I wrote the new password down and kept it in a safe place.|我把新密碼寫下來，放在安全的地方。
+I also changed the passwords for my other important accounts.|我也更改了其他重要帳號的密碼。
+Now I feel much safer when I shop online.|現在網購時我覺得安心多了。
 #b2-2|寄國際包裹|Sending an International Package
 I'd like to send this box to my sister in Canada.|我想把這個箱子寄給在加拿大的妹妹。
 What's the cheapest way to send it?|最便宜的寄送方式是什麼？
 Sea mail is cheaper, but it takes much longer.|海運比較便宜，但要花更久的時間。
 Air mail is faster, and it should arrive in about a week.|航空比較快，大約一週就會到。
 I'll choose air mail, because it's a birthday present.|我選航空，因為這是生日禮物。
+Please write the address clearly in English.|請用英文把地址寫清楚。
+Is there anything inside that can't be sent overseas?|裡面有不能寄到國外的東西嗎？
+You can track the package online with this number.|您可以用這個號碼在網路上追蹤包裹。
 #b3-1|網路詐騙|An Online Scam
 Yesterday I received a text message saying that my package couldn't be delivered.|昨天我收到一則簡訊，說我的包裹無法送達。
 It asked me to click a link and enter my credit card number to pay a small fee.|它要我點連結，輸入信用卡號碼支付一筆小費用。
@@ -1020,6 +1173,9 @@ Something felt wrong, because I wasn't expecting any package that week.|感覺�
 I called the delivery company directly, and they confirmed that it was a scam.|我直接打電話給物流公司，他們確認那是詐騙。
 Now I never click on links in messages from people I don't know.|現在我從不點陌生人訊息裡的連結。
 I also told my parents about it so they wouldn't fall for the same trick.|我也告訴爸媽這件事，免得他們上同樣的當。
+The police say that scams like this are becoming more and more common.|警方說這類詐騙越來越常見。
+If you're not sure, you can call the anti-fraud hotline at one six five.|如果不確定，可以打一六五反詐騙專線。
+It's always better to check first than to lose money or personal information.|先查證總比損失金錢或個人資料好。
 #b3-2|用手機付款|Paying with My Phone
 These days, I rarely carry much cash because I pay with my phone almost everywhere.|現在我很少帶很多現金，因為幾乎到處都用手機付款。
 It's fast and convenient, especially at convenience stores and on public transportation.|它快速又方便，尤其在便利商店和搭大眾運輸時。
@@ -1027,6 +1183,9 @@ I can also check my spending in the app, which helps me keep track of my budget.
 However, my mother still prefers cash because she doesn't trust online payments.|不過我母親還是比較喜歡現金，因為她不信任線上付款。
 I showed her how to use it step by step, and she's slowly getting used to it.|我一步一步教她怎麼用，她正慢慢習慣。
 I always remind her never to share her verification code with anyone.|我總是提醒她，絕對不要把驗證碼告訴任何人。
+I've also set a spending limit so I don't use too much each month.|我也設了消費上限，免得每個月花太多。
+If I lose my phone, I can lock the payment app from my computer right away.|如果手機遺失，我可以立刻從電腦鎖住支付 App。
+Even so, I still keep a little cash in my wallet just in case.|即使如此，我錢包裡還是會放一點現金以防萬一。
 #b4-1|詢問貸款|Asking About a Loan
 We're thinking about buying a small apartment, so I made an appointment at the bank to ask about loans.|我們在考慮買一間小公寓，所以我預約了銀行詢問貸款。
 The loan officer explained the interest rates and how long it would take to pay everything back.|放款專員說明了利率，以及全部還清需要多久。
@@ -1047,6 +1206,9 @@ I'd like two croissants and a loaf of whole wheat bread.|我要兩個可頌和�
 Could you slice the bread for me, please?|可以幫我把麵包切片嗎？
 Do you have anything with less sugar?|有沒有比較少糖的？
 These look delicious. I'll take one of each.|這些看起來好好吃，每種我各拿一個。
+Do you have any bread that's good for breakfast?|有適合當早餐的麵包嗎？
+How long will these stay fresh at home?|這些放在家裡可以保鮮多久？
+Please put them in separate bags so they don't get squashed.|請分開裝，免得壓扁了。
 #f3-3|帶爸媽聚餐|A Family Dinner Out
 Last Sunday, we took my parents to a new Japanese restaurant near the river.|上週日，我們帶爸媽去河邊一家新開的日本料理店。
 Because it was so popular, we had to wait about twenty minutes for a table.|因為很受歡迎，我們等了大約二十分鐘才有位子。
@@ -1054,12 +1216,18 @@ My father ordered grilled fish, while my mother chose a bowl of udon noodles.|�
 The portions were large, so we packed the leftovers to take home.|份量很大，所以我們把剩菜打包帶回家。
 When the bill came, my father insisted on paying, as he always does.|帳單來的時候，父親堅持要付錢，就像他一向那樣。
 We all agreed that we'd like to come back again next month.|我們都同意下個月還要再來。
+The waiter was very patient and explained each dish on the menu to us.|服務生很有耐心，向我們說明菜單上的每道菜。
+My mother especially liked the tempura, which was light and crispy.|我母親特別喜歡天婦羅，口感清爽又酥脆。
+On the way home, my parents kept talking about how much they enjoyed the evening.|回家路上，爸媽一直說那晚吃得多開心。
 #g2-3|搭高鐵|Taking the High-Speed Rail
 I'd like a round-trip ticket to Taipei for tomorrow morning.|我要一張明天早上到台北的來回票。
 Is there a discount for buying tickets online?|網路訂票有折扣嗎？
 Which cars have non-reserved seats?|哪幾節車廂是自由座？
 The train will arrive in Taipei in about two hours.|火車大約兩小時後抵達台北。
 Please keep your ticket until you leave the station.|出站前請保留好車票。
+Could I change my ticket to a later train?|我可以把車票改到晚一點的班次嗎？
+Where can I find the elevator to the platform?|往月台的電梯在哪裡？
+I'd like to buy a lunch box before I get on the train.|上車前我想買個便當。
 #g3-3|找路|Finding the Way
 When I visited Tainan last month, I used my phone's map app to find a famous temple.|上個月去台南時，我用手機地圖 App 找一間有名的廟。
 The app told me to walk straight for three blocks and then turn left at the bakery.|App 告訴我直走三個街區，然後在麵包店左轉。
@@ -1067,12 +1235,18 @@ However, the street was closed for a festival, so I had to find another way.|不
 I asked a shop owner for help, and she kindly walked me to the corner.|我請一位店老闆幫忙，她很親切地陪我走到轉角。
 From there, I could already see the temple's colorful roof.|從那裡我已經可以看到廟宇色彩繽紛的屋頂。
 It reminded me that asking people is sometimes faster than using technology.|這提醒我，有時候問人比用科技還快。
+Inside the temple, an old man told me the history of the building.|在廟裡，一位老先生跟我說這座建築的歷史。
+After visiting the temple, I tried some famous local snacks nearby.|參觀完廟之後，我在附近嚐了幾樣有名的小吃。
+Next time, I'd like to take my family there and show them around.|下次我想帶家人去，帶他們四處逛逛。
 #h2-3|驚喜生日派對|A Surprise Birthday Party
 We're planning a surprise birthday party for my wife next Friday.|我們打算下週五幫我太太辦驚喜生日派對。
 Could you help me keep it a secret until then?|在那之前可以幫我保密嗎？
 I've already ordered a cake and booked a small restaurant.|我已經訂好蛋糕，也訂了一家小餐廳。
 Please arrive by seven, before she gets there.|請在七點前、她到之前抵達。
 I'm sure she'll be very happy to see everyone.|我相信她看到大家一定會很開心。
+My daughter will bring her to the restaurant at seven thirty.|我女兒會在七點半帶她到餐廳。
+Please hide behind the door and turn off the lights.|請躲在門後，把燈關掉。
+When she walks in, let's all shout "Happy birthday!"|她一進來，我們就一起喊「生日快樂！」
 #h3-3|照顧年長父母|Caring for Elderly Parents
 Since my parents are getting older, I try to visit them every weekend.|因為父母年紀漸長，我盡量每個週末去看他們。
 I help them sort their medicines into a weekly pill box so they don't miss any doses.|我幫他們把藥分裝進一週藥盒，免得漏吃。
@@ -1080,12 +1254,18 @@ My mother sometimes forgets things, so we put a calendar on the refrigerator.|�
 We also installed handrails in the bathroom to prevent falls.|我們也在浴室裝了扶手，預防跌倒。
 Taking care of them can be tiring, but I'm grateful for the time we have together.|照顧他們有時很累，但我很感謝能有這段相處的時間。
 My brother and I take turns, so neither of us gets too exhausted.|我和哥哥輪流照顧，這樣我們都不會太累。
+We also check their blood pressure together and write the numbers in a notebook.|我們也會一起量血壓，把數字寫在筆記本裡。
+On sunny days, I take them for a short walk in the park near their house.|天氣好的時候，我帶他們到家附近的公園散步一下。
+Spending time with them reminds me how much they did for me when I was young.|陪伴他們讓我想起小時候他們為我付出了多少。
 #l2-3|去游泳|Going Swimming
 I go swimming at the sports center twice a week.|我每週去運動中心游泳兩次。
 It's good exercise, and it's easy on my knees.|這是很好的運動，對膝蓋的負擔也小。
 I usually swim for about forty minutes.|我通常游大約四十分鐘。
 Don't forget to bring a swimming cap and goggles.|別忘了帶泳帽和蛙鏡。
 After swimming, I always feel relaxed and hungry.|游完泳後，我總是覺得很放鬆又很餓。
+The pool is less crowded early in the morning.|早上的游泳池人比較少。
+I'm trying to improve my breathing when I swim.|我正在改善游泳時的換氣。
+A coach gave me some useful tips last week.|上週一位教練給了我一些實用的建議。
 #l3-3|學一項新技能|Learning a New Skill
 This year, I decided to learn how to cook a few simple Western dishes.|今年我決定學做幾道簡單的西式料理。
 I started by watching short videos online and writing down the recipes.|我先從看網路短片、抄下食譜開始。
@@ -1093,12 +1273,18 @@ My first attempt at pasta was too salty, but my family ate it anyway.|我第一�
 After a few weeks of practice, my cooking has improved quite a lot.|練習幾週後，我的廚藝進步了不少。
 Now I cook dinner every Sunday so my wife can take a break.|現在我每個週日煮晚餐，讓太太休息一下。
 Learning something new has made my weekends more interesting and fun.|學新東西讓我的週末更有趣、更好玩。
+My son taught me how to use a timer so I don't overcook the vegetables.|兒子教我用計時器，免得把蔬菜煮過頭。
+Last week, I invited my parents over and made them a simple steak dinner.|上週我邀爸媽來家裡，做了簡單的牛排晚餐給他們吃。
+I've realized that cooking is a great way to relax after a busy day.|我發現下廚是忙碌一天後很好的放鬆方式。
 #d2-3|自我介紹|Introducing Myself
 Hi, my name is Chen, and I'm a pharmacist in Pingtung.|嗨，我姓陳，是屏東的一名藥師。
 I've worked at the same hospital for many years.|我在同一家醫院工作很多年了。
 In my free time, I like hiking and reading.|空閒時我喜歡爬山和閱讀。
 I'm practicing English because I want to travel more.|我在練英文，因為我想多出去旅行。
 It's nice to meet you. Where are you from?|很高興認識你，你是哪裡人？
+I have two children who are both in college.|我有兩個孩子，都在讀大學。
+My favorite food is the beef noodles in Pingtung.|我最喜歡的食物是屏東的牛肉麵。
+I hope we can keep in touch after today.|希望今天之後我們能保持聯絡。
 #d3-3|我的一天|A Typical Day
 On a typical weekday, I wake up at six and have a simple breakfast with my family.|一般平日，我六點起床，和家人吃簡單的早餐。
 I usually arrive at work around seven thirty to check emails before the pharmacy gets busy.|我通常七點半左右到班，在藥局忙起來前先看郵件。
@@ -1106,12 +1292,18 @@ Most of my morning is spent in meetings or solving problems with my team.|我大
 After lunch, I take a short walk to clear my head.|午餐後，我會散步一下，讓頭腦清醒。
 In the evening, I practice English for about twenty minutes before dinner.|傍晚，我會在晚餐前練大約二十分鐘英文。
 I try to go to bed before eleven so I have enough energy for the next day.|我盡量在十一點前睡覺，讓隔天有足夠的精神。
+On weekends, I try to sleep a little later and spend more time with my family.|週末我會試著睡晚一點，多陪陪家人。
+Having a regular routine helps me stay healthy and manage my stress.|規律的作息幫助我保持健康、管理壓力。
+Sometimes my plans change, but I always try to finish my English practice.|有時計畫會改變，但我總會盡量完成英文練習。
 #t2-3|機場報到|Checking In at the Airport
 I'd like to check in for my flight to Osaka.|我要辦理飛往大阪的班機報到。
 Could I have an aisle seat, please?|可以給我靠走道的位子嗎？
 How many bags can I check in for free?|可以免費託運幾件行李？
 Do you have a power bank in your checked luggage?|您的託運行李裡有行動電源嗎？
 Boarding starts at gate twelve at ten fifteen.|十點十五分在十二號登機門開始登機。
+Is there a place to charge my phone near the gate?|登機門附近有地方可以幫手機充電嗎？
+How long does it take to get through security?|通過安檢要多久？
+Could you tell me where the duty-free shops are?|可以告訴我免稅店在哪裡嗎？
 #t3-3|請飯店推薦|Asking the Hotel for Recommendations
 Could you recommend a good place for dinner that most tourists don't know about?|可以推薦一間多數觀光客不知道的晚餐好去處嗎？
 We'd prefer somewhere quiet where we can try traditional local food.|我們比較想找安靜、可以吃到傳統在地料理的地方。
@@ -1119,12 +1311,18 @@ Is it within walking distance, or should we take a taxi?|走路到得了嗎？�
 Do we need to make a reservation, or can we just show up?|需要先訂位，還是直接過去就可以？
 Also, are there any interesting places we could visit tomorrow morning?|另外，明天早上有沒有什麼有趣的地方可以去？
 Thank you so much. You've been very helpful during our stay.|非常謝謝，我們住宿期間你幫了很大的忙。
+We'd like to see a local market and maybe buy some souvenirs for our family.|我們想去逛在地市場，或許幫家人買些紀念品。
+Could you write the name of the restaurant in the local language for the taxi driver?|可以幫我們用當地文字寫下餐廳名稱，給計程車司機看嗎？
+We'll definitely recommend your hotel to our friends when we get home.|回家後我們一定會把你們飯店推薦給朋友。
 #m2-3|藥膏的用法|Using a Cream
 Wash your hands before and after you use this cream.|使用這個藥膏前後請洗手。
 Apply a thin layer to the affected area twice a day.|一天兩次，在患處塗薄薄一層。
 Do not use it on broken skin or near your eyes.|不要塗在破皮處或眼睛附近。
 If the skin gets red or itchy, stop using it and tell us.|如果皮膚變紅或發癢，請停止使用並告訴我們。
 Please come back if it doesn't improve in a week.|如果一週後沒有改善，請回診。
+Keep the cream in a cool, dry place.|請將藥膏放在陰涼乾燥處。
+Please don't use more than the doctor told you to.|請不要用得比醫師交代的多。
+Keep it out of reach of children.|請放在兒童拿不到的地方。
 #m3-3|慢性病連續處方箋|Refill Prescriptions
 This is a refill prescription, so you can pick up your medicine three times.|這是慢性病連續處方箋，您可以領三次藥。
 Each time, you'll get enough medicine for twenty-eight days.|每次可以領二十八天份的藥。
@@ -1132,12 +1330,18 @@ You can collect your next refill within ten days before your current supply runs
 Please keep the prescription safe, because you'll need it every time you come.|請妥善保管處方箋，因為每次來都需要它。
 If your doctor changes your medicine, you'll need a new prescription.|如果醫師更改您的用藥，就需要開新的處方箋。
 Do you have any questions about when or how to take these medicines?|您對這些藥的服用時間或方式有任何問題嗎？
+If you're going to travel during that time, please let us know in advance.|如果那段期間要出遠門，請事先告訴我們。
+We can also send you a reminder by text message before your next pickup.|下次領藥前，我們也可以傳簡訊提醒您。
+Please keep a list of all your medicines and show it to every doctor you see.|請保留一份您所有用藥的清單，給每一位看診的醫師看。
 #w2-3|請假|Asking for Leave
 I'd like to take two days off next week.|我下週想請兩天假。
 My son is graduating, and I want to attend the ceremony.|我兒子要畢業了，我想參加典禮。
 I've already asked a colleague to cover my shifts.|我已經請同事幫我代班。
 I'll make sure all my urgent work is finished before I leave.|休假前我會確保所有緊急工作都完成。
 Please let me know if that's okay with you.|請告訴我這樣是否可以。
+I'll check my email once a day while I'm away.|休假期間我每天會看一次電子郵件。
+For urgent matters, please contact my deputy directly.|緊急事項請直接聯絡我的代理人。
+I'll be back in the office next Wednesday.|我下週三回辦公室。
 #w3-3|新人訓練|Training New Staff
 Welcome to the team. Today I'll show you how our department works.|歡迎加入團隊，今天我會帶你了解我們部門的運作。
 First, let's go through the safety rules and the standard procedures.|首先，我們一起看安全規則和標準作業程序。
@@ -1145,6 +1349,9 @@ Don't worry if you can't remember everything on the first day.|第一天記不�
 You'll work with a senior colleague for the first two weeks.|前兩週你會和一位資深同仁一起工作。
 If you're not sure about something, it's always better to ask than to guess.|如果有不確定的地方，問清楚永遠比用猜的好。
 At the end of the month, we'll meet to talk about how you're doing.|月底時，我們會碰面談談你的適應狀況。
+I'll also give you a checklist so you can keep track of what you've learned.|我也會給你一份檢核表，讓你掌握自己學了哪些。
+Please make sure to wash your hands and wear your ID badge at all times.|請隨時記得洗手並配戴識別證。
+We're glad to have you here, and I'm sure you'll do a great job.|很高興你加入，我相信你會做得很好。
 `;
 const ARTS=[]; const S=[];
 for(const line of ART_TXT.trim().split("\n")){
@@ -2441,9 +2648,10 @@ function playMine(c){
 function wireDict(d){
   dict=d;
   const inLesson=()=>document.body.classList.contains("lesson");
-  d.onPartial(({text})=>{ partialText=text||""; if(inLesson()){ showHeard(); bumpSilence(); } else { const b=pronBox(pcur); if(b){ const t=(finalText+" "+partialText).trim(); b.querySelector(".heard").textContent="聽到："+t; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,t); } } });
-  d.onFinal(({text})=>{ finalText=(finalText+" "+(text||"")).trim(); partialText=""; if(inLesson()){ showHeard(); bumpSilence(); } else { const b=pronBox(pcur); if(b){ b.querySelector(".heard").textContent="聽到："+finalText; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,finalText); } } });
+  d.onPartial(({text})=>{ partialText=text||""; if(vmic){ vmicHeard(); return; } if(inLesson()){ showHeard(); bumpSilence(); } else { const b=pronBox(pcur); if(b){ const t=(finalText+" "+partialText).trim(); b.querySelector(".heard").textContent="聽到："+t; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,t); } } });
+  d.onFinal(({text})=>{ finalText=(finalText+" "+(text||"")).trim(); partialText=""; if(vmic){ vmicHeard(); return; } if(inLesson()){ showHeard(); bumpSilence(); } else { const b=pronBox(pcur); if(b){ b.querySelector(".heard").textContent="聽到："+finalText; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,finalText); } } });
   d.onState(({state:s2})=>{ if(s2==="listening"){ micLive=true; micEver=true; } if(s2!=="idle"||!listening) return;
+    if(vmic){ vmicFinish(); return; }
     if(inLesson()){ finishListen(); return; }
     listening=false; pronMicUI(); setTimeout(()=>pronScore((finalText+" "+partialText).trim()),150); });
   if(document.body.classList.contains("lesson")&&deck[ci]&&st==="self"){ st="turn"; render(); }
@@ -2610,6 +2818,15 @@ const ICON={play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',paus
   mic:MIC, stop:'<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>', again:'<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>'};
 const isSavedSent = id => !!(state.savedSent[id]&&state.savedSent[id].on);
 const isSaved = id => !!(state.saved[id]&&state.saved[id].on);
+// 類似字儲存：字庫有的字存入收藏；沒有的就新增成自訂字（我的單字庫）
+function synFind(w){ const lw=w.toLowerCase(); return allVocab().find(v=>v.w.toLowerCase()===lw); }
+function synSaved(w){ const v=synFind(w); return !!v&&(v.id.startsWith("c")||isSaved(v.id)); }
+function toggleSynSave(w,zh){
+  const v=synFind(w), cur=vq[vpos];
+  if(v&&v.id.startsWith("c")){ delWord(v.id); toast("已從我的單字庫移除「"+w+"」"); }
+  else if(v){ const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); toast(on?"已存入我的單字庫「"+w+"」":"已移除「"+w+"」"); }
+  else { state.custom.unshift({id:"c"+Date.now(),w,zh,ex:cur?cur.ex||"":"",exZh:"",pos:w.includes(" ")?"片語":"自訂",ph:w.includes(" ")}); save(); toast("已存入我的單字庫「"+w+"」"); }
+}
 function statusHtml(){
   const c=deck[ci]; if(!c||c.type!=="sent") return "<span></span>";
   const s=c.s, sc=sess[s.id];
@@ -2861,13 +3078,48 @@ function startVocab(list,mode){
   show("vocab"); $("vocabHome").classList.add("hidden"); $("flash").classList.remove("hidden"); $("v-vocab").classList.add("studying"); document.body.classList.add("studying");
   timerOn=true; lastTick=Date.now(); renderFlash();
 }
-function endVocab(){
+function endVocab(){ vmicReset();
   $("v-vocab").classList.remove("studying"); document.body.classList.remove("studying"); $("flash").classList.add("hidden"); $("vocabHome").classList.remove("hidden");
   if(timerOn){ timerOn=false; flushTime(); save(); } renderVocab();
 }
 const ivLabel = n => n>=30 ? Math.round(n/30)+" 個月" : n+" 天";
 const SPK='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+// ===== 單字卡：收音判讀（單字或例句）=====
+let vmic=null; // {target, btn, res, box, timer}
+function vmicReset(){ if(vmic){ clearTimeout(vmic.sil); clearTimeout(vmic.max); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } vmic.btn.classList.remove("rec"); vmic.btn.querySelector("span").textContent=vmic.label; } vmic=null; }
+function vocabMic(kind){
+  const v=vq[vpos]; if(!v) return;
+  if(vmic&&vmic.kind===kind&&listening){ vmicFinish(); return; }
+  vmicReset();
+  if(!dict){ const w=wsDict(); if(w) wireDict(w); }
+  const btn=$(kind==="w"?"btnFMic":"btnFExMic"), res=$(kind==="w"?"fMicRes":"fExMicRes"), box=$(kind==="w"?"fWord":"fEx");
+  if(!dict){ res.className="vmicres no"; res.innerHTML=NOMIC_MSG; return; }
+  const target=kind==="w"?v.w:v.ex;
+  box.innerHTML=wordsHtml(target); box.classList.remove("ok");
+  vmic={kind,target,btn,res,box,label:kind==="w"?"唸唸看":"唸例句"};
+  finalText=""; partialText=""; listening=true;
+  btn.classList.add("rec"); btn.querySelector("span").textContent="聆聽中…按此結束"; res.className="vmicres"; res.textContent="請唸："+target;
+  const p=dict.start();
+  p.catch(e=>{ const m=vmic; vmicReset(); if(m){ m.res.className="vmicres no"; m.res.innerHTML=(e&&e.code==="not_granted"?"麥克風未被允許。":"無法開始收音，請再按一次。")+(e&&e.code==="not_granted"?NOMIC_MSG:""); } });
+  vmic.max=setTimeout(vmicFinish, 4000+700*target.split(/\s+/).length);
+}
+function vmicHeard(){ if(!vmic) return; const t=(finalText+" "+partialText).trim(); vmic.res.className="vmicres"; vmic.res.textContent="聽到："+t;
+  liveMark({querySelector:()=>vmic.box},vmic.target,t); clearTimeout(vmic.sil); vmic.sil=setTimeout(vmicFinish,2000); }
+async function vmicFinish(){
+  const m=vmic; if(!m) return; clearTimeout(m.sil); clearTimeout(m.max);
+  if(listening){ listening=false; try{ await dict.stop(); }catch(e){} }
+  m.btn.classList.remove("rec"); m.btn.querySelector("span").textContent=m.label; vmic=null;
+  const said=(finalText+" "+partialText).trim();
+  if(!said){ m.res.className="vmicres no"; m.res.textContent="沒有聽到聲音，請再按一次麥克風"; return; }
+  const {sc,html}=scoreText(m.target,said); m.box.innerHTML=html;
+  const pass=sc>=80;
+  m.box.classList.toggle("ok",pass);
+  m.res.className="vmicres "+(pass?"ok":"no");
+  m.res.textContent=(pass?"✓ 唸對了！":"✕ 再試一次")+"（"+sc+" 分，聽到："+said+"）";
+  if(pass&&m.kind==="w"){ const v=vq[vpos]; if(v){ state.best["vw:"+v.id]=Math.max(state.best["vw:"+v.id]||0,sc); save(); } }
+}
 function renderFlash(){
+  vmicReset(); ["fMicRes","fExMicRes"].forEach(i=>{ $(i).textContent=""; $(i).className="vmicres"; }); $("fWord").classList.remove("ok"); $("fEx").classList.remove("ok");
   const v=vq[vpos], r=state.vocab[v.id], x=VOCAB_EXT[v.id]||{exZh:v.exZh||""};
   $("fTag").textContent = vMode==="saved" ? "收藏複習" : r ? "複習" : (v.id.startsWith("c")?"新字・自訂":v.ph?"新片語":"新單字");
   $("fProg").textContent=(vpos+1)+" / "+vq.length;
@@ -2877,7 +3129,7 @@ function renderFlash(){
   $("fExBox").classList.toggle("hidden",!v.ex); $("fEx").textContent=v.ex||""; $("fExZh").textContent=x.exZh||"";
   const syn=x.syn||[];
   $("fSynBox").classList.toggle("hidden",!syn.length);
-  $("fSyn").innerHTML=syn.map(s=>`<button class="syn" data-say="${esc(s.w)}"><span class="ic sm">${SPK}</span><div><b>${esc(s.w)}</b><span>${esc(s.zh)}</span></div></button>`).join("");
+  $("fSyn").innerHTML=syn.map(s=>{ const on=synSaved(s.w); return `<div class="syn"><button class="ic sm synspk" data-say="${esc(s.w)}" aria-label="發音">${SPK}</button><div class="syntx" data-say="${esc(s.w)}"><b>${esc(s.w)}</b><span>${esc(s.zh)}</span></div><button class="ic sm synsv ${on?"on":""}" data-synsave="${esc(s.w)}" data-zh="${esc(s.zh)}" aria-label="儲存">${on?SV_ON:SV_ICON}</button></div>`; }).join("");
   $("btnFSave").classList.toggle("on",isSaved(v.id)); $("saveShape").setAttribute("fill",isSaved(v.id)?"currentColor":"none");
   const b=r?r.b:0;
   $("r0").textContent="明天"; $("r1").textContent=ivLabel(Math.max(1,Math.floor(INTERVALS[b]/2))); $("r2").textContent=ivLabel(INTERVALS[Math.min(b,INTERVALS.length-1)]);
@@ -3164,10 +3416,12 @@ $("btnNext").onclick=()=>go(ci+1,true);
 $("pCard").onclick=lessonClick;
 $("btnVocab").onclick=()=>startVocab();
 $("btnFPlay").onclick=()=>speak(vq[vpos].w,false);
+$("btnFMic").onclick=()=>vocabMic("w");
+$("btnFExMic").onclick=()=>vocabMic("e");
 $("btnFEx").onclick=()=>speak(vq[vpos].ex,false);
 $("btnFCopy").onclick=async()=>{ const v=vq[vpos]; try{ await navigator.clipboard.writeText(v.w); toast("已複製「"+v.w+"」"); }catch(e){ toast("無法複製"); } };
 $("btnFSave").onclick=()=>{ const v=vq[vpos]; const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); renderFlash(); toast(on?"已加入收藏":"已取消收藏"); };
-$("fSyn").onclick=e=>{ const b=e.target.closest("[data-say]"); if(b) speak(b.dataset.say,false); };
+$("fSyn").onclick=e=>{ const s=e.target.closest("[data-synsave]"); if(s){ toggleSynSave(s.dataset.synsave,s.dataset.zh); const on=synSaved(s.dataset.synsave); s.classList.toggle("on",on); s.innerHTML=on?SV_ON:SV_ICON; return; } const b=e.target.closest("[data-say]"); if(b) speak(b.dataset.say,false); };
 $("btnFEnd").onclick=endVocab;
 document.querySelectorAll(".rate").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
 $("btnAddWord").onclick=addWord;
