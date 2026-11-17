@@ -89,6 +89,16 @@ body.lesson .selbar,body.studying .selbar{bottom:16px!important}
 .rs-o{background:#22252d;border-radius:14px;padding:10px 12px;margin-bottom:8px;font-size:15px;line-height:1.5}.rs-o.hi{box-shadow:0 0 0 2px #3d5afe}
 .rs-ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rs-ex button{min-height:0;padding:4px 10px;border-radius:12px;font-size:14px;background:#2d313c}
 body.resetting{opacity:.4;pointer-events:none;transition:opacity .2s}
+body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending #btnHF{visibility:hidden}
+.endv{display:flex;flex-direction:column;align-items:center;text-align:center;padding:10px 4px 6px;gap:6px}
+.end-art{position:relative;width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:4px 0 10px;background:radial-gradient(circle at 35% 30%,hsl(var(--hue),85%,65%),hsl(var(--hue),70%,38%));box-shadow:0 0 0 5px #fff2,0 0 60px hsla(var(--hue),80%,60%,.45);animation:popin .5s cubic-bezier(.3,1.6,.5,1) both}
+.end-art span{font-size:74px;animation:float 3s ease-in-out .5s infinite}.end-art i{position:absolute;font-style:normal;font-size:34px;animation:popin .5s .3s both}.end-art .c1{left:-14px;top:8px}.end-art .c2{right:-12px;bottom:4px}
+.end-t{font-size:26px;font-weight:800}.end-s{color:var(--sub);font-size:15px;margin-bottom:10px}
+.end-cards{width:100%;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.ecard{display:flex;align-items:center;justify-content:space-between;background:#20232b;border-radius:20px;padding:14px 18px;text-align:left}
+.ecard b{display:block;font-size:26px;font-weight:800}.ecard span{color:var(--sub);font-size:14px}
+.ecard i{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:#fff;font-size:18px;font-weight:800}
+.endv>.pri.big{width:100%}.end-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}.end-links button{background:none;color:var(--sub);font-size:14px;min-height:36px;text-decoration:underline;text-underline-offset:3px}
 .vnav{display:grid;grid-template-columns:1fr 2fr;gap:10px}.vnav button{min-height:54px;font-size:17px;font-weight:700;border-radius:16px}.vend{background:#2d3039;color:#e6e8ee}.vnhint{font-size:12px;text-align:center;margin-top:6px}
 .ratebar{position:sticky;bottom:0;background:var(--card);padding:12px 0 6px;margin:6px -2px 0;z-index:5;box-shadow:0 -14px 20px var(--card)}
 .wd.hl{color:#fff;background:rgba(111,139,255,.28)}
@@ -174,7 +184,7 @@ body.resetting{opacity:.4;pointer-events:none;transition:opacity .2s}
 .lc-aud button{background:none;color:var(--pri2);font-size:16px;display:flex;align-items:center;gap:6px;padding:6px 10px}
 .lc-aud svg{width:22px;height:22px;fill:currentColor}
 .lc.sent.passed .heard{display:none}.lc.sent.passed .heard.show{display:block}
-.lc.sent.passed .en .wd{color:#5b8cff}
+.lc.sent.passed .en .wd{color:#5b8cff} .lc.sent.perfect .en .wd{color:#3fd0a0!important} .lc.sent.perfect .en{background:rgba(63,208,160,.12)} .lc.sent.perfect{box-shadow:0 10px 50px rgba(63,208,160,.18)}
 .lc-bot button{background:#2f333d;border-radius:18px;padding:12px 22px;font-size:17px;color:#e8eaee}
 .lc-bot button.pri{background:var(--pri);color:#fff}
 .w{display:inline;border-radius:6px;padding:0 2px}
@@ -2730,8 +2740,8 @@ function playMine(c){
 function wireDict(d){
   dict=d;
   const inLesson=()=>document.body.classList.contains("lesson");
-  d.onPartial(({text})=>{ partialText=text||""; if(vmic){ vmicHeard(); return; } if(inLesson()){ showHeard(); bumpSilence(); } else { const b=pronBox(pcur); if(b){ const t=(finalText+" "+partialText).trim(); b.querySelector(".heard").textContent="聽到："+t; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,t); } pronBump(); } });
-  d.onFinal(({text})=>{ finalText=(finalText+" "+(text||"")).trim(); partialText=""; if(vmic){ vmicHeard(); return; } if(inLesson()){ showHeard(); bumpSilence(); } else { const b=pronBox(pcur); if(b){ b.querySelector(".heard").textContent="聽到："+finalText; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,finalText); } pronBump(); } });
+  d.onPartial(({text})=>{ partialText=text||""; if(vmic){ vmicHeard(); return; } if(inLesson()){ showHeard(); waitUpdate(); if(hfOn()) bumpSilence(); } else { const b=pronBox(pcur); if(b){ const t=(finalText+" "+partialText).trim(); b.querySelector(".heard").textContent="聽到："+t; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,t); } pronBump(); } });
+  d.onFinal(({text})=>{ finalText=(finalText+" "+(text||"")).trim(); partialText=""; if(vmic){ vmicHeard(); return; } if(inLesson()){ showHeard(); waitUpdate(); if(hfOn()) bumpSilence(); } else { const b=pronBox(pcur); if(b){ b.querySelector(".heard").textContent="聽到："+finalText; const ps=queue[pcur]; if(ps) liveMark(b,ps.en,finalText); } pronBump(); } });
   d.onState(({state:s2})=>{ if(s2==="listening"){ micLive=true; micEver=true; } if(s2!=="idle"||!listening) return;
     if(vmic){ vmicFinish(); return; }
     if(inLesson()){ finishListen(); return; }
@@ -2836,7 +2846,8 @@ function liveMark(box,en,said,got){ if(!box) return; const el=box.querySelector(
   let k=0; el.querySelectorAll(".wd").forEach((sp,idx)=>{ const n=(units[idx]||[]).length; const ok=(n>0&&hit.slice(k,k+n).every(Boolean))||(got&&got.has(idx)); k+=n; sp.classList.toggle("live",!!ok); }); }
 // 複習挖空（比照 Speak Review）：挑句中較長的實詞遮成灰框，唸對才顯示
 const STOPW=new Set("the a an to of in on at for and or but is are was were be been am i you he she it we they my your his her our their this that with from by as do does did not no so very".split(" "));
-function clozeIdx(en){ const ws=en.split(/\s+/); if(ws.length<2) return new Set();
+function clozeIdx(en){ return new Set(); // 使用者要求：複習時單字不要遮起來
+  const ws=en.split(/\s+/); if(ws.length<2) return new Set();
   const cand=ws.map((w,k)=>({k,c:cleanWord(w).toLowerCase()})).filter(o=>o.c.length>=3&&!STOPW.has(o.c));
   let seed=[...en].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7); const rnd=()=>((seed=(seed*1103515245+12345)>>>0)/4294967296);
   cand.sort((a,b)=>b.c.length-a.c.length+(rnd()-.5)*4);
@@ -2859,7 +2870,7 @@ let deck=[], ci=0, queue=[], sentBox=null, lesson=null;
 let micEver=false, micLive=false;
 let st="paused", tok=0, cdTimer=null, silTimer=null, maxTimer=null, finalText="", partialText="";
 let opt=Object.assign({slow:false, auto:false, zh:true}, state.opt||{});
-opt.auto=false; if(!state.optV2){ state.optV2=true; }  // 使用者要求：預設不自動前進，手動上一句／下一句
+opt.auto=false; if(opt.flow===undefined) opt.flow=true; if(!state.optV2){ state.optV2=true; }  // 使用者要求：預設不自動前進，手動上一句／下一句
 let sess={};   // 本次每句最後得分
 const KW = Object.keys(VOCAB_EXT).map(id=>{ const v=[...LV,...VW,...VP].find(x=>x.id===id); return v; }).filter(Boolean)
   .map(v=>({v, forms:(()=>{ const b=norm(v.w).join(" "); const f=[b]; if(!v.ph){ f.push(b+"s",b+"es",b+"ed",b+"d",b+"ing",b.replace(/e$/,"")+"ing"); if(/y$/.test(b)) f.push(b.replace(/y$/,"ies"),b.replace(/y$/,"ied")); } return f; })()}))
@@ -2875,12 +2886,13 @@ function buildDeck(sents,{intro,words}){
   for(const s of sents){ if(words){ const v=keyWord(s,used); if(v) d.push({type:"word",v}); } d.push({type:"sent",s}); }
   return d;
 }
-function openLesson(L){
-  lesson=L; sess={};
+function openLesson(L,startAt){
+  lesson=L; sess={}; L._t0=L._t0||Date.now();
   deck=buildDeck(L.sents,{intro:L.intro, words:L.words});
   queue=deck.map(c=>c.type==="sent"?c.s:{id:"_",en:c.type==="word"?c.v.w:"",lv:2});
   ci=0; show("practice"); document.body.classList.add("lesson"); document.body.classList.toggle("smart",!!L.smart); syncHF();
   $("lTitle").textContent=L.title; timerOn=true; lastTick=Date.now();
+  if(startAt!=null){ ci=Math.max(0,Math.min(startAt,deck.length-1)); st="paused"; render(); return; }
   go(0,true);
 }
 // 開場卡插圖（使用者要求增加設計感）：每課 3 個 emoji（主圖＋兩側小圖），沒有指定就用主題預設
@@ -2895,20 +2907,21 @@ function introArt(L){ let e="", tp="";
   return {emo:seg.filter(x=>x.trim()), hue:TOPIC_HUE[tp]??225}; }
 // iPhone 收音卡住的補救：記下目前課程與卡片位置後重新整理網頁，載入後自動回到同一句
 // 使用者要求 iPhone 最穩定：①每用麥克風 3 次後，換到下一句時先自動重新整理（預防卡住）；②沒收到聲音時自動重新整理並回到同一句
-const SR_RESET_EVERY=3;
+// 使用者要求先拿掉「每 3 次收音自動重新整理」：設為 0＝停用預防性重整（沒收到聲音時的自動恢復仍保留）
+const SR_RESET_EVERY=0;
 function micReset(to,mode,msg){ const i=to==null?ci:to, c=deck[i];
   try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({art:lesson.art.id,ci:i,mode:mode||"turn",msg:msg||"已重新啟動麥克風",got:c&&c._got?[...c._got]:[]})); }catch(e){}
   document.body.classList.add("resetting"); location.reload(); }
-function safariResetDue(i){ return IS_SAFARI&&dict&&dict.kind==="web"&&!opt.nomic&&lesson&&lesson.art&&SRD.st>=SR_RESET_EVERY&&deck[i]&&deck[i].type==="sent"; }
+function safariResetDue(i){ return SR_RESET_EVERY>0&&IS_SAFARI&&dict&&dict.kind==="web"&&!opt.nomic&&lesson&&lesson.art&&SRD.st>=SR_RESET_EVERY&&deck[i]&&deck[i].type==="sent"; }
 function resumeAfterReset(){ let r=null; try{ r=JSON.parse(sessionStorage.getItem("speak20_resume")||"null"); sessionStorage.removeItem("speak20_resume"); }catch(e){}
   if(!r) return;
   if(r.vocab){ show("vocab"); setTimeout(()=>{ startVocab(); toast(r.msg||"已重新啟動麥克風"); },200); return; }
   const a=ARTS.find(x=>x.id===r.art); if(!a) return;
-  openLesson(lessonFromArt(a)); setTimeout(()=>{ stopAll(); ci=Math.min(r.ci,deck.length-1); const c=deck[ci];
+  openLesson(lessonFromArt(a), r.ci); { const c=deck[ci];
     if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=r.got&&r.got.length?new Set(r.got):null; }
     st = r.mode==="turn"&&c&&c.type==="sent" ? "turn" : "paused"; render();
     const m=sentBox&&sentBox.querySelector(".msg"); if(m) m.innerHTML=`<span class="muted" style="font-size:13px">${r.mode==="turn"?"🔄 麥克風已重新啟動，請按麥克風再唸一次":"🔄 已自動重新整理（避免 iPhone 收音卡住），按 ▶ 聽示範"}</span>`;
-    toast(r.msg||"已重新啟動麥克風"); },300); }
+    toast(r.msg||"已重新啟動麥克風"); } }
 function lessonFromArt(a){ return {key:a.id, kind:"art", title:a.zhT, sents:a.sents, words:true, art:a,
   intro:{title:a.zhT, sub:"來練習「"+a.enT+"」吧！", tag:TOPICS[a.topic].name+"・"+LEVELS[a.lv-1].n}}; }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -2965,7 +2978,7 @@ function render(){
       <div class="lc-bot"><button data-act="sayword">${ICON.again.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 再聽一次</button></div></div>`;
   } else {
     const s=c.s;
-    h=`<div class="lc sent ${st==="listen"?"listen":""} ${st==="pass"&&!sess["self:"+s.id]?"passed":""}" data-i="${ci}"><div class="lc-top"><span class="muted" style="min-width:40px;text-align:left">${deckSentNo()}</span>${statusHtml()}<button class="ic ${isSavedSent(s.id)?"on":""}" data-act="savesent" aria-label="收藏句子">${isSavedSent(s.id)?SV_ON:SV_ICON}</button></div>
+    h=`<div class="lc sent ${st==="listen"?"listen":""} ${st==="pass"&&!sess["self:"+s.id]?"passed":""} ${st==="pass"&&(sess[s.id]??0)>=100&&!sess["self:"+s.id]?"perfect":""}" data-i="${ci}"><div class="lc-top"><span class="muted" style="min-width:40px;text-align:left">${deckSentNo()}</span>${statusHtml()}<button class="ic ${isSavedSent(s.id)?"on":""}" data-act="savesent" aria-label="收藏句子">${isSavedSent(s.id)?SV_ON:SV_ICON}</button></div>
       <div class="lc-mid"><div class="en${s.en.split(/\s+/).length<=3?" short":""}">${wordsHtml(s.en, lesson.cloze&&dict&&!opt.nomic&&st!=="pass"&&st!=="self"&&st!=="quiet"?clozeIdx(s.en):null)}</div>${opt.zh?`<div class="zh">${esc(s.zh)}</div>`:""}<div class="heard"></div><div class="msg">${st==="self"?`<span class="muted" style="font-size:13px">${NOMIC_MSG}</span>`:st==="turn"&&!micEver?`<span class="muted" style="font-size:13px">按下方藍色麥克風開始說；第一次會詢問是否允許使用麥克風，請按允許。</span>`:""}</div></div>
       ${(st==="pass"||st==="fail")&&!sess["self:"+s.id]?`<div class="lc-aud"><button data-act="model">${SPK} 例子</button><button data-act="mine"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/><path d="M18 5a6 6 0 0 1 0 8M20.5 2.5a9.5 9.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> 您唸的</button></div>`:""}
       <div class="lc-bot">${st==="quiet"?`<button class="pri" data-act="selfok">✓ 通過</button>`:""}${st==="self"?`<button class="pri" data-act="trymic">${MIC.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 口說練習</button>`:""}<button data-act="again">${ICON.again.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 再來一次</button></div></div>`;
@@ -2985,12 +2998,23 @@ function renderEnd(){
   const pct=Math.round(100*ok/Math.max(1,sents.length));
   if(lesson.kind==="test"){ state.tests[lesson.key]=Math.max(state.tests[lesson.key]||0,pct); }
   flushTime(); save();
-  const next=nextNode(lesson.key);
-  $("pCard").innerHTML=`<div class="lc endc"><div class="lc-mid"><div class="muted">${lesson.kind==="test"?"實測結果":"本課結果"}</div>
-    <div class="big" style="color:${ok===sents.length?"var(--ok)":"var(--ink)"}">${ok} / ${sents.length}</div>
-    <div>${ok===sents.length?"全部通過，太棒了！":"還有 "+(sents.length-ok)+" 句沒通過，可以再練一次。"}</div></div>
-    <div class="lc-bot">${ok<sents.length?`<button class="pri" data-act="retry">重練沒通過的句子</button>`:""}
-    ${next?`<button class="${ok===sents.length?"pri":""}" data-act="next">下一課：${esc(next.label)}</button>`:""}${lesson.key==="mywords"?`<button class="${ok===sents.length?"pri":""}" data-act="mwmore">再練一組單字</button>`:""}${lesson.key==="smart"?`<button class="${ok===sents.length?"pri":""}" data-act="smartmore">再來一組智慧複習</button>`:""}<button data-act="home">${(lesson.key==="mywords"||lesson.key==="smart")?"回單字頁":"回首頁"}</button></div></div>`;
+  // 使用者要求比照 Speak 的結束畫面：插圖＋「已說的句子」「學習分鐘數」＋繼續
+  const said=sents.filter(s=>sess[s.id]!=null).length, perfect=sents.filter(s=>(sess[s.id]??0)>=100).length;
+  const mins=Math.max(1,Math.round((Date.now()-(lesson._t0||Date.now()))/60000));
+  const A=introArt(lesson), next=nextNode(lesson.key), toVocab=lesson.key==="mywords"||lesson.key==="smart";
+  document.body.classList.add("ending");
+  $("pCard").innerHTML=`<div class="endv" style="--hue:${A.hue}">
+    <div class="end-art"><span>${A.emo[0]||"🎉"}</span><i class="c1">${A.emo[1]||"✨"}</i><i class="c2">🎉</i></div>
+    <div class="end-t">${perfect===sents.length?"太完美了！":ok===sents.length?"全部完成！":"完成這一課了！"}</div>
+    <div class="end-s">${esc(lesson.title)}</div>
+    <div class="end-cards">
+      <div class="ecard"><div><b>${said}</b><span>已說的句子</span></div><i style="background:#8b6cf6">❞</i></div>
+      <div class="ecard"><div><b>${mins}</b><span>學習分鐘數</span></div><i style="background:#2fc49a">🕒</i></div>
+      <div class="ecard"><div><b>${perfect} / ${sents.length}</b><span>完美的句子（全部變綠）</span></div><i style="background:#3d5afe">✓</i></div>
+    </div>
+    <button class="pri big" data-act="${next&&!toVocab?"next":lesson.key==="smart"?"smartmore":"home"}">${next&&!toVocab?"繼續："+esc(next.label):lesson.key==="smart"?"再來一組智慧複習":"繼續"}</button>
+    <div class="end-links">${ok<sents.length?`<button data-act="retry">重練沒唸好的句子（${sents.length-ok}）</button>`:""}<button data-act="home">${toVocab?"回單字頁":"回首頁"}</button></div>
+  </div>`;
   $("btnMain").innerHTML=ICON.again; $("btnMain").classList.remove("rec");
   [...$("segs").children].forEach(seg=>seg.firstChild.style.width="100%");
 }
@@ -3001,8 +3025,8 @@ function go(i,auto){
   if(safariResetDue(i)&&i!==ci){ stopAll(); micReset(i,"play","預防卡住，已自動重新整理"); return; }
   stopAll(); sel=null;
   ci=Math.max(0,Math.min(i,deck.length)); st="paused";
-  const c=deck[ci]; if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=null; c._rounds=0; }
-  render(); if(auto&&deck[ci]) run();
+  const c=deck[ci]; if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=null; c._rounds=0; c._waitUntil=0; }
+  document.body.classList.remove("ending"); render(); if(auto&&deck[ci]) run();
 }
 // 免手持（只在智慧複習、且使用者開啟時）：自動播放、自動換下一張，下一句按鈕外圈顯示倒數
 const hfOn=()=>!!(lesson&&lesson.smart&&opt.hf);
@@ -3020,8 +3044,9 @@ function introCd(ms){
   tick(); clearTimeout(cdTimer); cdTimer=setTimeout(()=>{ if(t===tok) go(ci+1,true); },ms);
 }
 // 使用者要求：一律不自動跳下一張，只能手動按「下一句」（智慧複習的免手持例外）
+// 使用者要求比照 Speak：單字卡播完、句子全部唸對（變綠）後，「下一句」外圈倒數自動前進；按 ❚❚ 可暫停。⚙ 可關閉
 function countdown(ms){
-  return;
+  if(!opt.flow||hfOn()) return;
   const btn=$("btnNext"); btn.style.setProperty("--dur",ms+"ms"); btn.classList.remove("counting"); void btn.offsetWidth; btn.classList.add("counting");
   const t=tok; cdTimer=setTimeout(()=>{ if(t===tok) go(ci+1,true); },ms); $("btnMain").innerHTML=ICON.pause;
 }
@@ -3029,8 +3054,8 @@ async function run(){
   stopAll(); const t=tok, c=deck[ci]; if(!c) return;
   if(c.type==="intro"){ st="show"; render(); if(hfOn()) hfNext(1800); else introCd(3000); return; }
   if(c.type==="word"){ st="playing"; render(); await speak(c.v.w,false); if(t!==tok) return; await sleep(400); if(t!==tok) return; st="show"; render(); countdown(3200); return; }
-  if(lesson.cloze&&dict&&!opt.nomic&&!c._played&&clozeIdx(c.s.en).size){ c._played=true; c._html=null; if(dict.kind==="web"&&!IS_SAFARI){ startListen(true); return; } st="turn"; render(); return; }
-  st="playing"; c._html=null; c._got=null; c._rounds=0; render();
+  if(lesson.cloze&&dict&&!opt.nomic&&!c._played&&clozeIdx(c.s.en).size){ c._played=true; c._html=null; if(dict.kind==="web"){ startListen(true); return; } st="turn"; render(); return; }
+  st="playing"; c._html=null; c._got=null; c._rounds=0; c._waitUntil=0; render();
   const hlStop=karaoke(c.s.en);
   await speak(c.s.en,false); hlStop();
   if(t!==tok) return;
@@ -3039,7 +3064,8 @@ async function run(){
   // 免手持：播完直接開麥克風（iPhone 若不允許自動收音，會改為等待點按）
   if(hfOn()){ startListen(true); return; }
   // 瀏覽器收音（離線版／GitHub 版）播完自動開始收音；Claude 收音規定須由使用者點按
-  if(dict.kind==="web"&&!IS_SAFARI){ startListen(true); return; }
+  // 使用者要求比照 Speak：示範播完就自動收音（iPhone 也嘗試；若不允許自動開始，會改為「點麥克風開口說」）
+  if(dict.kind==="web"){ startListen(true); return; }
   st="turn"; render();
 }
 // 播放時依估計速度讓單字依序亮起（語音服務沒有提供逐字時間，為估算值）
@@ -3061,30 +3087,46 @@ function startListen(auto){
   lastStart.then(()=>{ setTimeout(()=>{ if(listening&&!micLive&&!finalText&&!partialText){ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span class="muted" style="font-size:13px">還沒收到聲音：請確認瀏覽器已允許麥克風（網址列左側鎖頭圖示），並使用電腦 Chrome／Edge 或 Claude 桌面 App。</span>`; } },4000); }).catch(()=>{});
   lastStart.catch(e=>{ listening=false; clearTimers();
     if(e&&e.code==="not_granted"){ st="turn"; setTimeout(()=>{ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">麥克風未被允許。${NOMIC_MSG}</span>${diagTxt(e)}`; },0); }
-    else { st="turn"; if(!auto) toast("無法開始收音，請再按一次麥克風"); setTimeout(()=>{ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">無法開始收音，請再按一次。</span>${diagTxt(e)}`; },0); }
+    else if(auto){ st="turn"; }
+    else { st="turn"; toast("無法開始收音，請再按一次麥克風"); setTimeout(()=>{ const el=sentBox&&sentBox.querySelector(".msg"); if(el) el.innerHTML=`<span style="font-size:13px;color:#ffb98a">無法開始收音，請再按一次。</span>${diagTxt(e)}`; },0); }
     render(); });
   const n=deck[ci].s.en.split(/\s+/).length;
-  maxTimer=setTimeout(finishListen, 8000+1200*n);
+  // 比照 Speak：一直等到整句唸對（全部變綠）；免手持維持停頓自動評分。每句最多等 45 秒
+  if(hfOn()) maxTimer=setTimeout(finishListen, 8000+1200*n);
+  else { const c=deck[ci]; if(!c._waitUntil) c._waitUntil=Date.now()+45000; maxTimer=setTimeout(finishListen, Math.max(8000,c._waitUntil-Date.now())); }
 }
+// 收音中即時累計唸對的字（藍色），全部唸對就立刻結束並變綠
+function waitUpdate(){ if(!listening) return; const c=deck[ci]; if(!c||c.type!=="sent") return;
+  const t=(finalText+" "+partialText).trim(); if(!t) return;
+  const r=scoreText(c.s.en,t,c._got); c._got=r.okIdx; liveMark(sentBox,c.s.en,"",c._got);
+  if(r.sc>=100){ clearTimeout(silTimer); silTimer=setTimeout(()=>{ if(listening) finishListen(); },250); } }
 function showHeard(){ const el=sentBox&&sentBox.querySelector(".heard"); if(!el) return; const t=(finalText+" "+partialText).trim(); el.textContent=t?"聽到："+t:""; const c=deck[ci]; if(c&&c.s) liveMark(sentBox,c.s.en,t,c._got); }
 // 優化：整句的字都已唸對時，0.7 秒後就評分，不必等 3.5 秒停頓
 function bumpSilence(){ if(!listening) return; clearTimeout(silTimer);
   let full=false; try{ const t=(finalText+" "+partialText).trim(), inL=document.body.classList.contains("lesson"), c=inL?deck[ci]:null;
     const en=c&&c.s?c.s.en:(!inL&&pcur>=0&&queue[pcur]?queue[pcur].en:""); if(en&&t) full=scoreText(en,t,c?c._got:null).sc===100; }catch(e){}
   silTimer=setTimeout(finishListen, full?700:3500); }
-async function finishListen(){
+let emptyRuns=0;
+async function finishListen(manual){
   if(!listening) return;
   listening=false; clearTimeout(silTimer); clearTimeout(maxTimer); st="scoring"; render();
   recStop();
   const t=tok; try{ await dict.stop(); }catch(e){} if(t!==tok) return;
+  // iPhone 按停止後，辨識結果可能晚一點才送到：最多再等 1.2 秒
+  if(IS_SAFARI&&!(finalText+partialText).trim()){ for(let k=0;k<6&&!(finalText+partialText).trim();k++){ await new Promise(r=>setTimeout(r,200)); if(t!==tok) return; } }
   const said=(finalText+" "+partialText).trim(), c=deck[ci];
-  if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"+srDiag();
-    if(IS_SAFARI&&lesson&&lesson.art&&!hfOn()){ micReset(ci,"turn","沒收到聲音，已自動重新啟動麥克風"); return; }
+  if(said) emptyRuns=0;
+  if(!said){ emptyRuns++;
+    // 等待模式中 iPhone 自行結束但還沒聽到聲音：先安靜地重新收音（最多 2 次），不立即重新整理
+    if(!manual&&!hfOn()&&c&&c.type==="sent"&&Date.now()<(c._waitUntil||0)&&emptyRuns<3&&dict&&dict.kind==="web"&&!opt.nomic){ st="turn"; render(); const t3=tok; autoTimer=setTimeout(()=>{ if(t3===tok&&st==="turn"&&deck[ci]===c) startListen(true); },300); return; }
+    st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"+srDiag();
+    if(IS_SAFARI&&lesson&&lesson.art&&!hfOn()&&(!manual||emptyRuns>=2)){ emptyRuns=0; micReset(ci,"turn","沒收到聲音，已自動重新啟動麥克風"); return; }
     if(hfOn()) hfNext(3000); return; }
   const {sc,html,okIdx}=scoreText(c.s.en,said,c._got); c._got=okIdx; sess[c.s.id]=sc; recordScore(c.s,sc);
   c._html=html; c._heard="聽到："+said;
   st= sc>=passOf(c.s) ? "pass" : "fail"; render(); srMark(c);
   if(hfOn()&&st==="pass"){ hfNext(1600); }
+  else if(st==="pass"&&sc>=100&&opt.flow&&!manual){ countdown(1800); }
   else if(hfOn()&&st==="fail"){ c._rounds=(c._rounds||0)+1;
     const msg=sentBox&&sentBox.querySelector(".msg");
     if(c._rounds<2&&!opt.nomic){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">再唸一次白色的字…</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
@@ -3096,7 +3138,7 @@ async function finishListen(){
     // 繼續聆聽白色（未唸對）的字，直到全部變藍；瀏覽器收音可自動接續，Claude 收音需再按一次
     c._rounds=(c._rounds||0)+1;
     const msg=sentBox&&sentBox.querySelector(".msg");
-    if(dict&&dict.kind==="web"&&!IS_SAFARI&&!opt.nomic&&c._rounds<8){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">繼續聆聽中…請唸白色的字</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
+    if(dict&&dict.kind==="web"&&!opt.nomic&&!manual&&c._rounds<8&&Date.now()<(c._waitUntil||0)){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">繼續聆聽中…請唸白色的字</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },IS_SAFARI?400:1200); }
     else if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字。按麥克風，只唸白色的部分就好，唸到全部變藍為止。</span>`;
   }
 }
@@ -3106,7 +3148,8 @@ function canMore(c){ return !!(c&&c.type==="sent"&&st==="pass"&&(sess[c.s.id]??0
 function selfOk(){ const c=deck[ci]; sess[c.s.id]=passOf(c.s); sess["self:"+c.s.id]=1; recordScore(c.s,passOf(c.s)); srMark(c); st="pass"; render(); countdown(1500); hfNext(1200); }
 function mainBtn(){
   if(!deck[ci]){ openLesson(lesson); return; }
-  if(st==="listen"){ finishListen(); return; }
+  if(st==="listen"){ finishListen(true); return; }
+  if(st==="scoring") return; // 評分中按鈕不動作，避免把結果中斷
   if(st==="turn"||st==="fail"||canMore(deck[ci])){ if(dict) startListen(false); return; }
   if(st==="paused" || st==="self" || st==="quiet" || ((st==="pass"||st==="show")&&!cdTimer)){ run(); return; }
   stopAll(); st="paused"; render();
@@ -3134,7 +3177,7 @@ function lessonClick(e){
   else if(a==="smartmore") startSmartReview();
   else if(a==="home"){ const mw=lesson.key==="mywords"||lesson.key==="smart"; closeLesson(); if(mw) show("vocab"); }
 }
-function closeLesson(){ document.body.classList.remove("smart"); try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show("home"); }
+function closeLesson(){ document.body.classList.remove("smart","ending"); try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show("home"); }
 
 // ===================== 選字存入「我的單字庫」 =====================
 let sel=null;
@@ -3540,7 +3583,7 @@ function levelSheet(){
 function setLevel(lv){ state.level=lv; save(); closeSheet(); renderHome(); if(!$("v-stats").classList.contains("hidden")) renderStats(); toast("已切換到「"+LEVELS[lv-1].n+"」"); }
 function settingsSheet(){
   const o=(k,label,a,b)=>`<button class="opt" data-opt="${k}"><span><b>${label}</b></span><span class="muted">${opt[k]?a:b}</span></button>`;
-  openSheet(`<h2>課程設定</h2><button class="opt" data-rate="1"><span><b>語速</b><small>點一下切換：慢 0.7x → 稍慢 0.85x → 正常 1x → 稍快 1.2x</small></span><span class="muted rateVal">${RATE_N[curRate()]}（${rateLabel()}）</span></button><button class="opt" data-voice="1"><span><b>發音人聲</b><small>可試聽後換成女聲</small></span><span class="muted">選擇 ›</span></button>${o("zh","顯示中文翻譯","顯示","隱藏")}`);
+  openSheet(`<h2>課程設定</h2><button class="opt" data-rate="1"><span><b>語速</b><small>點一下切換：慢 0.7x → 稍慢 0.85x → 正常 1x → 稍快 1.2x</small></span><span class="muted rateVal">${RATE_N[curRate()]}（${rateLabel()}）</span></button><button class="opt" data-voice="1"><span><b>發音人聲</b><small>可試聽後換成女聲</small></span><span class="muted">選擇 ›</span></button>${o("zh","顯示中文翻譯","顯示","隱藏")}${o("flow","自動下一句（比照 Speak）","開啟：唸對後自動前進","關閉：手動按下一句")}`);
 }
 
 // ===================== 收藏：已儲存的句子 =====================
@@ -3713,7 +3756,7 @@ $("btnFEnd").onclick=endVocab;
 // 使用者要求取消「不會／模糊／會了」：改為「下一個」，本張唸對就記為會了，否則記為模糊（照間隔再複習）
 $("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return; rate(vOk.has(v.id)?2:1);
   // iPhone：背單字也每用麥克風 3 次就在換卡時自動重新整理，避免收音卡住；載入後自動繼續背剩下的字
-  if(IS_SAFARI&&dict&&dict.kind==="web"&&SRD.st>=SR_RESET_EVERY&&!$("flash").classList.contains("hidden")&&vq[vpos]){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({vocab:1,msg:"預防卡住，已自動重新整理"})); }catch(e){} document.body.classList.add("resetting"); location.reload(); } };
+  if(SR_RESET_EVERY>0&&IS_SAFARI&&dict&&dict.kind==="web"&&SRD.st>=SR_RESET_EVERY&&!$("flash").classList.contains("hidden")&&vq[vpos]){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({vocab:1,msg:"預防卡住，已自動重新整理"})); }catch(e){} document.body.classList.add("resetting"); location.reload(); } };
 $("btnAddWord").onclick=addWord;
 const wordListClick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const i=m.dataset.more.indexOf("|"); svMore(m.dataset.more.slice(0,i),m.dataset.more.slice(i+1)); } };
 $("customList").onclick=wordListClick; $("searchList").onclick=wordListClick;
@@ -3772,7 +3815,7 @@ document.addEventListener("click",e=>{ if(e.target.closest(".voiceBtn")){ e.stop
 updateRateUI();
 if("speechSynthesis" in window) speechSynthesis.getVoices();
 renderHome();
-setTimeout(resumeAfterReset,200);
+resumeAfterReset();
 $("syncNote").textContent="僅存本機";
 
 // ===================== Claude 能力（有則啟用） =====================
