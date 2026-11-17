@@ -88,6 +88,7 @@ body.lesson .selbar,body.studying .selbar{bottom:16px!important}
 .rt b{font-size:17px}.rt small{font-size:12px;color:#c9ced8}.rt small.muted{color:var(--sub)}
 .rs-o{background:#22252d;border-radius:14px;padding:10px 12px;margin-bottom:8px;font-size:15px;line-height:1.5}.rs-o.hi{box-shadow:0 0 0 2px #3d5afe}
 .rs-ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rs-ex button{min-height:0;padding:4px 10px;border-radius:12px;font-size:14px;background:#2d313c}
+body.resetting{opacity:.4;pointer-events:none;transition:opacity .2s}
 .vnav{display:grid;grid-template-columns:1fr 2fr;gap:10px}.vnav button{min-height:54px;font-size:17px;font-weight:700;border-radius:16px}.vend{background:#2d3039;color:#e6e8ee}.vnhint{font-size:12px;text-align:center;margin-top:6px}
 .ratebar{position:sticky;bottom:0;background:var(--card);padding:12px 0 6px;margin:6px -2px 0;z-index:5;box-shadow:0 -14px 20px var(--card)}
 .wd.hl{color:#fff;background:rgba(111,139,255,.28)}
@@ -2893,10 +2894,21 @@ function introArt(L){ let e="", tp="";
   const seg=window.Intl&&Intl.Segmenter?[...new Intl.Segmenter("zh",{granularity:"grapheme"}).segment(e||"")].map(x=>x.segment):Array.from(e||"");
   return {emo:seg.filter(x=>x.trim()), hue:TOPIC_HUE[tp]??225}; }
 // iPhone 收音卡住的補救：記下目前課程與卡片位置後重新整理網頁，載入後自動回到同一句
-function micReset(){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({art:lesson.art.id,ci})); }catch(e){} location.reload(); }
+// 使用者要求 iPhone 最穩定：①每用麥克風 3 次後，換到下一句時先自動重新整理（預防卡住）；②沒收到聲音時自動重新整理並回到同一句
+const SR_RESET_EVERY=3;
+function micReset(to,mode,msg){ const i=to==null?ci:to, c=deck[i];
+  try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({art:lesson.art.id,ci:i,mode:mode||"turn",msg:msg||"已重新啟動麥克風",got:c&&c._got?[...c._got]:[]})); }catch(e){}
+  document.body.classList.add("resetting"); location.reload(); }
+function safariResetDue(i){ return IS_SAFARI&&dict&&dict.kind==="web"&&!opt.nomic&&lesson&&lesson.art&&SRD.st>=SR_RESET_EVERY&&deck[i]&&deck[i].type==="sent"; }
 function resumeAfterReset(){ let r=null; try{ r=JSON.parse(sessionStorage.getItem("speak20_resume")||"null"); sessionStorage.removeItem("speak20_resume"); }catch(e){}
-  if(!r) return; const a=ARTS.find(x=>x.id===r.art); if(!a) return;
-  openLesson(lessonFromArt(a)); setTimeout(()=>{ go(Math.min(r.ci,deck.length-1),false); toast("已重新啟動，按麥克風開始說"); },300); }
+  if(!r) return;
+  if(r.vocab){ show("vocab"); setTimeout(()=>{ startVocab(); toast(r.msg||"已重新啟動麥克風"); },200); return; }
+  const a=ARTS.find(x=>x.id===r.art); if(!a) return;
+  openLesson(lessonFromArt(a)); setTimeout(()=>{ stopAll(); ci=Math.min(r.ci,deck.length-1); const c=deck[ci];
+    if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=r.got&&r.got.length?new Set(r.got):null; }
+    st = r.mode==="turn"&&c&&c.type==="sent" ? "turn" : "paused"; render();
+    const m=sentBox&&sentBox.querySelector(".msg"); if(m) m.innerHTML=`<span class="muted" style="font-size:13px">${r.mode==="turn"?"🔄 麥克風已重新啟動，請按麥克風再唸一次":"🔄 已自動重新整理（避免 iPhone 收音卡住），按 ▶ 聽示範"}</span>`;
+    toast(r.msg||"已重新啟動麥克風"); },300); }
 function lessonFromArt(a){ return {key:a.id, kind:"art", title:a.zhT, sents:a.sents, words:true, art:a,
   intro:{title:a.zhT, sub:"來練習「"+a.enT+"」吧！", tag:TOPICS[a.topic].name+"・"+LEVELS[a.lv-1].n}}; }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -2986,6 +2998,7 @@ let autoTimer=null;
 function clearTimers(){ clearTimeout(autoTimer); clearTimeout(cdTimer); clearTimeout(silTimer); clearTimeout(maxTimer); cdTimer=silTimer=maxTimer=null; $("btnNext").classList.remove("counting"); }
 function stopAll(){ tok++; clearTimers(); stopSpeech(); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } }
 function go(i,auto){
+  if(safariResetDue(i)&&i!==ci){ stopAll(); micReset(i,"play","預防卡住，已自動重新整理"); return; }
   stopAll(); sel=null;
   ci=Math.max(0,Math.min(i,deck.length)); st="paused";
   const c=deck[ci]; if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=null; c._rounds=0; }
@@ -3066,7 +3079,7 @@ async function finishListen(){
   const t=tok; try{ await dict.stop(); }catch(e){} if(t!==tok) return;
   const said=(finalText+" "+partialText).trim(), c=deck[ci];
   if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"+srDiag();
-    if(IS_SAFARI&&lesson&&lesson.art){ const m=sentBox.querySelector(".msg"); if(m) m.innerHTML=`<button class="pri" data-act="micreset" style="margin-top:8px">🔄 重新啟動麥克風</button><div class="muted" style="font-size:12px;margin-top:4px">iPhone 收音卡住時按這裡，會重新整理並回到這一句</div>`; }
+    if(IS_SAFARI&&lesson&&lesson.art&&!hfOn()){ micReset(ci,"turn","沒收到聲音，已自動重新啟動麥克風"); return; }
     if(hfOn()) hfNext(3000); return; }
   const {sc,html,okIdx}=scoreText(c.s.en,said,c._got); c._got=okIdx; sess[c.s.id]=sc; recordScore(c.s,sc);
   c._html=html; c._heard="聽到："+said;
@@ -3103,7 +3116,7 @@ function lessonClick(e){
   const ex=e.target.closest("[data-sayex]"); if(ex&&deck[ci]&&deck[ci].type==="word"){ clearTimers(); speak(deck[ci].v.ex,false); return; }
   const b=e.target.closest("[data-act]"); if(!b) return;
   const a=b.dataset.act, c=deck[ci];
-  if(a==="micreset"){ micReset(); return; }
+  if(a==="micreset"){ micReset(ci,"turn"); return; }
   if(a==="again") run();
   else if(a==="model"){ const k=c&&c.s; if(k){ const hl=karaoke(k.en); speak(k.en,false).then(hl); } }
   else if(a==="mine"){ const el=sentBox&&sentBox.querySelector(".heard"); if(el){ el.classList.add("show"); el.style.display="block"; el.animate&&el.animate([{opacity:.3},{opacity:1}],{duration:400}); }
@@ -3698,7 +3711,9 @@ $("btnFSave").onclick=()=>{ const v=vq[vpos]; const on=!isSaved(v.id); state.sav
 $("fSyn").onclick=e=>{ const s=e.target.closest("[data-synsave]"); if(s){ toggleSynSave(s.dataset.synsave,s.dataset.zh); const on=synSaved(s.dataset.synsave); s.classList.toggle("on",on); s.innerHTML=on?SV_ON:SV_ICON; return; } const b=e.target.closest("[data-say]"); if(b) speak(b.dataset.say,false); };
 $("btnFEnd").onclick=endVocab;
 // 使用者要求取消「不會／模糊／會了」：改為「下一個」，本張唸對就記為會了，否則記為模糊（照間隔再複習）
-$("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return; rate(vOk.has(v.id)?2:1); };
+$("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return; rate(vOk.has(v.id)?2:1);
+  // iPhone：背單字也每用麥克風 3 次就在換卡時自動重新整理，避免收音卡住；載入後自動繼續背剩下的字
+  if(IS_SAFARI&&dict&&dict.kind==="web"&&SRD.st>=SR_RESET_EVERY&&!$("flash").classList.contains("hidden")&&vq[vpos]){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({vocab:1,msg:"預防卡住，已自動重新整理"})); }catch(e){} document.body.classList.add("resetting"); location.reload(); } };
 $("btnAddWord").onclick=addWord;
 const wordListClick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const i=m.dataset.more.indexOf("|"); svMore(m.dataset.more.slice(0,i),m.dataset.more.slice(i+1)); } };
 $("customList").onclick=wordListClick; $("searchList").onclick=wordListClick;
