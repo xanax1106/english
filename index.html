@@ -2679,29 +2679,32 @@ const SRD={st:0,on:0,end:0,res:0,err:""};
 function srDiag(){ return `（診斷：啟動 ${SRD.on}/${SRD.st}、結果 ${SRD.res}、結束 ${SRD.end}${SRD.err?"、錯誤 "+SRD.err:""}${IS_SAFARI?"、Safari":""}${opt.srx?"、延長收音":""}）`; }
 function wsDict(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) return null;
-  const h={}; let rec=null, cur=null;
+  const h={}; let rec=null, cur=null, one=null, running=false;
   // 每次收音用獨立的 session；iPhone Safari 預設照原本方式（一停頓就結束並評分），
   // 「延長收音」開啟時才在結束後用新的辨識物件自動接續（opt.srx，可在「我的」設定）
   return { kind:"web",
     onPartial:f=>h.p=f, onFinal:f=>h.f=f, onState:f=>h.s=f,
     start(){
-      if(rec){ const old=rec; rec=null; if(cur) cur.want=false; old.onend=old.onresult=old.onerror=old.onstart=null; try{ old.abort(); }catch(e){} }
+      // iPhone：第二句起收不到音（使用者回報）→ Safari 重複使用同一個辨識物件，不再先 abort；只有還在收音時才中止
+      if(rec&&(!IS_SAFARI||running)){ const old=rec; rec=null; if(cur) cur.want=false; old.onend=old.onresult=old.onerror=old.onstart=null; try{ old.abort(); }catch(e){} running=false; if(old===one) one=null; }
       const ses={want:true,restarts:0,ok:false,interim:""}; cur=ses; SRD.st++; SRD.err="";
       const mk=(first,res,rej)=>{
-        let r; try{ r=new SR(); }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); return; }
+        let r; try{ r=(IS_SAFARI&&one&&!running)?one:new SR(); if(IS_SAFARI) one=r; }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); return; }
         rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI; r.maxAlternatives=1;
-        r.onstart=()=>{ if(cur!==ses) return; SRD.on++; if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res&&res(); } };
+        r.onstart=()=>{ running=true; if(cur!==ses) return; SRD.on++; if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res&&res(); } };
         r.onresult=e=>{ if(cur!==ses) return; SRD.res++; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal){ const t=x[0].transcript.trim(); if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } } else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
         r.onerror=ev=>{ SRD.err=ev.error||"error"; const c=(ev.error==="not-allowed"||ev.error==="service-not-allowed")?"not_granted":ev.error||"error"; if(c==="not_granted"||c==="audio-capture") ses.want=false; if(!ses.ok&&first){ ses.want=false; rej({code:c}); } };
-        r.onend=()=>{ if(cur!==ses) return; SRD.end++;
+        r.onend=()=>{ running=false; if(cur!==ses) return; SRD.end++;
           if(ses.interim){ const t=ses.interim.trim(); ses.interim=""; if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } }
           const extend = !IS_SAFARI || opt.srx;
           if(extend&&ses.want&&ses.ok&&ses.restarts<20){ ses.restarts++; setTimeout(()=>{ if(cur!==ses||!ses.want){ h.s&&h.s({state:"idle",reason:"stopped"}); return; } mk(false); },120); return; }
           ses.want=false; h.s&&h.s({state:"idle",reason:"stopped"}); };
-        try{ r.start(); }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); }
+        try{ r.start(); }catch(e){
+          if(IS_SAFARI&&r===one){ try{ r.abort(); }catch(e2){} one=null; running=false; try{ const r2=new SR(); one=r2; rec=r2; r2.lang=r.lang; r2.interimResults=true; r2.continuous=false; r2.maxAlternatives=1; r2.onstart=r.onstart; r2.onresult=r.onresult; r2.onerror=r.onerror; r2.onend=r.onend; r2.start(); return; }catch(e3){} }
+          ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); }
       };
-      // 開始收音前先停掉正在播放的發音（iPhone 播放中無法收音）
-      try{ if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending)) speechSynthesis.cancel(); }catch(e){}
+      // 開始收音前先停掉正在播放的發音；iPhone 的 speaking 狀態常卡住，cancel 會讓收音失效，所以 Safari 不呼叫
+      if(!IS_SAFARI){ try{ if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending)) speechSynthesis.cancel(); }catch(e){} }
       return new Promise((res,rej)=>mk(true,res,rej)); },
     stop(){ if(cur) cur.want=false; return new Promise(res=>{ const r=rec; if(!r){ res(); return; } const t=setTimeout(res,800); try{ r.addEventListener("end",()=>{ clearTimeout(t); res(); },{once:true}); r.stop(); }catch(e){ clearTimeout(t); res(); } }); } };
 }
@@ -2919,7 +2922,7 @@ function statusHtml(){
   const c=deck[ci]; if(!c||c.type!=="sent") return "<span></span>";
   const s=c.s, sc=sess[s.id];
   const m={playing:["","播放中"], turn:["on",MIC+"點麥克風開口說"], listen:["on",MIC+"請開口說"], scoring:["","評分中…"], self:["warn","無法收音"], quiet:["","免開麥克風・按「通過」"],
-    pass:["ok",(sess["self:"+s.id]?(opt.nomic?"✓ 通過":"✓ 自評通過"):"✓ "+((sc??0)>=100?"很讚！":(sc??0)>=90?"很好！":"對！")+" "+(sc??"")+" 分")], fail:["warn","✕ 不太對 "+(sc??"")+" 分"], paused:["","暫停中"]}[st];
+    pass:["ok",(sess["self:"+s.id]?(opt.nomic?"✓ 通過":"✓ 自評通過"):"✓ "+praise(sc??0))], fail:["warn","💪 "+praise(sc??0)], paused:["","暫停中"]}[st];
   if(m&&(st==="turn"||st==="fail"||st==="self")) return `<button class="st ${m[0]} stbtn" data-act="mic">${m[1]}</button>`;
   if(m&&st==="listen") return `<button class="st ${m[0]} stbtn" data-act="micstop">${m[1]}</button>`;
   return m?`<span class="st ${m[0]}">${m[1]}</span>`:"<span></span>";
@@ -2951,7 +2954,7 @@ function render(){
   $("pCard").innerHTML=h; sentBox=$("pCard");
   if(c.type==="sent" && c._html){ sentBox.querySelector(".en").innerHTML=c._html; sentBox.querySelector(".heard").textContent=c._heard||""; }
   const idle = st==="paused" || st==="self" || st==="quiet" || ((st==="pass"||st==="show")&&!cdTimer);
-  const icon = st==="listen"?"stop" : (st==="turn"||st==="fail")?"mic" : idle?"play" : "pause";
+  const icon = st==="listen"?"stop" : (st==="turn"||st==="fail"||canMore(c))?"mic" : idle?"play" : "pause";
   $("btnMain").innerHTML=ICON[icon]; $("btnMain").classList.toggle("rec",st==="listen");
   $("btnPrev").disabled=ci===0;
   if(sel) paintSel();
@@ -3065,19 +3068,24 @@ async function finishListen(){
     if(c._rounds<2&&!opt.nomic){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">再唸一次白色的字…</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
     else { if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">先換下一張，之後會再安排複習</span>`; hfNext(2500); }
   }
+  else if(st==="pass"){ const msg=sentBox&&sentBox.querySelector(".msg");
+    if(msg) msg.innerHTML = sc<100&&dict&&!opt.nomic ? `<span class="muted" style="font-size:13px">還有白色的字，按麥克風只唸白色的部分，全部變藍就完美了！</span>` : `<span style="font-size:14px;color:var(--ok)">🎉 每個字都唸對了！</span>`; }
   else if(st==="fail"){
     // 繼續聆聽白色（未唸對）的字，直到全部變藍；瀏覽器收音可自動接續，Claude 收音需再按一次
     c._rounds=(c._rounds||0)+1;
     const msg=sentBox&&sentBox.querySelector(".msg");
     if(dict&&dict.kind==="web"&&!IS_SAFARI&&!opt.nomic&&c._rounds<8){ if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">繼續聆聽中…請唸白色的字</span>`; const t2=tok; autoTimer=setTimeout(()=>{ if(t2===tok&&st==="fail"&&deck[ci]===c) startListen(true); },1200); }
-    else if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字，按麥克風再唸白色的部分</span>`;
+    else if(msg) msg.innerHTML=`<span class="muted" style="font-size:13px">藍色是已唸對的字。按麥克風，只唸白色的部分就好，唸到全部變藍為止。</span>`;
   }
 }
+// 使用者要求不顯示分數，改用鼓勵詞：全部唸對＝完美；及格＝非常好；一半以上＝再加油一點；其餘＝加油
+function praise(sc){ return sc>=100?"完美！":sc>=80?"非常好！":sc>=50?"再加油一點！":"加油，慢慢來！"; }
+function canMore(c){ return !!(c&&c.type==="sent"&&st==="pass"&&(sess[c.s.id]??0)<100&&!sess["self:"+c.s.id]&&dict&&!opt.nomic); }
 function selfOk(){ const c=deck[ci]; sess[c.s.id]=passOf(c.s); sess["self:"+c.s.id]=1; recordScore(c.s,passOf(c.s)); srMark(c); st="pass"; render(); countdown(1500); hfNext(1200); }
 function mainBtn(){
   if(!deck[ci]){ openLesson(lesson); return; }
   if(st==="listen"){ finishListen(); return; }
-  if(st==="turn"||st==="fail"){ if(dict) startListen(false); return; }
+  if(st==="turn"||st==="fail"||canMore(deck[ci])){ if(dict) startListen(false); return; }
   if(st==="paused" || st==="self" || st==="quiet" || ((st==="pass"||st==="show")&&!cdTimer)){ run(); return; }
   stopAll(); st="paused"; render();
 }
@@ -3276,7 +3284,7 @@ async function vmicFinish(){
   const pass=sc>=80;
   m.box.classList.toggle("ok",pass);
   m.res.className="vmicres "+(pass?"ok":"no");
-  m.res.textContent=(pass?"✓ 唸對了！":"✕ 再試一次")+"（"+sc+" 分，聽到："+said+"）";
+  m.res.textContent=(pass?"✓ ":"💪 ")+praise(sc)+"（聽到："+said+"）";
   if(pass&&m.kind==="w"){ const v=m.v; if(v){ state.best["vw:"+v.id]=Math.max(state.best["vw:"+v.id]||0,sc); save(); } }
   if(pass&&!m.wd){ const v=m.v; if(v){ vOk.add(v.id); const r=state.vocab[v.id]; vHint(v,r?r.b:0); } }
 }
@@ -3406,7 +3414,7 @@ function openPron(id){
   $("pPairs").innerHTML=p.pairs.map(([a,b])=>`<div class="pair"><button data-say="${esc(a)}">▶ ${esc(a)}</button><span>↔</span><button data-say="${esc(b)}">▶ ${esc(b)}</button></div>`).join("");
   queue=pronItems(p); pcur=-1; sentBox=$("pSents"); sel=null;
   sentBox.innerHTML=queue.map((s,i)=>{ const b=state.best[s.id];
-    return `<div class="sent${b!=null&&b>=passOf(s)?" passed":""}" data-i="${i}"><div class="no">${i+1}<span class="sc" style="color:${b==null?"":b>=passOf(s)?"var(--ok)":"var(--bad)"}">${b==null?"":"最佳 "+b+" 分"}</span></div>
+    return `<div class="sent${b!=null&&b>=passOf(s)?" passed":""}" data-i="${i}"><div class="no">${i+1}<span class="sc" style="color:${b==null?"":b>=passOf(s)?"var(--ok)":"var(--bad)"}">${b==null?"":(b>=passOf(s)?"✓ ":"")+praise(b)}</span></div>
       <div class="en">${wordsHtml(s.en)}</div><div class="zh">${esc(s.zh)}</div>
       <div class="acts"><button data-act="play">▶ 播放</button><button data-act="slow">▶ 慢速</button><button class="mic pri" data-act="mic">● 口說練習</button></div>
       <div class="heard"></div><div class="msg"></div></div>`; }).join("");
@@ -3437,8 +3445,8 @@ function pronScore(said){
   if(!said){ box.querySelector(".heard").textContent="沒有聽到聲音，請靠近麥克風再試一次。"; return; }
   const {sc,html}=scoreText(s.en,said); recordScore(s,sc); const P=passOf(s);
   box.querySelector(".en").innerHTML=html; box.querySelector(".heard").textContent="聽到："+said;
-  const scEl=box.querySelector(".sc"); scEl.textContent=sc+" 分（最佳 "+state.best[s.id]+"）"; scEl.style.color=sc>=P?"var(--ok)":"var(--bad)";
-  box.querySelector(".msg").innerHTML= sc>=P?`<b style="color:var(--ok)">✓ 通過（${sc} 分）</b>`:`<b style="color:var(--bad)">✗ 未通過（${sc} 分，及格 ${P}）</b> 沒變藍的字是沒被正確辨識的字，再聽一次後重試。`;
+  const scEl=box.querySelector(".sc"); scEl.textContent=praise(sc); scEl.style.color=sc>=P?"var(--ok)":"#ffb98a";
+  box.querySelector(".msg").innerHTML= sc>=P?`<b style="color:var(--ok)">✓ ${praise(sc)}</b>`:`<b style="color:#ffb98a">💪 ${praise(sc)}</b> 白色的字還沒被正確辨識，聽一次示範後再唸。`;
   box.classList.toggle("passed",isPass(s)); pronDone();
 }
 function pronClick(e){
@@ -3485,7 +3493,7 @@ function renderHome(){
       const cls=n.key===curKey?"cur":n.done?"done":"";
       let ic= n.done&&n.key!==curKey ? CHECK : n.type==="art" ? `<span>${n.no}</span>` : n.type==="review" ? `<span>${n.badge||"↺"}</span>` : `<span>${n.score!=null?n.score:"✓"}</span>`;
       if(n.type==="test" && n.score==null && !(n.done&&n.key!==curKey)) ic=`<svg viewBox="0 0 24 24"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/></svg>`;
-      const sub = n.type==="art" ? n.sub : n.type==="review" ? (n.badge?n.badge+" 句待加強":"再練一次") : (n.score!=null?"最高 "+n.score+" 分":"整個單元測一次");
+      const sub = n.type==="art" ? n.sub : n.type==="review" ? (n.badge?n.badge+" 句待加強":"再練一次") : (n.score!=null?"最佳："+praise(n.score):"整個單元測一次");
       const bubble = isCurUnit&&i===2 ? `<button class="bubble" data-vocab="1">${vleft?`<span class="badge">${vleft}</span>`:""}<span class="cardsI"><svg viewBox="0 0 24 24"><path d="M5 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2zM19 7v12h-1V7z"/></svg></span>今日單字</button>` : "";
       h+=`<div class="nrow" style="padding-left:${offs[i%4]}%"><button class="node ${cls}" data-n="${n.key}"><span class="ni">${ic}</span><span>${esc(n.label)}<small>${esc(sub)}</small></span></button>${bubble}</div>`;
     });
@@ -3610,7 +3618,7 @@ function renderStats(){
   const L=LEVELS[state.level-1]; $("levelDesc").textContent=`${L.n}（${L.cefr}）：${L.desc}及格 ${L.pass} 分。`;
   $("meLevel").textContent=L.n+"（"+L.cefr+"）・"+levelPct(state.level)+"%";
   const wl=weakList(); $("btnWeak").disabled=!wl.length; $("btnWeak").classList.toggle("hidden",!wl.length); $("weakCount").textContent=wl.length?wl.length+" 句":"";
-  $("weakList").innerHTML = wl.length ? wl.slice(0,3).map(s=>`<div class="it">${esc(s.en)}<span class="pill" style="color:var(--bad)">${state.best[s.id]||0}分</span><div class="muted">${esc(s.zh)}</div></div>`).join("")+(wl.length>3?`<p class="muted" style="margin:6px 0 0;font-size:13px">只列出分數最低的 3 句，複習時會一起練。</p>`:"") : `<p class="muted" style="margin:0">目前沒有弱點句子，繼續保持！</p>`;
+  $("weakList").innerHTML = wl.length ? wl.slice(0,3).map(s=>`<div class="it">${esc(s.en)}<span class="pill" style="color:#ffb98a">需加強</span><div class="muted">${esc(s.zh)}</div></div>`).join("")+(wl.length>3?`<p class="muted" style="margin:6px 0 0;font-size:13px">只列出最需要加強的 3 句，複習時會一起練。</p>`:"") : `<p class="muted" style="margin:0">目前沒有弱點句子，繼續保持！</p>`;
   const days=[],labs=[]; const d=new Date(); d.setDate(d.getDate()-6);
   for(let i=0;i<7;i++){ const k=todayKey(d); days.push(Math.floor((state.days[k]?.sec||0)/60)); labs.push(d.getDate()); d.setDate(d.getDate()+1); }
   const mx=Math.max(20,...days);
