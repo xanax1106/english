@@ -448,7 +448,8 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <button class="setrow" id="btnMeLevel"><span>課程級別</span><b id="meLevel"></b><i>›</i></button>
       <div class="setrow"><span>發音語速</span><button class="rateBtn">語速 1x</button></div>
       <button class="setrow voiceBtn"><span>發音人聲</span><b>選擇</b><i>›</i></button>
-      <button class="setrow" id="btnSrx"><span>iPhone 延長收音<small class="muted" style="display:block;font-size:12px">開啟後停頓也會繼續收音；若收不到音請關閉</small></span><b id="srxVal">關閉</b></button>
+      <button class="setrow" id="btnSrx"><span>iPhone 收音模式<small class="muted" style="display:block;font-size:12px">連續：停頓 3.5 秒或按停止才評分；標準：一停頓就評分。收不到音時可換另一種試試</small></span><b id="srxVal">連續</b></button>
+      <button class="setrow" id="btnMicTest"><span>麥克風收音測試</span><b>測試</b><i>›</i></button>
       <div class="hidden"><div id="levelSeg"></div><p id="levelDesc"></p></div>
     </div>
     <details class="card fold"><summary>各單元與單字進度</summary>
@@ -2676,7 +2677,7 @@ const NOMIC_MSG=`無法開啟麥克風收音。請確認：① 用 <b>Chrome 或
 // 瀏覽器內建語音辨識（Web Speech API）包成與 Claude dictation 相同的介面，作為備援
 // 收音診斷（使用者回報 iPhone 收不到音）：記錄啟動、結束、錯誤、結果次數，沒聽到聲音時顯示
 const SRD={st:0,on:0,end:0,res:0,err:""};
-function srDiag(){ return `（診斷：啟動 ${SRD.on}/${SRD.st}、結果 ${SRD.res}、結束 ${SRD.end}${SRD.err?"、錯誤 "+SRD.err:""}${IS_SAFARI?"、Safari":""}${opt.srx?"、延長收音":""}）`; }
+function srDiag(){ return `（診斷：啟動 ${SRD.on}/${SRD.st}、結果 ${SRD.res}、結束 ${SRD.end}${SRD.err?"、錯誤 "+SRD.err:""}${IS_SAFARI?"、Safari・"+(opt.srm==="std"?"標準":"連續"):""}）`; }
 function wsDict(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) return null;
   const h={}; let rec=null, cur=null, one=null, running=false;
@@ -2691,13 +2692,14 @@ function wsDict(){
       const ses={want:true,restarts:0,ok:false,interim:""}; cur=ses; SRD.st++; SRD.err="";
       const mk=(first,res,rej)=>{
         let r; try{ r=new SR(); }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); return; }
-        rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI; r.maxAlternatives=1;
+        // iPhone 收音模式（opt.srm）：連續（預設，收音直到停頓 3.5 秒或按停止）／標準（Safari 一停頓就結束）
+        rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI||opt.srm!=="std"; r.maxAlternatives=1;
         r.onstart=()=>{ running=true; if(cur!==ses) return; SRD.on++; if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res&&res(); } };
         r.onresult=e=>{ if(cur!==ses) return; SRD.res++; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal){ const t=x[0].transcript.trim(); if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } } else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
         r.onerror=ev=>{ SRD.err=ev.error||"error"; const c=(ev.error==="not-allowed"||ev.error==="service-not-allowed")?"not_granted":ev.error||"error"; if(c==="not_granted"||c==="audio-capture") ses.want=false; if(!ses.ok&&first){ ses.want=false; rej({code:c}); } };
         r.onend=()=>{ running=false; if(cur!==ses) return; SRD.end++;
           if(ses.interim){ const t=ses.interim.trim(); ses.interim=""; if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } }
-          const extend = !IS_SAFARI || opt.srx;
+          const extend = !IS_SAFARI;
           if(extend&&ses.want&&ses.ok&&ses.restarts<20){ ses.restarts++; setTimeout(()=>{ if(cur!==ses||!ses.want){ h.s&&h.s({state:"idle",reason:"stopped"}); return; } mk(false); },120); return; }
           ses.want=false; h.s&&h.s({state:"idle",reason:"stopped"}); };
         try{ r.start(); }catch(e){
@@ -3724,9 +3726,23 @@ $("btnSvSearch").onclick=()=>{ $("svQ").classList.toggle("hidden"); if(!$("svQ")
 $("svQ").oninput=renderSaved;
 $("btnSvStart").onclick=startSavedReview;
 $("btnMeLevel").onclick=levelSheet;
-function syncSrx(){ $("srxVal").textContent=opt.srx?"開啟":"關閉"; $("srxVal").style.color=opt.srx?"#7ea0ff":""; }
-$("btnSrx").onclick=()=>{ opt.srx=!opt.srx; state.opt={...opt}; save(); syncSrx(); toast(opt.srx?"已開啟延長收音":"已關閉延長收音（iPhone 一停頓就評分）"); };
+function syncSrx(){ $("srxVal").textContent=opt.srm==="std"?"標準":"連續"; $("srxVal").style.color="#7ea0ff"; }
+$("btnSrx").onclick=()=>{ opt.srm=opt.srm==="std"?"cont":"std"; state.opt={...opt}; save(); syncSrx(); toast(opt.srm==="std"?"已改為標準模式（一停頓就評分）":"已改為連續模式（停頓 3.5 秒或按停止才評分）"); };
 syncSrx();
+// 收音測試（除錯用）：每按一次建立新的辨識，記錄所有事件，可連按數次檢查第二次以後是否還能收音
+$("btnMicTest").onclick=()=>{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  openSheet(`<h2>麥克風收音測試</h2><p class="muted" style="margin-top:0">按「開始」後說 hello，再按「停止」；連續測 3 次。完成後截圖這個畫面。</p>
+    <div class="row" style="gap:8px"><button class="pri" id="mtGo">開始（第 1 次）</button><button id="mtStop">停止</button></div>
+    <pre id="mtLog" style="white-space:pre-wrap;font-size:12px;background:#15171c;border-radius:12px;padding:10px;margin-top:10px;max-height:40vh;overflow:auto">${SR?"":"這個瀏覽器不支援語音辨識\n"}模式：${IS_SAFARI?"Safari・"+(opt.srm==="std"?"標準":"連續"):"非 Safari"}\n</pre>`);
+  let n=0, r=null; const log=t=>{ const el=$("mtLog"); if(el){ el.textContent+=t+"\n"; el.scrollTop=1e9; } };
+  $("mtGo").onclick=()=>{ if(!SR) return; n++; $("mtGo").textContent=`開始（第 ${n+1} 次）`; const t0=Date.now(), k=n, ts=()=>((Date.now()-t0)/1000).toFixed(1)+"s";
+    try{ r=new SR(); r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI||opt.srm!=="std";
+      ["start","audiostart","soundstart","speechstart","speechend","soundend","audioend","nomatch"].forEach(ev=>r.addEventListener(ev,()=>log(`#${k} ${ts()} ${ev}`)));
+      r.onresult=e=>{ const x=e.results[e.results.length-1]; log(`#${k} ${ts()} result${x.isFinal?"(final)":""}: ${x[0].transcript}`); };
+      r.onerror=e=>log(`#${k} ${ts()} error: ${e.error}`); r.onend=()=>log(`#${k} ${ts()} end`);
+      r.start(); log(`#${k} 呼叫 start()`); }catch(e){ log(`#${k} 例外：${e.message}`); } };
+  $("mtStop").onclick=()=>{ try{ r&&r.stop(); log("呼叫 stop()"); }catch(e){ log("stop 例外："+e.message); } };
+};
 $("levelSeg").onclick=e=>{ const b=e.target.closest("[data-lv]"); if(b) setLevel(+b.dataset.lv); };
 $("btnWeak").onclick=()=>{ const l=weakList(); if(l.length) openLesson({key:"weak",kind:"weak",title:"弱點複習",sents:l.slice(0,15),words:false,intro:{title:"弱點複習",sub:"一共 "+Math.min(15,l.length)+" 句，再挑戰一次！"}}); };
 document.addEventListener("click",e=>{ if(e.target.closest(".voiceBtn")){ e.stopPropagation(); voiceSheet(); return; } if(e.target.closest(".rateBtn")){ e.stopPropagation(); cycleRate(); } },true);
