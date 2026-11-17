@@ -2685,11 +2685,12 @@ function wsDict(){
   return { kind:"web",
     onPartial:f=>h.p=f, onFinal:f=>h.f=f, onState:f=>h.s=f,
     start(){
-      // iPhone：第二句起收不到音（使用者回報）→ Safari 重複使用同一個辨識物件，不再先 abort；只有還在收音時才中止
-      if(rec&&(!IS_SAFARI||running)){ const old=rec; rec=null; if(cur) cur.want=false; old.onend=old.onresult=old.onerror=old.onstart=null; try{ old.abort(); }catch(e){} running=false; if(old===one) one=null; }
+      // iPhone：恢復最早可正常收音的做法——每次都建立新的辨識物件，不 abort、不重複使用舊物件（舊物件的事件由 session 檢查忽略）
+      if(rec&&!IS_SAFARI){ const old=rec; rec=null; if(cur) cur.want=false; old.onend=old.onresult=old.onerror=old.onstart=null; try{ old.abort(); }catch(e){} running=false; }
+      else if(cur) cur.want=false;
       const ses={want:true,restarts:0,ok:false,interim:""}; cur=ses; SRD.st++; SRD.err="";
       const mk=(first,res,rej)=>{
-        let r; try{ r=(IS_SAFARI&&one&&!running)?one:new SR(); if(IS_SAFARI) one=r; }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); return; }
+        let r; try{ r=new SR(); }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); return; }
         rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI; r.maxAlternatives=1;
         r.onstart=()=>{ running=true; if(cur!==ses) return; SRD.on++; if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res&&res(); } };
         r.onresult=e=>{ if(cur!==ses) return; SRD.res++; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal){ const t=x[0].transcript.trim(); if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } } else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
@@ -2700,7 +2701,6 @@ function wsDict(){
           if(extend&&ses.want&&ses.ok&&ses.restarts<20){ ses.restarts++; setTimeout(()=>{ if(cur!==ses||!ses.want){ h.s&&h.s({state:"idle",reason:"stopped"}); return; } mk(false); },120); return; }
           ses.want=false; h.s&&h.s({state:"idle",reason:"stopped"}); };
         try{ r.start(); }catch(e){
-          if(IS_SAFARI&&r===one){ try{ r.abort(); }catch(e2){} one=null; running=false; try{ const r2=new SR(); one=r2; rec=r2; r2.lang=r.lang; r2.interimResults=true; r2.continuous=false; r2.maxAlternatives=1; r2.onstart=r.onstart; r2.onresult=r.onresult; r2.onerror=r.onerror; r2.onend=r.onend; r2.start(); return; }catch(e3){} }
           ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); }
       };
       // 開始收音前先停掉正在播放的發音；iPhone 的 speaking 狀態常卡住，cancel 會讓收音失效，所以 Safari 不呼叫
