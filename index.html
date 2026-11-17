@@ -283,6 +283,13 @@ button.rec{background:var(--bad);color:#fff}
 .seg4 button.on{background:var(--pri);color:#fff}
 .seg4 button.on small{color:#dfe6ff}
 .days{display:flex;gap:4px;align-items:flex-end;height:90px}
+.me-big{display:grid;grid-template-columns:1fr 1fr;gap:10px}.me-big>div{display:flex;flex-direction:column;gap:2px}.me-big span{font-size:14px;color:var(--sub)}.me-big b{font-size:30px;font-weight:800}
+.me-days{height:56px;margin-top:16px;gap:8px}.me-days div{border-radius:6px 6px 2px 2px}.me-top .dlab{gap:8px}.me-top .dlab span{flex:1;text-align:center}
+.me-sub{font-size:14px;color:var(--sub);margin-top:12px;padding-top:12px;border-top:1px solid #2d3039}.me-sub b{color:var(--ink,#e6e8ee);font-weight:700}
+.setlist{padding:6px 18px}.setrow{display:flex;align-items:center;gap:10px;width:100%;background:none;border-radius:0;padding:12px 0;min-height:54px;text-align:left;border-bottom:1px solid #2a2d36;font-size:16px;color:inherit}
+.setlist>.setrow:last-of-type{border-bottom:0}.setrow span{flex:1}.setrow b{font-weight:500;color:var(--sub)}.setrow i{font-style:normal;color:var(--sub)}
+.fold summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between}.fold summary::-webkit-details-marker{display:none}.fold summary::after{content:"›";color:var(--sub);transition:transform .2s}.fold[open] summary::after{transform:rotate(90deg)}
+.fold{padding-top:16px;padding-bottom:16px}
 .days div{flex:1;background:var(--pri2);border-radius:4px 4px 0 0;min-height:2px}
 .days div.zero{background:var(--card2)}
 .dlab{display:flex;gap:4px;font-size:11px;color:var(--sub)}
@@ -422,44 +429,35 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
 
   <!-- 我的 -->
   <section id="v-stats" class="hidden">
+    <!-- 使用者要求簡化：重點數字＋7 天圖、弱點句子、設定清單；詳細進度、備份、說明收合 -->
     <div class="ph2">我的學習</div>
-    <div class="card">
-      <div class="grid">
-        <div class="stat"><span class="muted">連續練習</span><b id="sStreak">0 天</b></div>
-        <div class="stat"><span class="muted">今日練習</span><b id="sToday">0 分鐘</b></div>
-        <div class="stat"><span class="muted">已通過句子</span><b id="sSent">0</b></div>
-        <div class="stat"><span class="muted">已學單字</span><b id="sWord">0</b></div>
+    <div class="card me-top">
+      <div class="me-big">
+        <div><span>🔥 連續練習</span><b id="sStreak">0 天</b></div>
+        <div><span>⏱ 今日練習</span><b id="sToday">0 分鐘</b></div>
       </div>
+      <div class="days me-days" id="days"></div><div class="dlab" id="dlab"></div>
+      <div class="me-sub">已通過句子 <b id="sSent">0</b>　・　已學單字 <b id="sWord">0</b></div>
     </div>
     <div class="card">
-      <h2>課程級別</h2>
-      <div class="seg4" id="levelSeg"></div>
-      <p class="muted" id="levelDesc" style="margin:10px 0 0"></p>
-      <div class="row" style="justify-content:space-between;margin-top:12px"><span>發音語速（全部功能共用）</span><button class="rateBtn">語速 1x</button></div>
-      <div class="row" style="justify-content:space-between;margin-top:10px"><span>發音人聲（可換女聲）</span><button class="voiceBtn">選擇人聲</button></div>
+      <div class="row" style="justify-content:space-between"><h2 style="margin:0">弱點句子</h2><span class="muted" id="weakCount"></span></div>
+      <div class="list" id="weakList" style="margin-top:8px"></div>
+      <button class="pri big" id="btnWeak" style="margin-top:10px">複習弱點句子</button>
     </div>
-    <div class="card">
-      <h2>弱點句子</h2>
-      <p class="muted" style="margin-top:0">練過但最高分未達及格的句子。</p>
-      <button class="pri big" id="btnWeak">開始複習</button>
-      <div class="list" id="weakList" style="margin-top:10px"></div>
+    <div class="card setlist">
+      <button class="setrow" id="btnMeLevel"><span>課程級別</span><b id="meLevel"></b><i>›</i></button>
+      <div class="setrow"><span>發音語速</span><button class="rateBtn">語速 1x</button></div>
+      <button class="setrow voiceBtn"><span>發音人聲</span><b>選擇</b><i>›</i></button>
+      <div class="hidden"><div id="levelSeg"></div><p id="levelDesc"></p></div>
     </div>
-    <div class="card"><h2>近 14 天練習分鐘</h2><div class="days" id="days"></div><div class="dlab" id="dlab"></div></div>
-    <div class="card"><h2>各單元進度（目前級別）</h2><div id="topicStats"></div></div>
-    <div class="card"><h2>單字進度</h2><div id="vocabStats"></div></div>
-    <div class="card">
-      <h2>備份與還原</h2>
-      <p class="muted" style="margin-top:0">離線版的紀錄存在這台裝置。換電腦或手機時，先在舊裝置「匯出」，再到新裝置「匯入」。</p>
+    <details class="card fold"><summary>各單元與單字進度</summary>
+      <div id="topicStats" style="margin-top:12px"></div><div class="fc-lab" style="margin-top:6px">單字</div><div id="vocabStats"></div>
+    </details>
+    <details class="card fold"><summary>備份與還原</summary>
+      <p class="muted" style="margin-top:10px">學習紀錄存在這台裝置。換手機或電腦時，先在舊裝置「匯出」，再到新裝置「匯入」。</p>
       <div class="row" style="gap:8px"><button class="pri" id="btnExport">匯出學習紀錄</button><button id="btnImport">匯入學習紀錄</button><input type="file" id="fImport" accept=".json,application/json" class="hidden"></div>
-    </div>
-    <div class="card">
-      <h2>說明</h2>
-      <ul class="muted" style="padding-left:18px;margin:0">
-        <li>評分：把語音辨識結果與原句逐字比對，算出唸對的字數比例；唸對的字會變藍色，沒變色的字代表沒被正確辨識。</li>
-        <li>離線版：用 Chrome／Edge 的語音辨識收音評分（需連網），第一次會詢問麥克風權限，請選「造訪這個網站時允許」。學習紀錄存在這台裝置的瀏覽器，可用下方「備份與還原」搬到其他裝置。</li>
-        <li>進度同步：<span id="syncNote">載入中…</span></li>
-      </ul>
-    </div>
+    </details>
+    <span id="syncNote" class="hidden"></span><!-- 使用者要求移除「使用說明」，同步狀態元素保留供程式更新 -->
   </section>
 </div>
 
@@ -3602,10 +3600,11 @@ function renderStats(){
   const vs=vocabStatus(); $("sWord").textContent=vs.learned+" / "+vs.total;
   $("levelSeg").innerHTML=LEVELS.map((x,i)=>`<button data-lv="${i+1}" class="${i+1===state.level?"on":""}">${x.n}<small>${x.cefr}・${levelPct(i+1)}%</small></button>`).join("");
   const L=LEVELS[state.level-1]; $("levelDesc").textContent=`${L.n}（${L.cefr}）：${L.desc}及格 ${L.pass} 分。`;
-  const wl=weakList(); $("btnWeak").disabled=!wl.length;
-  $("weakList").innerHTML = wl.length ? wl.slice(0,30).map(s=>`<div class="it">${esc(s.en)}<span class="pill" style="color:var(--bad)">${state.best[s.id]||0}分</span><div class="muted">${TOPICS[s.topic].name}・${esc(s.zh)}</div></div>`).join("") : `<p class="muted">目前沒有弱點句子，繼續保持！</p>`;
-  const days=[],labs=[]; const d=new Date(); d.setDate(d.getDate()-13);
-  for(let i=0;i<14;i++){ const k=todayKey(d); days.push(Math.floor((state.days[k]?.sec||0)/60)); labs.push(d.getDate()); d.setDate(d.getDate()+1); }
+  $("meLevel").textContent=L.n+"（"+L.cefr+"）・"+levelPct(state.level)+"%";
+  const wl=weakList(); $("btnWeak").disabled=!wl.length; $("btnWeak").classList.toggle("hidden",!wl.length); $("weakCount").textContent=wl.length?wl.length+" 句":"";
+  $("weakList").innerHTML = wl.length ? wl.slice(0,3).map(s=>`<div class="it">${esc(s.en)}<span class="pill" style="color:var(--bad)">${state.best[s.id]||0}分</span><div class="muted">${esc(s.zh)}</div></div>`).join("")+(wl.length>3?`<p class="muted" style="margin:6px 0 0;font-size:13px">只列出分數最低的 3 句，複習時會一起練。</p>`:"") : `<p class="muted" style="margin:0">目前沒有弱點句子，繼續保持！</p>`;
+  const days=[],labs=[]; const d=new Date(); d.setDate(d.getDate()-6);
+  for(let i=0;i<7;i++){ const k=todayKey(d); days.push(Math.floor((state.days[k]?.sec||0)/60)); labs.push(d.getDate()); d.setDate(d.getDate()+1); }
   const mx=Math.max(20,...days);
   $("days").innerHTML=days.map(m=>`<div class="${m?"":"zero"}" style="height:${Math.max(2,m/mx*100)}%" title="${m} 分鐘"></div>`).join("");
   $("dlab").innerHTML=labs.map(x=>`<span>${x}</span>`).join("");
@@ -3708,6 +3707,7 @@ $("svList").onclick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.
 $("btnSvSearch").onclick=()=>{ $("svQ").classList.toggle("hidden"); if(!$("svQ").classList.contains("hidden")) $("svQ").focus(); };
 $("svQ").oninput=renderSaved;
 $("btnSvStart").onclick=startSavedReview;
+$("btnMeLevel").onclick=levelSheet;
 $("levelSeg").onclick=e=>{ const b=e.target.closest("[data-lv]"); if(b) setLevel(+b.dataset.lv); };
 $("btnWeak").onclick=()=>{ const l=weakList(); if(l.length) openLesson({key:"weak",kind:"weak",title:"弱點複習",sents:l.slice(0,15),words:false,intro:{title:"弱點複習",sub:"一共 "+Math.min(15,l.length)+" 句，再挑戰一次！"}}); };
 document.addEventListener("click",e=>{ if(e.target.closest(".voiceBtn")){ e.stopPropagation(); voiceSheet(); return; } if(e.target.closest(".rateBtn")){ e.stopPropagation(); cycleRate(); } },true);
