@@ -448,6 +448,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <button class="setrow" id="btnMeLevel"><span>課程級別</span><b id="meLevel"></b><i>›</i></button>
       <div class="setrow"><span>發音語速</span><button class="rateBtn">語速 1x</button></div>
       <button class="setrow voiceBtn"><span>發音人聲</span><b>選擇</b><i>›</i></button>
+      <button class="setrow" id="btnSrx"><span>iPhone 延長收音<small class="muted" style="display:block;font-size:12px">開啟後停頓也會繼續收音；若收不到音請關閉</small></span><b id="srxVal">關閉</b></button>
       <div class="hidden"><div id="levelSeg"></div><p id="levelDesc"></p></div>
     </div>
     <details class="card fold"><summary>各單元與單字進度</summary>
@@ -2673,29 +2674,36 @@ const IS_SAFARI=/^((?!chrome|android|crios|fxios|edg).)*safari/i.test(navigator.
 const diagTxt=e=>`<br><span class="muted" style="font-size:11px">診斷：收音來源 ${dict?(dict.kind==="web"?"瀏覽器":"Claude"):"無"}（${dictInfo}）${e?"，代碼 "+esc(String(e.code||e.message||e)):""}</span>`;
 const NOMIC_MSG=`無法開啟麥克風收音。請確認：① 用 <b>Chrome 或 Edge</b> 開啟（iPhone 用 Safari）；② 網址列左側圖示 → 麥克風設為「允許」後重新整理；③ Windows 設定 → 隱私權與安全性 → 麥克風，允許桌面應用程式使用；④ 需連上網路。`;
 // 瀏覽器內建語音辨識（Web Speech API）包成與 Claude dictation 相同的介面，作為備援
+// 收音診斷（使用者回報 iPhone 收不到音）：記錄啟動、結束、錯誤、結果次數，沒聽到聲音時顯示
+const SRD={st:0,on:0,end:0,res:0,err:""};
+function srDiag(){ return `（診斷：啟動 ${SRD.on}/${SRD.st}、結果 ${SRD.res}、結束 ${SRD.end}${SRD.err?"、錯誤 "+SRD.err:""}${IS_SAFARI?"、Safari":""}${opt.srx?"、延長收音":""}）`; }
 function wsDict(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) return null;
   const h={}; let rec=null, cur=null;
-  // 每次收音用獨立的 session，避免上一次收音結束的事件誤觸發下一次（單字卡與課程共用同一個收音器）
+  // 每次收音用獨立的 session；iPhone Safari 預設照原本方式（一停頓就結束並評分），
+  // 「延長收音」開啟時才在結束後用新的辨識物件自動接續（opt.srx，可在「我的」設定）
   return { kind:"web",
     onPartial:f=>h.p=f, onFinal:f=>h.f=f, onState:f=>h.s=f,
     start(){
       if(rec){ const old=rec; rec=null; if(cur) cur.want=false; old.onend=old.onresult=old.onerror=old.onstart=null; try{ old.abort(); }catch(e){} }
-      const ses={want:true,restarts:0,ok:false}; cur=ses;
+      const ses={want:true,restarts:0,ok:false,interim:""}; cur=ses; SRD.st++; SRD.err="";
+      const mk=(first,res,rej)=>{
+        let r; try{ r=new SR(); }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); return; }
+        rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI; r.maxAlternatives=1;
+        r.onstart=()=>{ if(cur!==ses) return; SRD.on++; if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res&&res(); } };
+        r.onresult=e=>{ if(cur!==ses) return; SRD.res++; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal){ const t=x[0].transcript.trim(); if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } } else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
+        r.onerror=ev=>{ SRD.err=ev.error||"error"; const c=(ev.error==="not-allowed"||ev.error==="service-not-allowed")?"not_granted":ev.error||"error"; if(c==="not_granted"||c==="audio-capture") ses.want=false; if(!ses.ok&&first){ ses.want=false; rej({code:c}); } };
+        r.onend=()=>{ if(cur!==ses) return; SRD.end++;
+          if(ses.interim){ const t=ses.interim.trim(); ses.interim=""; if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } }
+          const extend = !IS_SAFARI || opt.srx;
+          if(extend&&ses.want&&ses.ok&&ses.restarts<20){ ses.restarts++; setTimeout(()=>{ if(cur!==ses||!ses.want){ h.s&&h.s({state:"idle",reason:"stopped"}); return; } mk(false); },120); return; }
+          ses.want=false; h.s&&h.s({state:"idle",reason:"stopped"}); };
+        try{ r.start(); }catch(e){ ses.want=false; if(first) rej({code:"error"}); else h.s&&h.s({state:"idle",reason:"stopped"}); }
+      };
       // 開始收音前先停掉正在播放的發音（iPhone 播放中無法收音）
       try{ if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending)) speechSynthesis.cancel(); }catch(e){}
-      return new Promise((res,rej)=>{
-      let r; try{ r=new SR(); }catch(e){ ses.want=false; rej({code:"error"}); return; }
-      rec=r;
-      r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI; r.maxAlternatives=1;
-      r.onstart=()=>{ if(cur!==ses) return; if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res(); } };
-      r.onresult=e=>{ if(cur!==ses) return; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal) h.f&&h.f({text:x[0].transcript}); else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
-      r.onerror=ev=>{ const c=(ev.error==="not-allowed"||ev.error==="service-not-allowed")?"not_granted":ev.error||"error"; if(c==="not_granted") ses.want=false; if(!ses.ok){ ses.want=false; rej({code:c}); } };
-      // iPhone Safari 一停頓（或還沒開口）就自行結束辨識：自動接續收音，交由停頓計時／上限計時結束
-      r.onend=()=>{ if(cur!==ses) return; if(ses.interim){ const t=ses.interim; ses.interim=""; h.f&&h.f({text:t}); } if(ses.want&&ses.ok&&ses.restarts<30){ ses.restarts++; setTimeout(()=>{ if(cur!==ses||!ses.want){ h.s&&h.s({state:"idle",reason:"stopped"}); return; } try{ r.start(); }catch(e){ ses.want=false; h.s&&h.s({state:"idle",reason:"stopped"}); } },60); return; }
-        ses.want=false; h.s&&h.s({state:"idle",reason:"stopped"}); };
-      try{ r.start(); }catch(e){ ses.want=false; rej({code:"error"}); } }); },
-    stop(){ if(cur) cur.want=false; return new Promise(res=>{ const r=rec; if(!r){ res(); return; } const t=setTimeout(res,800); r.addEventListener("end",()=>{ clearTimeout(t); res(); },{once:true}); try{ r.stop(); }catch(e){ clearTimeout(t); res(); } }); } };
+      return new Promise((res,rej)=>mk(true,res,rej)); },
+    stop(){ if(cur) cur.want=false; return new Promise(res=>{ const r=rec; if(!r){ res(); return; } const t=setTimeout(res,800); try{ r.addEventListener("end",()=>{ clearTimeout(t); res(); },{once:true}); r.stop(); }catch(e){ clearTimeout(t); res(); } }); } };
 }
 
 // 錄下使用者的聲音（離線版／一般網頁可用；Claude 網頁沙箱會被擋，則改顯示辨識文字）
@@ -3047,7 +3055,7 @@ async function finishListen(){
   recStop();
   const t=tok; try{ await dict.stop(); }catch(e){} if(t!==tok) return;
   const said=(finalText+" "+partialText).trim(), c=deck[ci];
-  if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"; if(hfOn()) hfNext(3000); return; }
+  if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"+srDiag(); if(hfOn()) hfNext(3000); return; }
   const {sc,html,okIdx}=scoreText(c.s.en,said,c._got); c._got=okIdx; sess[c.s.id]=sc; recordScore(c.s,sc);
   c._html=html; c._heard="聽到："+said;
   st= sc>=passOf(c.s) ? "pass" : "fail"; render(); srMark(c);
@@ -3263,7 +3271,7 @@ async function vmicFinish(){
   if(listening){ listening=false; try{ await dict.stop(); }catch(e){} }
   m.btn.classList.remove("rec"); m.btn.querySelector("span").textContent=m.label; vmic=null;
   const said=(finalText+" "+partialText).trim();
-  if(!said){ m.res.className="vmicres no"; m.res.textContent="沒有聽到聲音，請再按一次麥克風"; return; }
+  if(!said){ m.res.className="vmicres no"; m.res.textContent="沒有聽到聲音，請再按一次麥克風"+srDiag(); return; }
   const {sc,html}=scoreText(m.target,said); m.box.innerHTML=html;
   const pass=sc>=80;
   m.box.classList.toggle("ok",pass);
@@ -3708,6 +3716,9 @@ $("btnSvSearch").onclick=()=>{ $("svQ").classList.toggle("hidden"); if(!$("svQ")
 $("svQ").oninput=renderSaved;
 $("btnSvStart").onclick=startSavedReview;
 $("btnMeLevel").onclick=levelSheet;
+function syncSrx(){ $("srxVal").textContent=opt.srx?"開啟":"關閉"; $("srxVal").style.color=opt.srx?"#7ea0ff":""; }
+$("btnSrx").onclick=()=>{ opt.srx=!opt.srx; state.opt={...opt}; save(); syncSrx(); toast(opt.srx?"已開啟延長收音":"已關閉延長收音（iPhone 一停頓就評分）"); };
+syncSrx();
 $("levelSeg").onclick=e=>{ const b=e.target.closest("[data-lv]"); if(b) setLevel(+b.dataset.lv); };
 $("btnWeak").onclick=()=>{ const l=weakList(); if(l.length) openLesson({key:"weak",kind:"weak",title:"弱點複習",sents:l.slice(0,15),words:false,intro:{title:"弱點複習",sub:"一共 "+Math.min(15,l.length)+" 句，再挑戰一次！"}}); };
 document.addEventListener("click",e=>{ if(e.target.closest(".voiceBtn")){ e.stopPropagation(); voiceSheet(); return; } if(e.target.closest(".rateBtn")){ e.stopPropagation(); cycleRate(); } },true);
