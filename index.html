@@ -2892,6 +2892,11 @@ function introArt(L){ let e="", tp="";
   else e={smart:"✨🧠🔁",mywords:"🗣️📖🎯",saved:"🔖📚🔁",weak:"💪🎯🔁"}[L.key]||"📖🗣️✨";
   const seg=window.Intl&&Intl.Segmenter?[...new Intl.Segmenter("zh",{granularity:"grapheme"}).segment(e||"")].map(x=>x.segment):Array.from(e||"");
   return {emo:seg.filter(x=>x.trim()), hue:TOPIC_HUE[tp]??225}; }
+// iPhone 收音卡住的補救：記下目前課程與卡片位置後重新整理網頁，載入後自動回到同一句
+function micReset(){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({art:lesson.art.id,ci})); }catch(e){} location.reload(); }
+function resumeAfterReset(){ let r=null; try{ r=JSON.parse(sessionStorage.getItem("speak20_resume")||"null"); sessionStorage.removeItem("speak20_resume"); }catch(e){}
+  if(!r) return; const a=ARTS.find(x=>x.id===r.art); if(!a) return;
+  openLesson(lessonFromArt(a)); setTimeout(()=>{ go(Math.min(r.ci,deck.length-1),false); toast("已重新啟動，按麥克風開始說"); },300); }
 function lessonFromArt(a){ return {key:a.id, kind:"art", title:a.zhT, sents:a.sents, words:true, art:a,
   intro:{title:a.zhT, sub:"來練習「"+a.enT+"」吧！", tag:TOPICS[a.topic].name+"・"+LEVELS[a.lv-1].n}}; }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -3060,7 +3065,9 @@ async function finishListen(){
   recStop();
   const t=tok; try{ await dict.stop(); }catch(e){} if(t!==tok) return;
   const said=(finalText+" "+partialText).trim(), c=deck[ci];
-  if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"+srDiag(); if(hfOn()) hfNext(3000); return; }
+  if(!said){ st="turn"; render(); sentBox.querySelector(".heard").textContent="沒有聽到聲音，請按麥克風再試一次。"+srDiag();
+    if(IS_SAFARI&&lesson&&lesson.art){ const m=sentBox.querySelector(".msg"); if(m) m.innerHTML=`<button class="pri" data-act="micreset" style="margin-top:8px">🔄 重新啟動麥克風</button><div class="muted" style="font-size:12px;margin-top:4px">iPhone 收音卡住時按這裡，會重新整理並回到這一句</div>`; }
+    if(hfOn()) hfNext(3000); return; }
   const {sc,html,okIdx}=scoreText(c.s.en,said,c._got); c._got=okIdx; sess[c.s.id]=sc; recordScore(c.s,sc);
   c._html=html; c._heard="聽到："+said;
   st= sc>=passOf(c.s) ? "pass" : "fail"; render(); srMark(c);
@@ -3096,6 +3103,7 @@ function lessonClick(e){
   const ex=e.target.closest("[data-sayex]"); if(ex&&deck[ci]&&deck[ci].type==="word"){ clearTimers(); speak(deck[ci].v.ex,false); return; }
   const b=e.target.closest("[data-act]"); if(!b) return;
   const a=b.dataset.act, c=deck[ci];
+  if(a==="micreset"){ micReset(); return; }
   if(a==="again") run();
   else if(a==="model"){ const k=c&&c.s; if(k){ const hl=karaoke(k.en); speak(k.en,false).then(hl); } }
   else if(a==="mine"){ const el=sentBox&&sentBox.querySelector(".heard"); if(el){ el.classList.add("show"); el.style.display="block"; el.animate&&el.animate([{opacity:.3},{opacity:1}],{duration:400}); }
@@ -3749,6 +3757,7 @@ document.addEventListener("click",e=>{ if(e.target.closest(".voiceBtn")){ e.stop
 updateRateUI();
 if("speechSynthesis" in window) speechSynthesis.getVoices();
 renderHome();
+setTimeout(resumeAfterReset,200);
 $("syncNote").textContent="僅存本機";
 
 // ===================== Claude 能力（有則啟用） =====================
