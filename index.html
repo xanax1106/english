@@ -101,7 +101,7 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .endv>.pri.big{width:100%}.end-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}.end-links button{background:none;color:var(--sub);font-size:14px;min-height:36px;text-decoration:underline;text-underline-offset:3px}
 #btnMain.tapme{animation:tapme 1.4s ease-in-out infinite}
 @keyframes tapme{0%,100%{box-shadow:0 0 0 0 rgba(61,90,254,.55)}50%{box-shadow:0 0 0 14px rgba(61,90,254,0)}}
-.vnav{display:grid;grid-template-columns:1fr 2fr;gap:10px}.vnav button{min-height:54px;font-size:17px;font-weight:700;border-radius:16px}.vend{background:#2d3039;color:#e6e8ee}.vnhint{font-size:12px;text-align:center;margin-top:6px}
+.vnav{display:grid;grid-template-columns:.75fr 1fr 1.35fr;gap:8px}.vnav button{white-space:nowrap;padding-left:6px;padding-right:6px}.vnav button{min-height:54px;font-size:17px;font-weight:700;border-radius:16px}.vend{background:#2d3039;color:#e6e8ee}.vnhint{font-size:12px;text-align:center;margin-top:6px}
 .ratebar{position:sticky;bottom:0;background:var(--card);padding:12px 0 6px;margin:6px -2px 0;z-index:5;box-shadow:0 -14px 20px var(--card)}
 .wd.hl{color:#fff;background:rgba(111,139,255,.28)}
 .hero{background:linear-gradient(135deg,#1e2a5c,#22252e 60%);border-radius:26px;padding:18px 18px 16px;margin:14px 0 6px;box-shadow:0 8px 26px rgba(0,0,0,.4)}
@@ -375,7 +375,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       </div>
       <div id="fSynBox"><div class="fc-lab">類似的字</div><div id="fSyn"></div></div>
       <div class="ratebar">
-        <div class="vnav"><button id="btnFEnd" class="vend">結束</button><button id="btnFNext" class="pri vnext">下一個 <svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align:-4px"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="vnav"><button id="btnFEnd" class="vend">結束</button><button id="btnFPrev" class="vend"><svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align:-4px"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> 上一個</button><button id="btnFNext" class="pri vnext">下一個 <svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align:-4px"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
         <div class="muted vnhint" id="fNextHint"></div>
       </div>
     </div>
@@ -3309,7 +3309,7 @@ function vocabStatus(){
   return {due, fresh, newToday, learned:all.filter(v=>vs[v.id]).length, mastered:all.filter(v=>vs[v.id]&&vs[v.id].b>=MASTER_BOX).length, total:all.length};
 }
 let vq=[], vpos=0, vRequeued=new Set(), vMode="daily";
-function startVocab(list,mode){ vOk.clear();
+function startVocab(list,mode){ vOk.clear(); vSnap.clear();
   if(!list){ const st=vocabStatus(); list=[...st.due.sort((a,b)=>state.vocab[a.id].d<state.vocab[b.id].d?-1:1), ...st.fresh]; mode="daily"; }
   if(!list.length){ toast("今天的單字都完成了！"); return; }
   vq=list; vMode=mode; vpos=0; vRequeued=new Set();
@@ -3364,7 +3364,7 @@ function renderFlash(){
   const v=vq[vpos], r=state.vocab[v.id], x=VOCAB_EXT[v.id]||{exZh:v.exZh||"",exp:v.exp||"",syn:v.syn||[]};
   $("fTag").textContent = vMode==="saved" ? "收藏複習" : r ? "複習" : (v.id.startsWith("c")?"新字・自訂":v.ph?"新片語":"新單字");
   $("fProg").textContent=(vpos+1)+" / "+vq.length;
-  $("fWord").textContent=v.w; $("fPhon").innerHTML=phonCompact(v.w);
+  $("fWord").textContent=v.w; $("fPhon").innerHTML=phonCompact(v.w); $("btnFPrev").disabled=vpos<=0;
   $("fZh").textContent=v.zh+(v.pos&&v.pos!=="自訂"?` (${v.pos})`:"");
   $("fExpBox").classList.toggle("hidden",!x.exp); $("fExp").textContent=x.exp||"";
   $("fExBox").classList.toggle("hidden",!v.ex); $("fEx").textContent=v.ex||""; $("fExZh").textContent=x.exZh||"";
@@ -3383,14 +3383,18 @@ const vOk=new Set();
 function vHint(v,b){ const el=$("fNextHint"); if(!el) return;
   el.textContent= vOk.has(v.id) ? "✓ 已唸對，記為會了，"+ivLabel(INTERVALS[Math.min(b,INTERVALS.length-1)])+"後複習"
     : "唸對記為會了；沒唸就按下一個，"+ivLabel(Math.max(1,Math.floor(INTERVALS[b]/2)))+"後複習"; }
+const vSnap=new Map();
 function rate(g){
-  const v=vq[vpos], t=todayKey(), old=state.vocab[v.id];
-  if(!old) state.vnew[t]=(state.vnew[t]||0)+1;
+  const v=vq[vpos], t=todayKey(), again=vSnap.has(v.id);
+  if(again){ const o=vSnap.get(v.id); if(o) state.vocab[v.id]=o; else delete state.vocab[v.id]; }
+  else vSnap.set(v.id,state.vocab[v.id]?{...state.vocab[v.id]}:null);
+  const old=state.vocab[v.id];
+  if(!old&&!again) state.vnew[t]=(state.vnew[t]||0)+1;
   let b=old?old.b:0, d;
   if(g===0){ b=0; d=addDays(1); if(!vRequeued.has(v.id)){ vRequeued.add(v.id); vq.push(v); } }
   else if(g===1){ d=addDays(Math.max(1,Math.floor(INTERVALS[b]/2))); }
   else { d=addDays(INTERVALS[Math.min(b,INTERVALS.length-1)]); b=Math.min(INTERVALS.length-1,b+1); }
-  state.vocab[v.id]={b,d,t:Date.now(),n:(old?.n||0)+1}; day().n++; flushTime(); save();
+  state.vocab[v.id]={b,d,t:Date.now(),n:(old?.n||0)+1}; if(!again) day().n++; flushTime(); save();
   if(vpos<vq.length-1){ vpos++; renderFlash(); } else { toast(vMode==="saved"?"收藏複習完成！":"今天的單字完成！"); endVocab(); }
 }
 function renderVocab(){
@@ -3758,6 +3762,8 @@ $("btnFCopy").onclick=async()=>{ const v=vq[vpos]; try{ await navigator.clipboar
 $("btnFSave").onclick=()=>{ const v=vq[vpos]; const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); renderFlash(); toast(on?"已加入收藏":"已取消收藏"); };
 $("fSyn").onclick=e=>{ const s=e.target.closest("[data-synsave]"); if(s){ toggleSynSave(s.dataset.synsave,s.dataset.zh); const on=synSaved(s.dataset.synsave); s.classList.toggle("on",on); s.innerHTML=on?SV_ON:SV_ICON; return; } const b=e.target.closest("[data-say]"); if(b) speak(b.dataset.say,false); };
 $("btnFEnd").onclick=endVocab;
+// 使用者要求：背單字可以回上一個
+$("btnFPrev").onclick=()=>{ if(vpos<=0) return; vmicReset(); vpos--; renderFlash(); };
 // 使用者要求取消「不會／模糊／會了」：改為「下一個」，本張唸對就記為會了，否則記為模糊（照間隔再複習）
 $("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return; rate(vOk.has(v.id)?2:1);
   // iPhone：背單字也每用麥克風 3 次就在換卡時自動重新整理，避免收音卡住；載入後自動繼續背剩下的字
