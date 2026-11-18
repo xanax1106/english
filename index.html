@@ -54,10 +54,19 @@ nav button.on{background:#14161b;color:var(--pri2);font-weight:700}
 body.lesson nav,body.studying nav{display:none}
 .selbar{bottom:96px!important}
 body.lesson .selbar,body.studying .selbar{bottom:16px!important}
-.wdv{position:fixed;inset:0;z-index:45;background:var(--bg,#0b0c10);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px calc(env(safe-area-inset-bottom,0px) + 24px)}
-.wdv .wdtop{display:flex;justify-content:flex-start;margin-bottom:8px}
-.wdv .wdcard{max-width:560px;margin:0 auto;background:var(--card);border-radius:26px;padding:22px 20px}
-.wdv h1{font-size:34px;margin:0;word-break:break-word;flex:1}
+/* 使用者要求：單字詳情比照 Speak App — 由下往上滑出的底部面板，背後清單變暗 */
+.wdv{position:fixed;inset:0;z-index:45;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;animation:wdFade .2s ease}
+.wdv .wdtop{display:none}
+.wdv .wdcard{position:relative;width:min(560px,100%);max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#1c1f26;border-radius:26px 26px 0 0;padding:10px 22px calc(env(safe-area-inset-bottom,0px) + 22px);box-shadow:0 -10px 40px rgba(0,0,0,.5);animation:wdUp .26s cubic-bezier(.2,.8,.2,1)}
+.wdv .wdgrab{position:sticky;top:-10px;margin:-10px -22px 6px;padding:10px 0 14px;display:flex;justify-content:center;background:#1c1f26;z-index:2;cursor:grab;touch-action:none}
+.wdv .wdgrab i{width:44px;height:5px;border-radius:3px;background:#4a4f5c}
+@keyframes wdUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes wdFade{from{background:rgba(0,0,0,0)}}
+.wdv .syn{border:1px solid #2d3039;border-radius:18px;padding:12px 14px;margin-bottom:10px}
+.wdv details.wdph{margin-top:20px;border-top:1px solid #2d3039;padding-top:12px}
+.wdv details.wdph summary{color:var(--sub,#8a8f9c);font-size:14px;cursor:pointer;list-style:none}
+.wdv details.wdph summary::after{content:" ▾"}
+.wdv h1{font-size:30px;margin:0;word-break:break-word;flex:1}
 .wdv .wdhead{display:flex;align-items:center;gap:6px}
 .wdv .ic.on{color:var(--pri,#3d5afe)}
 .wdv .lab{color:var(--sub,#8a8f9c);font-size:14px;margin:20px 0 6px}
@@ -135,6 +144,16 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .node.cur{background:linear-gradient(110deg,#2a5bd7,#3ea2e0 45%,#2a4fa8);color:#fff;font-weight:700}
 .node.cur .ni{background:#fff;color:#2a5bd7;box-shadow:0 0 0 6px rgba(255,255,255,.25)}
 .node.done .ni{background:var(--ok-soft);color:var(--ok)}
+/* 使用者要求：首頁課程四段狀態 — 完成(綠✓)／唸過未全對(淡藍＋進度)／下一課(藍漸層)／未開始(灰) */
+.node.done{background:#243029;box-shadow:inset 0 0 0 1px rgba(63,208,160,.35),0 6px 18px rgba(0,0,0,.35)}
+.node.part{background:#24304a;box-shadow:inset 0 0 0 1px rgba(91,140,255,.45),0 6px 18px rgba(0,0,0,.35);color:#e6ecff}
+.node.part .ni{background:rgba(91,140,255,.22);color:#9fb8ff}
+.node .nbody{flex:1;min-width:0}
+.node .prog{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;font-weight:600;opacity:.9}
+.node .prog i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden;max-width:120px}
+.node .prog i b{display:block;height:100%;border-radius:3px;background:#5b8cff}
+.node.cur .prog i b{background:#fff}
+.node.done .prog i b{background:var(--ok)}
 .node small{display:block;font-size:13px;opacity:.75;font-weight:400}
 .bubble{width:96px;height:96px;border-radius:50%;background:#1c1f26;box-shadow:inset 0 0 0 6px #262a33,0 6px 18px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:#fff;gap:2px;position:relative}
 .bubble .cardsI{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#f6a35b,#ef5a6f);display:flex;align-items:center;justify-content:center;transform:rotate(-8deg);box-shadow:6px 2px 0 #c46a52}
@@ -217,10 +236,35 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .opt{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:10px;padding:14px 16px;border-radius:16px;background:#262a33}
 .opt.on{outline:2px solid var(--pri2)}
 .opt small{display:block;color:var(--sub);font-size:13px}
+.selbar button{white-space:nowrap}
+@media (max-width:480px){ /* 優化：手機窄螢幕時選字列改兩行（上：單字與中文，下：按鈕平均分配），避免中文被擠成直排 */
+  #selBar>.row{flex-wrap:wrap!important;gap:8px}
+  #selBar>.row>div:first-child{flex:1 1 100%}
+  #selBar>.row>.row{flex:1 1 100%}
+  #selBar>.row>.row>button{flex:1;min-height:44px;padding:8px 6px}
+  #selBar>.row>.row>button.pri{flex:2}
+}
 .selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(540px,calc(100% - 24px));background:#1b1d23;border:1px solid var(--pri2);border-radius:20px;padding:12px 14px;z-index:35;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 /* ---- 收藏 ---- */
 .ph2{font-size:34px;font-weight:800;margin:14px 0}
 .fchips{display:flex;gap:10px;margin-bottom:16px}
+.mwsec{margin-top:22px}
+.mwhead{display:flex;align-items:center;justify-content:space-between;margin:0 2px 12px}
+.mwhead h2{font-size:28px;margin:0}
+.mwhead .circ svg{width:22px;height:22px}
+#mwQ{margin:0 0 12px}
+.mwbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mwbar .fchips{margin-bottom:0;flex:1;min-width:0}.mwbar #customCount{font-size:13px;white-space:nowrap;flex-shrink:0}
+.mwsec .fchips button{padding:10px 20px!important;font-size:16px!important}
+.mwgrp{color:var(--sub,#8a8f9c);font-size:15px;margin:20px 4px 8px}
+.mwcard{background:#1f2229;border-radius:24px;padding:4px 16px}
+.mwcard .svrow+.svrow{border-top:1px solid rgba(255,255,255,.05)}
+.mwcard .svrow .tx b{font-size:18px}
+.mwcard .svrow.sent .tx b{font-size:17px;line-height:1.35}
+.mwfoot{position:sticky;bottom:96px;z-index:5;padding:14px 0 4px;background:linear-gradient(to top,var(--bg,#0b0c10) 70%,transparent)}
+body.studying .mwfoot{bottom:16px}
+.mwfoot button{width:100%;margin:0}
+.mwempty{background:#1f2229;border-radius:24px;padding:22px 18px;margin-top:14px}
 .fchips.scrollx{overflow-x:auto;scrollbar-width:none;margin-right:-6px;padding-right:6px}.fchips.scrollx::-webkit-scrollbar{display:none}.fchips.scrollx{gap:5px}.fchips.scrollx button{flex:0 0 auto;padding:8px 10px;font-size:15px}
 .fchips button{border-radius:30px;padding:10px 22px;background:#22252d;color:#cfd4dc;font-size:17px}
 .fchips button.on{background:#fff;color:#111;font-weight:700}
@@ -228,6 +272,11 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .svrow .spk{background:none;color:var(--pri);padding:0;min-width:40px}
 .svrow .spk svg{width:30px;height:30px;fill:currentColor}
 .svrow .tx{flex:1;min-width:0}
+.stag{font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:9px;margin-right:8px;vertical-align:3px}
+.stag.new{background:rgba(91,140,255,.2);color:#9fb8ff}.stag.weak{background:rgba(255,170,90,.18);color:#ffb98a}
+#btnMwStart .vbrk,#btnVocab .vbrk{display:block;font-size:13px;font-weight:500;opacity:.85;margin-top:2px}
+.svrow:has(.tx[data-wd]){cursor:pointer;border-radius:14px;transition:background .15s}
+.svrow:has(.tx[data-wd]):active{background:rgba(255,255,255,.05)}
 .svrow .tx b{display:block;font-weight:500;font-size:19px}
 .svrow .tx span{color:#c7ccd4;font-size:15px}
 .svrow .more{background:none;color:#cfd4dc;font-size:22px;letter-spacing:2px;padding:0 6px}
@@ -384,14 +433,14 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <input id="vSearch" placeholder="輸入英文或中文搜尋">
       <div id="searchList" style="margin-top:4px"></div>
     </div>
-    <div class="card">
-      <div class="row" style="justify-content:space-between"><h2 style="margin:0">我的收藏</h2><span class="muted" id="customCount"></span></div>
-      <p class="muted" style="margin:8px 0 12px">課程中點選單字、片語，或按句子右上角書籤，都會存到這裡。</p>
-      <div class="fchips scrollx" id="mwChips"><button data-f="all" class="on">全部</button><button data-f="w">單字</button><button data-f="s">句子</button><button data-f="new">新儲存</button><button data-f="rev">已複習</button></div>
-      <div class="muted" style="font-size:15px;margin:4px 0 2px">最近的</div>
+    <!-- 使用者要求：我的收藏比照 Speak「已儲存的句子」版面（標題＋搜尋鈕、分類膠囊、依時間分組的清單卡、底部固定複習鈕），保留「新」標記 -->
+    <div class="mwsec">
+      <div class="mwhead"><h2>已儲存的句子</h2><button class="circ" id="btnMwSearch" aria-label="搜尋收藏"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+      <input id="mwQ" class="hidden" placeholder="搜尋收藏的單字或句子">
+      <div class="mwbar"><div class="fchips scrollx" id="mwChips"><button data-f="all" class="on">全部</button><button data-f="new">新儲存</button><button data-f="rev">已複習</button></div><span class="muted hidden" id="customCount"></span></div>
       <div id="customList"></div>
-      <button class="pri big smartBtn" id="btnSmart" style="margin-top:10px">✨ 智慧複習</button>
-      <button class="big" id="btnMwStart" style="margin-top:8px">開始複習</button>
+      <button class="pri big smartBtn" id="btnSmart" style="display:none">✨ 智慧複習</button>
+      <div class="mwfoot"><button class="big" id="btnMwStart">開始複習</button></div>
       <details id="addBox"><summary>手動新增</summary>
         <input id="nW" placeholder="英文單字或片語"><input id="nZh" placeholder="中文意思"><input id="nEx" placeholder="例句（可不填）">
         <button style="margin-top:8px" id="btnAddWord">新增</button>
@@ -479,7 +528,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
 <!-- 選字列 -->
 <div class="selbar hidden" id="selBar">
   <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
-    <div style="min-width:0"><span class="muted" style="font-size:13px">已選取</span><div id="selText" style="font-weight:700;font-size:18px;word-break:break-word"></div><div id="selZh" style="font-size:15px;color:#9fb4ff;margin-top:2px;word-break:break-word"></div></div>
+    <div style="min-width:0"><span class="muted" style="font-size:13px" id="selLbl">已選取</span><div id="selText" style="font-weight:700;font-size:18px;word-break:break-word"></div><div id="selZh" style="font-size:15px;color:#9fb4ff;margin-top:2px;word-break:break-word"></div></div>
     <div class="row" style="flex-wrap:nowrap;gap:6px"><button id="btnSelSpeak">▶</button><button id="btnSelPhon">拆解</button><button id="btnSelClear">取消</button><button class="pri" id="btnSelSave">存入單字庫</button></div>
   </div>
   <div id="selForm" class="hidden">
@@ -2889,6 +2938,7 @@ function buildDeck(sents,{intro,words}){
   return d;
 }
 function openLesson(L,startAt){
+  if(!document.body.classList.contains("lesson")) L._from=["vocab","pron","stats","home"].find(v=>!$("v-"+v).classList.contains("hidden"))||"home"; // 優化：記住從哪一頁進來，關閉後回原頁
   lesson=L; sess={}; L._t0=L._t0||Date.now();
   deck=buildDeck(L.sents,{intro:L.intro, words:L.words});
   queue=deck.map(c=>c.type==="sent"?c.s:{id:"_",en:c.type==="word"?c.v.w:"",lv:2});
@@ -3027,7 +3077,7 @@ function clearTimers(){ clearTimeout(autoTimer); clearTimeout(cdTimer); clearTim
 function stopAll(){ tok++; clearTimers(); stopSpeech(); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } }
 function go(i,auto){
   if(safariResetDue(i)&&i!==ci){ stopAll(); micReset(i,"play","預防卡住，已自動重新整理"); return; }
-  stopAll(); sel=null;
+  stopAll(); sel=null; hold=null;
   ci=Math.max(0,Math.min(i,deck.length)); st="paused";
   const c=deck[ci]; if(c&&c.type==="sent"){ c._html=null; c._heard=""; c._got=null; c._rounds=0; c._waitUntil=0; }
   document.body.classList.remove("ending"); render(); if(auto&&deck[ci]) run();
@@ -3035,7 +3085,7 @@ function go(i,auto){
 // 免手持（只在智慧複習、且使用者開啟時）：自動播放、自動換下一張，下一句按鈕外圈顯示倒數
 const hfOn=()=>!!(lesson&&lesson.smart&&opt.hf);
 function hfNext(ms){
-  if(!hfOn()) return;
+  if(!hfOn()) return; if(hold){ hold.counting=true; return; }
   const btn=$("btnNext"); btn.style.setProperty("--dur",ms+"ms"); btn.classList.remove("counting"); void btn.offsetWidth; btn.classList.add("counting");
   const t=tok; clearTimeout(cdTimer); cdTimer=setTimeout(()=>{ if(t===tok&&hfOn()) go(ci+1,true); },ms);
 }
@@ -3050,7 +3100,7 @@ function introCd(ms){
 // 使用者要求：一律不自動跳下一張，只能手動按「下一句」（智慧複習的免手持例外）
 // 使用者要求比照 Speak：單字卡播完、句子全部唸對（變綠）後，「下一句」外圈倒數自動前進；按 ❚❚ 可暫停。⚙ 可關閉
 function countdown(ms){
-  if(!opt.flow||hfOn()) return;
+  if(!opt.flow||hfOn()) return; if(hold){ hold.counting=true; return; }
   const btn=$("btnNext"); btn.style.setProperty("--dur",ms+"ms"); btn.classList.remove("counting"); void btn.offsetWidth; btn.classList.add("counting");
   const t=tok; cdTimer=setTimeout(()=>{ if(t===tok) go(ci+1,true); },ms); $("btnMain").innerHTML=ICON.pause;
 }
@@ -3151,6 +3201,7 @@ function praise(sc){ return sc>=100?"完美！":sc>=80?"非常好！":sc>=50?"�
 function canMore(c){ return !!(c&&c.type==="sent"&&st==="pass"&&(sess[c.s.id]??0)<100&&!sess["self:"+c.s.id]&&dict&&!opt.nomic); }
 function selfOk(){ const c=deck[ci]; sess[c.s.id]=passOf(c.s); sess["self:"+c.s.id]=1; recordScore(c.s,passOf(c.s)); srMark(c); st="pass"; render(); countdown(1500); hfNext(1200); }
 function mainBtn(){
+  if(hold){ hold=null; if(sel){ sel=null; paintSel(); } }
   if(!deck[ci]){ openLesson(lesson); return; }
   if(st==="listen"){ finishListen(true); return; }
   if(st==="scoring") return; // 評分中按鈕不動作，避免把結果中斷
@@ -3159,7 +3210,7 @@ function mainBtn(){
   stopAll(); st="paused"; render();
 }
 function lessonClick(e){
-  const wd=e.target.closest(".wd"); if(wd&&deck[ci]&&deck[ci].type==="sent"){ if(st==="listen") return; pickWord(ci,+wd.dataset.k); return; }
+  const wd=e.target.closest(".wd"); if(wd&&deck[ci]&&deck[ci].type==="sent"){ holdFlow(); pickWord(ci,+wd.dataset.k); return; }
   const ex=e.target.closest("[data-sayex]"); if(ex&&deck[ci]&&deck[ci].type==="word"){ clearTimers(); speak(deck[ci].v.ex,false); return; }
   const b=e.target.closest("[data-act]");
   if(!b){ const c0=deck[ci]; if(IS_SAFARI&&dict&&!opt.nomic&&c0&&c0.type==="sent"&&(st==="turn"||st==="fail"||canMore(c0))&&!e.target.closest("button,a,[data-say],[data-sayex]")) startListen(false); return; }
@@ -3180,9 +3231,9 @@ function lessonClick(e){
   else if(a==="next"){ const n=nextNode(lesson.key); if(n) n.open(); }
   else if(a==="mwmore") startMyWordsReview();
   else if(a==="smartmore") startSmartReview();
-  else if(a==="home"){ const mw=lesson.key==="mywords"||lesson.key==="smart"; closeLesson(); if(mw) show("vocab"); }
+  else if(a==="home"){ const mw=lesson.key==="mywords"||lesson.key==="smart"; closeLesson(); show(mw?"vocab":"home"); }
 }
-function closeLesson(){ document.body.classList.remove("smart","ending"); try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show("home"); }
+function closeLesson(){ document.body.classList.remove("smart","ending"); try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show((lesson&&lesson._from)||"home"); }
 
 // ===================== 選字存入「我的單字庫」 =====================
 let sel=null;
@@ -3191,10 +3242,19 @@ function selWords(){ if(!sel) return ""; const ws=queue[sel.i].en.split(/\s+/).s
   let t=ws.join(" "); if(sel.a===0 && /^[A-Z][a-z]/.test(t) && !/^I\b/.test(t)) t=t[0].toLowerCase()+t.slice(1); return t; }
 function paintSel(){
   if(sentBox) sentBox.querySelectorAll(".wd.sel").forEach(x=>x.classList.remove("sel"));
-  if(!sel){ $("selBar").classList.add("hidden"); return; }
+  if(!sel){ $("selBar").classList.add("hidden"); resumeFlow(); return; }
   sentBox.querySelectorAll(`.sent[data-i="${sel.i}"] .wd`).forEach(x=>{ const k=+x.dataset.k; if(k>=sel.a&&k<=sel.b) x.classList.add("sel"); });
-  $("selText").textContent=selWords(); $("selForm").classList.add("hidden"); $("selBar").classList.remove("hidden"); showGloss();
+  $("selText").textContent=selWords(); $("selForm").classList.add("hidden"); $("selBar").classList.remove("hidden"); placeSel(); showGloss();
 }
+// 使用者要求：練習口說時，選字中文解釋框改放在練習卡片正下方（原本貼齊畫面底部太下面）
+function placeSel(){ const b=$("selBar"); if(!b||b.classList.contains("hidden")) return;
+  const pc=$("pCard"), card=pc&&(pc.querySelector(".lc")||pc);
+  const inLesson=document.body.classList.contains("lesson")&&sentBox===pc&&card&&card.offsetParent;
+  if(!inLesson){ b.style.removeProperty("top"); b.style.removeProperty("bottom"); return; }
+  const r=card.getBoundingClientRect(), h=b.offsetHeight||90, top=Math.round(r.bottom+10);
+  if(top+h>window.innerHeight-8){ b.style.removeProperty("top"); b.style.removeProperty("bottom"); return; } // 空間不足時退回原本底部位置
+  b.style.setProperty("top",top+"px","important"); b.style.setProperty("bottom","auto","important"); }
+window.addEventListener("resize",placeSel); window.addEventListener("scroll",placeSel,true);
 function pickWord(i,k){
   if(!sel||sel.i!==i) sel={i,a:k,b:k};
   else if(sel.a===sel.b && sel.a===k) sel=null;
@@ -3205,8 +3265,30 @@ function pickWord(i,k){
 function clearSel(){ sel=null; paintSel(); }
 // 使用者要求：選字時點選字列以外的地方（空白處）就自動取消，不必按「取消」；點英文字仍可繼續選字
 document.addEventListener("click",e=>{ if(!sel) return; const t=e.target;
-  if(t.closest&&(t.closest("#selBar")||t.closest(".wd"))) return;
+  if(t.closest&&(t.closest("#selBar")||t.closest(".wd")||t.closest("#sheet")||t.closest("#mask")||t.closest("#wdView")||t.closest("#toast"))) return; // 優化：在「拆解」等彈出面板內操作或關閉面板時，保留選字與暫停狀態
+  if(t.closest&&t.closest("button,a,[data-act]")) hold=null; // 點其他按鈕（麥克風、上/下一句…）→ 以該按鈕動作為準，不自動續播
   clearSel(); },true);
+// 使用者要求：練習中點單字＝暫時停止（停播放／收音／自動前進），按「取消」或點空白處就從原處繼續
+let hold=null;
+function holdFlow(){
+  if(hold||!document.body.classList.contains("lesson")||sentBox!==$("pCard")||!deck[ci]) return;
+  const prev=st; hold={prev,ci,counting:!!cdTimer};
+  if(prev==="scoring") return; // 評分中不中斷，評分完的自動前進會延到取消後
+  const wasListen=prev==="listen"; if(wasListen) recStop();
+  stopAll();
+  if(prev==="playing"){ st="paused"; render(); }
+  else if(wasListen){ st="turn"; render(); }
+  else if(hold.counting) render();
+  const l=$("selLbl"); if(l) l.textContent="⏸ 已暫停";
+}
+function resumeFlow(){
+  const l=$("selLbl"); if(l) l.textContent="已選取";
+  if(!hold) return; const h=hold; hold=null;
+  if(!document.body.classList.contains("lesson")||ci!==h.ci||!deck[ci]) return;
+  if(h.prev==="playing"){ run(); return; }                       // 示範播放被打斷 → 從頭再播一次
+  if(h.prev==="listen"&&st==="turn"&&dict){ startListen(false); return; } // 收音被打斷 → 接著收音（已唸對的藍字保留）
+  if(h.counting){ if(hfOn()) hfNext(1500); else countdown(1500); }   // 自動前進被打斷 → 重新倒數
+}
 // ===== 選字顯示中文：先查字庫（含字形還原），查不到再請 Claude 依句意翻譯（結果快取） =====
 let sampleFn=null, glossTok=0;
 const GLOSS_KEY="speak20_gloss_v1";
@@ -3258,11 +3340,11 @@ async function showGloss0(){
   const s=queue[sel.i], key=w.toLowerCase()+"|"+s.en;
   if(glossCache[key]){ el.textContent=glossCache[key]; return; }
   if(!sampleFn){
-    if(!navigator.onLine){ el.textContent=""; return; }
+    if(!navigator.onLine){ el.textContent="離線中，查不到中文（存入時可自行輸入）"; return; }
     el.textContent="查詢中文…";
     const t=(await onlineGloss(w)).slice(0,40); if(my!==glossTok) return;
     if(t){ glossCache[key]=t; try{ localStorage.setItem(GLOSS_KEY,JSON.stringify(glossCache)); }catch(e){} }
-    el.textContent=t; return;
+    el.textContent=t||"查不到中文（存入時可自行輸入）"; return;
   }
   el.textContent="查詢中文…";
   try{
@@ -3283,9 +3365,9 @@ async function openSelForm(){
     state.saved[hit.id]={on:true,t:Date.now()}; save(); toast("已存入我的單字庫：「"+hit.w+"」"+hit.zh); clearSel(); return;
   }
   // 使用者反映：已顯示中文還要自己輸入 → 有中文就直接存入，查不到中文才開輸入框
-  { const g=($("selZh").textContent||"").trim(); if(g&&!/^查詢|請稍後/.test(g)){ $("sW").value=w; $("sZh").value=g; confirmSel(); return; } }
-  $("sW").value=w; { const g=$("selZh").textContent; $("sZh").value=(g&&!/^查詢|請稍後/.test(g))?g:""; } $("sEx").textContent=queue[sel.i].en;
-  $("selForm").classList.remove("hidden"); $("sZh").focus();
+  { const g=($("selZh").textContent||"").trim(); if(g&&!/^查詢|請稍後|查不到/.test(g)){ $("sW").value=w; $("sZh").value=g; confirmSel(); return; } }
+  $("sW").value=w; { const g=$("selZh").textContent; $("sZh").value=(g&&!/^查詢|請稍後|查不到/.test(g))?g:""; } $("sEx").textContent=queue[sel.i].en;
+  $("selForm").classList.remove("hidden"); placeSel(); $("sZh").focus();
 }
 function confirmSel(){
   const w=$("sW").value.trim(), zh=$("sZh").value.trim();
@@ -3301,16 +3383,19 @@ const VOCAB_DAILY = 20, INTERVALS = [1,3,7,14,30,60], MASTER_BOX = 4;
 function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return todayKey(d); }
 function allVocab(){ return [...state.custom.filter(c=>!state.customDel.includes(c.id)), ...VOCAB_ORDER]; }
 const VBY = () => Object.fromEntries(allVocab().map(v=>[v.id,v]));
+function favWordIds(){ const o=new Set(state.custom.filter(c=>!state.customDel.includes(c.id)).map(c=>c.id)); for(const [id,x] of Object.entries(state.saved)) if(x&&x.on) o.add(id); return o; }
 function vocabStatus(){
   const t=todayKey(), all=allVocab(), vs=state.vocab;
   const due=all.filter(v=>vs[v.id] && vs[v.id].d<=t);
   const newToday=state.vnew[t]||0;
-  const fresh=all.filter(v=>!vs[v.id]).slice(0,Math.max(0,VOCAB_DAILY-newToday));
-  return {due, fresh, newToday, learned:all.filter(v=>vs[v.id]).length, mastered:all.filter(v=>vs[v.id]&&vs[v.id].b>=MASTER_BOX).length, total:all.length};
+  // 使用者要求（統一排程）：收藏的單字（我的單字庫＋自訂字）也納入間隔重複；還沒背過的收藏字另列「收藏」，不佔每日新字額度
+  const favIds=favWordIds(), fav=all.filter(v=>favIds.has(v.id)&&!vs[v.id]);
+  const fresh=all.filter(v=>!vs[v.id]&&!favIds.has(v.id)).slice(0,Math.max(0,VOCAB_DAILY-newToday));
+  return {due, fresh, fav, left:due.length+fav.length+fresh.length, newToday, learned:all.filter(v=>vs[v.id]).length, mastered:all.filter(v=>vs[v.id]&&vs[v.id].b>=MASTER_BOX).length, total:all.length};
 }
 let vq=[], vpos=0, vRequeued=new Set(), vMode="daily";
 function startVocab(list,mode){ vOk.clear(); vSnap.clear();
-  if(!list){ const st=vocabStatus(); list=[...st.due.sort((a,b)=>state.vocab[a.id].d<state.vocab[b.id].d?-1:1), ...st.fresh]; mode="daily"; }
+  if(!list){ const st=vocabStatus(); list=[...st.due.sort((a,b)=>state.vocab[a.id].d<state.vocab[b.id].d?-1:1), ...st.fav, ...st.fresh]; mode="daily"; }
   if(!list.length){ toast("今天的單字都完成了！"); return; }
   vq=list; vMode=mode; vpos=0; vRequeued=new Set();
   show("vocab"); $("vocabHome").classList.add("hidden"); $("flash").classList.remove("hidden"); $("v-vocab").classList.add("studying"); document.body.classList.add("studying");
@@ -3389,7 +3474,7 @@ function rate(g){
   if(again){ const o=vSnap.get(v.id); if(o) state.vocab[v.id]=o; else delete state.vocab[v.id]; }
   else vSnap.set(v.id,state.vocab[v.id]?{...state.vocab[v.id]}:null);
   const old=state.vocab[v.id];
-  if(!old&&!again) state.vnew[t]=(state.vnew[t]||0)+1;
+  if(!old&&!again&&!favWordIds().has(v.id)) state.vnew[t]=(state.vnew[t]||0)+1;
   let b=old?old.b:0, d;
   if(g===0){ b=0; d=addDays(1); if(!vRequeued.has(v.id)){ vRequeued.add(v.id); vq.push(v); } }
   else if(g===1){ d=addDays(Math.max(1,Math.floor(INTERVALS[b]/2))); }
@@ -3401,18 +3486,23 @@ function renderVocab(){
   const st=vocabStatus();
   $("vNew").textContent=st.newToday+" / "+VOCAB_DAILY; $("vDue").textContent=st.due.length;
   $("vLearned").textContent=st.learned+" / "+st.total; $("vMastered").textContent=st.mastered;
-  const left=st.due.length+st.fresh.length;
-  $("btnVocab").disabled=!left; $("btnVocab").textContent=`開始背單字（${left} 張）`;
+  const left=st.left;
+  $("btnVocab").disabled=!left; $("btnVocab").innerHTML=`開始背單字（${left} 張）<small class="vbrk">${[st.fresh.length&&"新字 "+st.fresh.length, st.due.length&&"到期複習 "+st.due.length, st.fav.length&&"收藏 "+st.fav.length].filter(Boolean).join("・")}</small>`;
   // 使用者要求：今天的單字都完成時，不顯示這個按鈕
   $("vocabHome").style.display= left ? "" : "none";
   const all=savedAll(), mw=all.filter(x=>x.kind!=="s"), ns=all.length-mw.length;
-  const l=all.filter(x=> mwFilter==="w"?x.kind!=="s" : mwFilter==="s"?x.kind==="s" : mwFilter==="new"?!x.rev : mwFilter==="rev"?x.rev : true);
+  if(!["all","new","rev"].includes(mwFilter)) mwFilter="all";
+  const q=(($("mwQ")&&$("mwQ").value)||"").trim().toLowerCase();
+  const l=all.filter(x=> mwFilter==="new"?isNewSaved(x) : mwFilter==="rev"?!isNewSaved(x) : true).filter(x=>!q||(x.en+" "+x.zh).toLowerCase().includes(q));
   $("customCount").textContent=`單字 ${mw.length}・句子 ${ns}`;
   [...$("mwChips").children].forEach(b=>b.classList.toggle("on",b.dataset.f===mwFilter));
-  $("customList").innerHTML = l.length ? l.map(x=>wordRow(x.en,x.zh,x.kind+"|"+x.id)).join("")
-    : `<p class="muted">${all.length?"這個分類目前沒有內容。":"還沒有收藏任何內容。課程中點選單字存入，或按句子右上角的書籤即可。"}</p>`;
-  $("btnSmart").disabled=!all.length; $("btnSmart").textContent= all.length ? `✨ 智慧複習（${Math.min(SMART_N,all.length)} 張）` : "✨ 智慧複習";
-  $("btnMwStart").disabled=!l.length; $("btnMwStart").textContent= l.length ? (mwFilter==="all"?`全部複習（${l.length} 個）`:`複習「${{w:"單字",s:"句子",new:"新儲存",rev:"已複習"}[mwFilter]}」（${l.length} 個）`) : "全部複習";
+  $("customList").innerHTML = l.length ? mwGroups(l)
+    : `<div class="mwempty muted">${q?"找不到符合的收藏。":all.length?"這個分類目前沒有內容。":"還沒有收藏任何內容。課程中點選單字、片語存入，或按句子右上角的書籤即可。"}</div>`;
+  // 使用者要求整合：收藏區只留一個「複習收藏」（依目前篩選，口說跟讀）；智慧複習與全部複習重複，已移除
+  $("btnSmart").style.display="none";
+  { const pk=l.map(x=>state.best[x.kind==="s"?x.id:"sv:"+x.id]), nNew=pk.filter(b=>b==null).length, nWeak=pk.filter(b=>b!=null&&b<80).length, n=Math.min(SMART_N,l.length);
+    $("btnMwStart").classList.add("pri"); $("btnMwStart").disabled=!l.length;
+    $("btnMwStart").textContent="開始複習"; } // 使用者要求比照 Speak：按鈕只顯示「開始複習」，功能仍為智慧複習（依分類挑最多 10 張，新收藏與待加強優先）
   renderSearch();
 }
 function renderSearch(){
@@ -3423,8 +3513,16 @@ function renderSearch(){
     : `<p class="muted">查無資料，可以在「我的單字庫」手動新增。</p>`;
 }
 // 單字列表（比照「已儲存的句子」：喇叭／英文＋中文／•••）
-let mwFilter="all";
-function wordRow(en,zh,more){ return `<div class="svrow"><button class="spk" data-say="${esc(en)}" aria-label="播放">${SPK}</button><div class="tx" ${more.startsWith("s|")?`data-say="${esc(en)}"`:`data-wd="${esc(more)}"`}><b>${esc(en)}</b><span>${esc(zh)}</span></div><button class="more" data-more="${esc(more)}" aria-label="更多">•••</button></div>`; }
+let mwFilter="all"; // 使用者要求精簡：只留 全部／單字／句子（新儲存、已複習改由智慧複習自動優先挑選＋列表「新」標記）
+// 依收藏時間分組（比照 Speak：今天／昨天／本週／一週前／一個月前）；句子只顯示英文
+function mwGroups(l){ const d0=new Date(); d0.setHours(0,0,0,0); const T=d0.getTime(), DAY=864e5;
+  const lab=t=> t>=T?"今天": t>=T-DAY?"昨天": t>=T-6*DAY?"本週": t>=T-29*DAY?"一週前":"一個月前";
+  const g=[]; l.forEach(x=>{ const k=lab(x.t||0); let G=g.find(z=>z.k===k); if(!G){ G={k,a:[]}; g.push(G); } G.a.push(x); });
+  return g.map(G=>`<div class="mwgrp">${G.k}</div><div class="mwcard">${G.a.map(x=>wordRow(x.en,x.kind==="s"?"":x.zh,x.kind+"|"+x.id,smartTag(x)).replace('class="svrow"',x.kind==="s"?'class="svrow sent"':'class="svrow"')).join("")}</div>`).join(""); }
+// 使用者要求比照 Speak：分類為 全部／新儲存／已複習。「新儲存」＝還沒練過（與列表「新」標記同一標準），其餘為「已複習」
+function isNewSaved(x){ return state.best[x.kind==="s"?x.id:"sv:"+x.id]==null && !(x.kind!=="s"&&state.vocab[x.id]) && !(x.kind==="s"&&state.tries[x.id]); }
+function smartTag(x){ const b=state.best[x.kind==="s"?x.id:"sv:"+x.id]; return isNewSaved(x)?`<em class="stag new">新</em>`:b==null?"":b<80?`<em class="stag weak">待加強</em>`:""; }
+function wordRow(en,zh,more,tag=""){ return `<div class="svrow"><button class="spk" data-say="${esc(en)}" aria-label="播放">${SPK}</button><div class="tx" ${more.startsWith("s|")?`data-say="${esc(en)}"`:`data-wd="${esc(more)}"`}><b>${tag}${esc(en)}</b>${zh?`<span>${esc(zh)}</span>`:""}</div><button class="more" data-more="${esc(more)}" aria-label="更多">•••</button></div>`; }
 function myWords(){ return savedAll().filter(x=>x.kind!=="s"); }
 // 單字口說練習：從我的單字庫挑 10 個（沒練過、分數低的優先，其餘隨機），逐一聽→唸→評分
 const MW_PICK=10;
@@ -3436,10 +3534,10 @@ function pickMyWords(){
 // 智慧複習（使用者要求，比照 Speak Smart Review）：從我的單字庫挑 10 張，單字與片語交錯
 // 優先：沒練過 > 分數低 > 很久沒做智慧複習 > 最近才存；同分隨機。流程：播英文＋中文 → 跟唸評分
 const SMART_N=10;
-function pickSmart(){
+function pickSmart(f){
   if(!state.sr) state.sr={};
   const now=Date.now(), DAY=864e5;
-  const l=savedAll().map(x=>{ const k=x.kind==="s"?x.id:"sv:"+x.id, b=state.best[k], last=state.sr[k];
+  const l=savedAll().filter(x=>f==="new"?isNewSaved(x):f==="rev"?!isNewSaved(x):true).map(x=>{ const k=x.kind==="s"?x.id:"sv:"+x.id, b=state.best[k], last=state.sr[k];
     let p = b==null ? 4 : b<80 ? 1+3*(1-b/80) : 0;
     p += last ? Math.min(3,(now-last)/DAY/2) : 3;
     if(now-(x.t||0)<3*DAY) p+=1;
@@ -3449,8 +3547,8 @@ function pickSmart(){
     if(!b||(a&&(out.length%2===0)&&a.p>=b.p-2)) out.push(wd.shift()); else out.push(ph.shift()); }
   return out.map(o=>o.x);
 }
-function startSmartReview(){
-  const l=pickSmart(); if(!l.length) return;
+function startSmartReview(f){
+  const l=pickSmart(f||"all"); if(!l.length) return;
   openLesson({key:"smart", kind:"saved", smart:true, title:"智慧複習", sents:l.map(x=>x.kind==="s"?x.s:({id:"sv:"+x.id,en:x.en,zh:x.zh,lv:2})), words:false,
     intro:{title:"智慧複習", sub:"從我的收藏挑出 "+l.length+" 個單字、片語與句子，聽英文、看中文，跟著唸一次。", tag:"Smart Review"}});
 }
@@ -3539,11 +3637,11 @@ function streak(){ let n=0; const d=new Date(); if(!(state.days[todayKey(d)]?.n)
 function weakList(filter){ return S.filter(s=>state.tries[s.id]&&!isPass(s)&&(!filter||filter(s))).sort((a,b)=>(state.best[a.id]||0)-(state.best[b.id]||0)); }
 function unitNodes(u,lv=state.level){
   const arts=ARTS.filter(a=>a.topic===u&&a.lv===lv);
-  const ns=arts.map((a,i)=>({key:a.id, type:"art", no:i+1, label:a.zhT, sub:a.enT, done:pctOf(a.sents)===100, open:()=>openLesson(lessonFromArt(a))}));
+  const ns=arts.map((a,i)=>({key:a.id, type:"art", no:i+1, label:a.zhT, sub:a.enT, done:pctOf(a.sents)===100, total:a.sents.length, passN:a.sents.filter(isPass).length, tried:a.sents.some(x=>state.tries[x.id]), open:()=>openLesson(lessonFromArt(a))}));
   const weak=weakList(s=>s.topic===u&&s.lv===lv).length;
-  ns.push({key:"rv:"+u+lv, type:"review", label:"來複習囉", badge:weak, done:ns.every(n=>n.done)&&!weak, open:()=>openLesson(lessonReview(u))});
+  ns.push({key:"rv:"+u+lv, type:"review", label:"來複習囉", badge:weak, tried:weak>0, done:ns.every(n=>n.done)&&!weak, open:()=>openLesson(lessonReview(u))});
   const ts=state.tests["ts:"+u+lv];
-  ns.push({key:"ts:"+u+lv, type:"test", label:"來實測囉", score:ts, done:(ts||0)>=80, open:()=>openLesson(lessonTest(u))});
+  ns.push({key:"ts:"+u+lv, type:"test", label:"來實測囉", score:ts, tried:ts!=null, done:(ts||0)>=80, open:()=>openLesson(lessonTest(u))});
   return ns;
 }
 function allNodes(){ return UNITS.flatMap(u=>unitNodes(u)); }
@@ -3556,7 +3654,7 @@ function renderHome(){
   $("streakN").textContent=streak();
   $("lvBar").style.width=levelPct(lv)+"%";
   const all=allNodes(); const curKey=(all.find(n=>!n.done)||{}).key;
-  const vs=vocabStatus(), vleft=vs.due.length+vs.fresh.length;
+  const vs=vocabStatus(), vleft=vs.left;
   const offs=[24,10,0,12];
   let h="";
   UNITS.forEach((u,ui)=>{
@@ -3565,12 +3663,13 @@ function renderHome(){
                : `<div class="unit-sep">單元 ${ui+1}</div><div class="unit-sep2">${TOPICS[u].name}</div>`;
     h+=`<div class="path">`;
     ns.forEach((n,i)=>{
-      const cls=n.key===curKey?"cur":n.done?"done":"";
+      const cls=n.key===curKey?"cur":n.done?"done":n.tried?"part":"";
       let ic= n.done&&n.key!==curKey ? CHECK : n.type==="art" ? `<span>${n.no}</span>` : n.type==="review" ? `<span>${n.badge||"↺"}</span>` : `<span>${n.score!=null?n.score:"✓"}</span>`;
       if(n.type==="test" && n.score==null && !(n.done&&n.key!==curKey)) ic=`<svg viewBox="0 0 24 24"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/></svg>`;
       const sub = n.type==="art" ? n.sub : n.type==="review" ? (n.badge?n.badge+" 句待加強":"再練一次") : (n.score!=null?"最佳："+praise(n.score):"整個單元測一次");
+      const prog = n.type==="art"&&(n.tried||n.done) ? `<span class="prog"><i><b style="width:${Math.round(100*n.passN/n.total)}%"></b></i>${n.passN}/${n.total} 句</span>` : "";
       const bubble = isCurUnit&&i===2 ? `<button class="bubble" data-vocab="1">${vleft?`<span class="badge">${vleft}</span>`:""}<span class="cardsI"><svg viewBox="0 0 24 24"><path d="M5 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2zM19 7v12h-1V7z"/></svg></span>今日單字</button>` : "";
-      h+=`<div class="nrow" style="padding-left:${offs[i%4]}%"><button class="node ${cls}" data-n="${n.key}"><span class="ni">${ic}</span><span>${esc(n.label)}<small>${esc(sub)}</small></span></button>${bubble}</div>`;
+      h+=`<div class="nrow" style="padding-left:${offs[i%4]}%"><button class="node ${cls}" data-n="${n.key}"><span class="ni">${ic}</span><span class="nbody">${esc(n.label)}<small>${esc(sub)}</small>${prog}</span></button>${bubble}</div>`;
     });
     h+=`</div>`;
   });
@@ -3631,21 +3730,27 @@ async function onlineDetail(w){
   const lines=[def,ex,...syn]; const tr=(await gtxText(lines.join("\n"))).split("\n");
   return {exp:tr[0]||"", ex, exZh:ex?(tr[1]||""):"", pos:POS_ZH[pos]||"", syn:syn.map((z,i)=>({w:z,zh:tr[2+i]||""}))};
 }
+// 有 Claude 時：依例句語境產生 Speak 風格的翻譯、解釋、例句與類似字（繁中・台灣用語）
+async function aiDetail(w,ctx){
+  const r=await sampleFn(`你是英文老師。請為英文「${w}」產生學習卡，只輸出 JSON，不要其他文字：
+{"pos":"詞性（名詞/動詞/形容詞/副詞/片語…）","exp":"用繁體中文（台灣用語）一兩句說明意思與常用情境，以「\"${w}\" 意指」開頭","ex":"一句自然的生活英文例句","exZh":"例句中譯","ctxZh":"${ctx?"下面原句的中譯":""}","syn":[{"w":"類似的英文字","zh":"中文"},{"w":"","zh":""},{"w":"","zh":""}]}${ctx?"\n原句："+ctx:""}`,{modelTier:"quick"});
+  const t=(r&&r.text||""); const j=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));
+  return {pos:j.pos||"",exp:j.exp||"",ex:j.ex||"",exZh:j.exZh||"",ctxZh:j.ctxZh||"",syn:(j.syn||[]).filter(z=>z&&z.w&&z.w.toLowerCase()!==w.toLowerCase()).slice(0,3)};
+}
 function wdHtml(v,loading){
   const x=VOCAB_EXT[v.id]||{exp:v.exp||"",exZh:v.exZh||"",syn:v.syn||[]}, on=isMine(v.id), syn=x.syn||[];
   const pos=v.pos&&!["自訂","片語"].includes(v.pos)?` (${esc(v.pos)})`:"";
-  return `<div class="wdtop"><button class="circ" data-wdact="close" aria-label="關閉">✕</button></div>
-  <div class="wdcard">
+  return `<div class="wdcard"><div class="wdgrab" data-wdgrab="1" aria-label="下拉關閉"><i></i></div>
     <div class="wdhead"><h1>${esc(v.w)}</h1>
       <button class="ic" data-say="${esc(v.w)}" aria-label="發音">${SPK}</button>
       <button class="ic" data-wdact="copy" aria-label="複製"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
       <button class="ic ${on?"on":""}" data-wdact="save" aria-label="我的單字庫">${on?SV_ON:SV_ICON}</button></div>
     <div class="lab">翻譯</div><div class="zh">${esc(v.zh)}${pos}</div>
-    <div class="lab">發音拆解</div>${phonFull(v.w)}
     ${x.exp?`<div class="lab">單字解釋</div><div>${esc(x.exp)}</div>`:""}
     ${v.ex?`<div class="lab">例句</div><div class="exbox" data-say="${esc(v.ex)}"><div style="flex:1"><b>${esc(v.ex)}</b>${x.exZh?`<span>${esc(x.exZh)}</span>`:""}</div><i class="exspk">${SPK}</i></div>`:""}
     ${syn.length?`<div class="lab">類似的字</div><div>${syn.map(z=>{ const s2=synSaved(z.w); return `<div class="syn"><button class="ic sm synspk" data-say="${esc(z.w)}" aria-label="發音">${SPK}</button><div class="syntx" data-say="${esc(z.w)}"><b>${esc(z.w)}</b><span>${esc(z.zh)}</span></div><button class="ic sm synsv ${s2?"on":""}" data-synsave="${esc(z.w)}" data-zh="${esc(z.zh)}" aria-label="儲存">${s2?SV_ON:SV_ICON}</button></div>`; }).join("")}</div>`:""}
-    ${loading?`<p class="muted" style="margin-top:18px">正在查詢解釋與例句…</p>`:(!x.exp&&!v.ex&&!syn.length?`<p class="muted" style="margin-top:18px">這個字目前沒有解釋與例句${navigator.onLine?"（線上字典查無資料）":"（需要連網才能查詢）"}。</p>`:"")}
+    <details class="wdph"><summary>發音拆解（音節・重音・KK 音標）</summary>${phonFull(v.w)}</details>
+    ${loading?`<p class="muted" style="margin-top:18px">正在查詢解釋、例句與類似的字…</p>`:(!x.exp&&!v.ex&&!syn.length?`<p class="muted" style="margin-top:18px">這個字目前沒有解釋與例句${navigator.onLine?"（線上字典查無資料）":"（需要連網才能查詢）"}。</p>`:"")}
     <div class="wdbtns"><button data-wdact="mic"><span>唸唸看</span></button><button class="pri" data-wdact="practice">背這個字</button></div>
     <div class="vmicres" id="wdMicRes" style="margin-top:8px"></div>
   </div>`;
@@ -3653,10 +3758,13 @@ function wdHtml(v,loading){
 function isMine(id){ return id.startsWith("c")||isSaved(id); }
 async function openWordDetail(id){
   const v=VBY()[id]; if(!v) return; wdId=id; const my=++wdTok;
-  const need=id.startsWith("c")&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine;
+  const need=id.startsWith("c")&&!v._looked2&&(!v.exp||!(v.syn&&v.syn.length)||(v.ex&&!v.exZh))&&(navigator.onLine||!!sampleFn);
   $("wdView").innerHTML=wdHtml(v,need); $("wdView").classList.remove("hidden"); $("wdView").scrollTop=0; document.body.classList.add("wdopen");
   speak(v.w,false);
-  if(need){ const d=await onlineDetail(v.w); const c=state.custom.find(z=>z.id===id); if(c){ c._looked=true;
+  if(need){ let d=null; if(sampleFn) d=await aiDetail(v.w,v.ex).catch(()=>null); if(!d) d=await onlineDetail(v.w).catch(()=>null);
+    const c=state.custom.find(z=>z.id===id);
+    if(c&&c.ex&&!c.exZh&&!(d&&d.exZh&&d.ex===c.ex)){ const z=sampleFn&&d&&d.ctxZh?d.ctxZh:await gtxText(c.ex); if(z) c.exZh=z; }
+    if(c){ c._looked=true; c._looked2=true;
       if(d){ if(d.exp) c.exp=d.exp; if(d.ex&&!c.ex){ c.ex=d.ex; c.exZh=d.exZh; } if(d.syn.length) c.syn=d.syn; if(d.pos&&(c.pos==="自訂"||!c.pos)) c.pos=d.pos; }
       save(); }
     if(my===wdTok&&wdId===id) $("wdView").innerHTML=wdHtml(VBY()[id]||v,false); }
@@ -3665,8 +3773,10 @@ function closeWordDetail(){ wdId=null; wdTok++; if(vmic) vmicReset(); $("wdView"
 function svMore(kind,id){
   if(kind==="v"){ const v=VBY()[id]; if(!v) return; const mine=myWords().some(x=>x.id===id);
     openSheet(`<h2 style="word-break:break-word">${esc(v.w)}</h2><p class="muted" style="margin-top:-6px">${esc(v.zh)}${v.ex?"<br>"+esc(v.ex):""}</p>
+      <button class="opt" data-sv="detail|v|${esc(id)}"><b>查看單字說明</b><span class="muted">解釋・例句・類似的字</span></button>
       ${mine?`<button class="opt" data-sv="del|w|${esc(id)}"><b style="color:var(--bad)">從我的單字庫移除</b></button>`:`<button class="opt" data-sv="add|v|${esc(id)}"><b>加入我的單字庫</b></button>`}`); return; }
   openSheet(`<h2 style="word-break:break-word">${esc((savedAll().find(x=>x.id===id)||{}).en||"")}</h2>
+    ${kind!=="s"&&VBY()[id]?`<button class="opt" data-sv="detail|${kind}|${esc(id)}"><b>查看單字說明</b><span class="muted">解釋・例句・類似的字</span></button>`:""}
     <button class="opt" data-sv="del|${kind}|${esc(id)}"><b style="color:var(--bad)">${kind==="s"?"從收藏移除":"從我的單字庫移除"}</b></button>`);
 }
 function svAction(a,kind,id){
@@ -3713,7 +3823,7 @@ function show(v){
   pronStop();
   if(timerOn&&v!=="practice"){ timerOn=false; flushTime(); save(); }
   $("flash").classList.add("hidden"); $("vocabHome").classList.remove("hidden"); $("v-vocab").classList.remove("studying"); document.body.classList.remove("studying");
-  sel=null; $("selBar").classList.add("hidden"); closeSheet();
+  sel=null; hold=null; $("selBar").classList.add("hidden"); closeSheet();
   if(v==="home") renderHome(); if(v==="vocab") renderVocab(); if(v==="pron") renderPronList();
   if(v==="saved") renderSaved(); if(v==="stats") renderStats();
   window.scrollTo(0,0);
@@ -3734,7 +3844,7 @@ $("sheet").onclick=e=>{ const lv=e.target.closest("[data-lv]"); if(lv){ setLevel
   const bt=e.target.closest("[data-btry]"); if(bt){ tryBrowserVoice(bt.dataset.btry); return; }
   const bs=e.target.closest("[data-bset]"); if(bs){ state.bvoice=bs.dataset.bset; state.bvNat=1; save(); voiceSheet(); tryBrowserVoice(state.bvoice); toast("已換成 "+state.bvoice); return; }
   const o=e.target.closest("[data-opt]"); if(o){ opt[o.dataset.opt]=!opt[o.dataset.opt]; state.opt={...opt}; save(); settingsSheet(); if(deck[ci]) render(); return; }
-  const sv=e.target.closest("[data-sv]"); if(sv){ const [a,k,id]=sv.dataset.sv.split("|"); svAction(a,k,id); } };
+  const sv=e.target.closest("[data-sv]"); if(sv){ const [a,k,id]=sv.dataset.sv.split("|"); if(a==="detail"){ closeSheet(); openWordDetail(id); return; } svAction(a,k,id); } };
 $("btnClose").onclick=closeLesson;
 $("btnSet").onclick=settingsSheet;
 function syncNoMic(){ $("btnNoMic").classList.toggle("on",!!opt.nomic); $("btnNoMic").querySelector(".nmlab").textContent=opt.nomic?"免開麥克風":"無法說話？"; }
@@ -3769,10 +3879,12 @@ $("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return; rate(vOk.has(v.id)?
   // iPhone：背單字也每用麥克風 3 次就在換卡時自動重新整理，避免收音卡住；載入後自動繼續背剩下的字
   if(SR_RESET_EVERY>0&&IS_SAFARI&&dict&&dict.kind==="web"&&SRD.st>=SR_RESET_EVERY&&!$("flash").classList.contains("hidden")&&vq[vpos]){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({vocab:1,msg:"預防卡住，已自動重新整理"})); }catch(e){} document.body.classList.add("resetting"); location.reload(); } };
 $("btnAddWord").onclick=addWord;
-const wordListClick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const i=m.dataset.more.indexOf("|"); svMore(m.dataset.more.slice(0,i),m.dataset.more.slice(i+1)); } };
+const wordListClick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]")||(!e.target.closest("[data-more]")&&e.target.closest(".svrow")?.querySelector("[data-wd]")); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const i=m.dataset.more.indexOf("|"); svMore(m.dataset.more.slice(0,i),m.dataset.more.slice(i+1)); } };
 $("customList").onclick=wordListClick; $("searchList").onclick=wordListClick;
+$("btnMwSearch").onclick=()=>{ const q=$("mwQ"); q.classList.toggle("hidden"); if(q.classList.contains("hidden")){ q.value=""; renderVocab(); } else q.focus(); };
+$("mwQ").oninput=renderVocab;
 $("mwChips").onclick=e=>{ const b=e.target.closest("[data-f]"); if(b){ mwFilter=b.dataset.f; renderVocab(); } };
-$("btnMwStart").onclick=()=>startSavedReview(mwFilter);
+$("btnMwStart").onclick=()=>startSmartReview(mwFilter);
 $("vSearch").oninput=renderSearch;
 $("pronItems").onclick=e=>{ const b=e.target.closest("[data-p]"); if(b) openPron(b.dataset.p); };
 $("btnPronBack").onclick=()=>show("pron");
@@ -3785,6 +3897,7 @@ $("btnSelPhon").onclick=()=>{ const w=selWords(); if(w) phonSheet(w); };
 $("btnSelSave").onclick=openSelForm;
 $("btnSelConfirm").onclick=confirmSel;
 $("wdView").onclick=async e=>{
+  if(e.target===$("wdView")){ closeWordDetail(); return; } // 點面板外的暗處 → 關閉
   const v=wdId&&VBY()[wdId]; if(!v) return;
   const ss=e.target.closest("[data-synsave]"); if(ss){ toggleSynSave(ss.dataset.synsave,ss.dataset.zh); const on=synSaved(ss.dataset.synsave); ss.classList.toggle("on",on); ss.innerHTML=on?SV_ON:SV_ICON; return; }
   const a=e.target.closest("[data-wdact]");
@@ -3797,8 +3910,15 @@ $("wdView").onclick=async e=>{
   else if(k==="mic") vocabMic("w",{v,btn:a,res:$("wdMicRes"),box:$("wdView").querySelector("h1")});
   else if(k==="practice"){ closeWordDetail(); startVocab([v],"saved"); }
 };
+// 拖曳上方把手往下拉 → 關閉（比照 Speak）
+(()=>{ let y0=null,dy=0,card=null;
+  $("wdView").addEventListener("pointerdown",e=>{ if(!e.target.closest("[data-wdgrab]")) return; card=$("wdView").querySelector(".wdcard"); y0=e.clientY; dy=0; card.style.transition="none"; e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId); });
+  $("wdView").addEventListener("pointermove",e=>{ if(y0==null) return; dy=Math.max(0,e.clientY-y0); card.style.transform=`translateY(${dy}px)`; });
+  const up=()=>{ if(y0==null) return; y0=null; card.style.transition="transform .2s"; if(dy>90){ card.style.transform="translateY(100%)"; setTimeout(closeWordDetail,180); } else card.style.transform=""; };
+  $("wdView").addEventListener("pointerup",up); $("wdView").addEventListener("pointercancel",up);
+})();
 $("svChips").onclick=e=>{ const b=e.target.closest("[data-f]"); if(b){ svFilter=b.dataset.f; renderSaved(); } };
-$("svList").onclick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const [k,id]=m.dataset.more.split("|"); svMore(k,id); } };
+$("svList").onclick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]")||(!e.target.closest("[data-more]")&&e.target.closest(".svrow")?.querySelector("[data-wd]")); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const [k,id]=m.dataset.more.split("|"); svMore(k,id); } };
 $("btnSvSearch").onclick=()=>{ $("svQ").classList.toggle("hidden"); if(!$("svQ").classList.contains("hidden")) $("svQ").focus(); };
 $("svQ").oninput=renderSaved;
 $("btnSvStart").onclick=startSavedReview;
