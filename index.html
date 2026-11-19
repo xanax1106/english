@@ -533,6 +533,17 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <p class="muted" style="margin-top:10px">學習紀錄自動存在這台裝置。換裝置時，先在舊裝置「匯出」，再到新裝置「匯入」。iPhone 的 Safari 分頁和主畫面 App 資料是分開的，第一次改用主畫面 App 時也要匯出、匯入一次。匯入會合併，不會刪除現有紀錄。</p>
       <div class="row" style="gap:8px"><button class="pri" id="btnExport">匯出學習進度（.json）</button><button id="btnImport">匯入還原紀錄</button><input type="file" id="fImport" accept=".json,application/json" class="hidden"></div>
     </details>
+    <details class="card fold" id="gistCard"><summary>雲端同步（GitHub）<small id="gistSum" style="display:block;font-weight:500;font-size:13px;color:var(--sub);margin-top:2px">尚未設定・紀錄只存在這台裝置</small></summary>
+      <div id="gistOff">
+        <p class="muted" style="margin-top:10px">電腦和手機各設定一次，之後開啟 App、練習後會自動同步並合併紀錄。權杖只存在這台裝置的瀏覽器，不會寫進程式，也不會隨「匯出」一起輸出。請勿在公用電腦設定。</p>
+        <input id="gistTok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="貼上 GitHub 權杖（github_pat_ 開頭）">
+        <div class="row" style="margin-top:10px"><button class="pri" id="btnGistOn">連線並同步</button></div>
+      </div>
+      <div id="gistOn" class="hidden">
+        <p class="muted" id="gistNoteT" style="margin-top:10px"></p>
+        <div class="row" style="gap:8px"><button class="pri" id="btnGistNow">立即同步</button><button id="btnGistOff">中斷連線</button></div>
+      </div>
+    </details>
     <span id="syncNote" class="hidden"></span><!-- 使用者要求移除「使用說明」，同步狀態元素保留供程式更新 -->
   </section>
 </div>
@@ -2741,6 +2752,7 @@ function save(){
   try{ const k=todayKey(); if(localStorage.getItem(LS_KEY+"_bakday")!==k){ const prev=localStorage.getItem(LS_KEY); if(prev){ localStorage.setItem(LS_KEY+"_bak",prev); localStorage.setItem(LS_KEY+"_bakday",k); } } }catch(e){}
   try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){ toast("無法儲存進度：瀏覽器可能是無痕模式"); }
   if(!window.claude) localNote();
+  if(typeof gistSchedule==="function") gistSchedule();
   if(!dbRef || dirty) return;
   dirty=true;
   saving = saving.then(async()=>{
@@ -4077,6 +4089,102 @@ $("btnExport").onclick=async()=>{ const blob=new Blob([JSON.stringify(state)],{t
   // iPhone：用分享選單「儲存到檔案」，比下載更可靠
   if(IS_SAFARI&&navigator.canShare&&window.File){ try{ const f=new File([blob],fname,{type:"application/json"}); if(navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:fname}); toast("已匯出學習紀錄"); return; } }catch(e){ if(e&&e.name==="AbortError") return; } }
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); toast("已匯出學習紀錄"); };
+// ===================== 雲端同步（GitHub Gist）=====================
+// 使用者選 A 方案：學習紀錄存成自己帳號下的「秘密 Gist」；各裝置先下載合併（mergeRemote）再上傳。
+// 權杖只存在本機 localStorage（speak20_gist），不寫進程式、不隨匯出輸出。
+const GIST_KEY="speak20_gist", GIST_FILE="speak20_progress.json", GIST_API="https://api.github.com";
+let gistCfg=null; try{ gistCfg=JSON.parse(localStorage.getItem(GIST_KEY)||"null"); }catch(e){}
+let gistBusy=null, gistAgain=false, gistTimer=null, gistQuiet=false, gistLastPull=0, gistDirty=false;
+function gistSaveCfg(){ try{ if(gistCfg) localStorage.setItem(GIST_KEY,JSON.stringify(gistCfg)); else localStorage.removeItem(GIST_KEY); }catch(e){} }
+const gistTime=t=>{ const d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); };
+function gistNote(msg){
+  const on=!!(gistCfg&&gistCfg.token);
+  $("gistOff").classList.toggle("hidden",on); $("gistOn").classList.toggle("hidden",!on);
+  const t=msg||(on?(gistCfg.last?"已同步 "+gistTime(gistCfg.last)+"（電腦、手機共用）":"已連線，尚未同步"):"尚未設定・紀錄只存在這台裝置");
+  $("gistSum").textContent=t; if(on) $("gistNoteT").textContent=t;
+}
+async function gistApi(path,opt={}){
+  const h={"Authorization":"Bearer "+gistCfg.token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  if(opt.body) h["Content-Type"]="application/json";
+  const r=await fetch(GIST_API+path,{...opt,headers:h,cache:"no-store"});
+  if(r.status===401) throw {code:"auth"};
+  if(r.status===403) throw {code:r.headers.get("x-ratelimit-remaining")==="0"?"rate":"perm"};
+  if(r.status===404) throw {code:"notfound"};
+  if(!r.ok) throw {code:"http",status:r.status};
+  return r.json();
+}
+async function gistFind(){   // 找自己帳號中已有的同步檔；沒有就建立秘密 Gist
+  for(let page=1;page<=5;page++){
+    const l=await gistApi(`/gists?per_page=100&page=${page}`);
+    const g=l.find(x=>x.files&&x.files[GIST_FILE]); if(g) return g.id;
+    if(l.length<100) break;
+  }
+  const g=await gistApi("/gists",{method:"POST",body:JSON.stringify({description:"英文口說練習・學習進度（自動同步，請勿手動修改）",public:false,files:{[GIST_FILE]:{content:JSON.stringify(state)}}})});
+  return g.id;
+}
+async function gistRead(){
+  const g=await gistApi("/gists/"+gistCfg.id); const f=g.files&&g.files[GIST_FILE]; if(!f) return {obj:null,txt:""};
+  let txt=f.content||""; if(f.truncated&&f.raw_url){ txt=await (await fetch(f.raw_url,{cache:"no-store"})).text(); }
+  let obj=null; try{ obj=JSON.parse(txt); }catch(e){}
+  return {obj,txt};
+}
+function gistRefreshViews(){
+  if(document.body.classList.contains("lesson")||document.body.classList.contains("studying")) return;  // 練習中不重畫，避免打斷
+  for(const f of [typeof renderHome==="function"&&renderHome, typeof renderStats==="function"&&renderStats, typeof renderVocab==="function"&&renderVocab]) if(f){ try{ f(); }catch(e){} }
+}
+function gistSync(){
+  if(!gistCfg||!gistCfg.token) return Promise.resolve();
+  if(gistBusy){ gistAgain=true; return gistBusy; }
+  if(!navigator.onLine){ gistNote("離線中，連網後會自動同步"); return Promise.resolve(); }
+  clearTimeout(gistTimer); gistDirty=false;
+  gistBusy=(async()=>{
+    try{
+      gistNote("同步中…");
+      if(!gistCfg.id){ gistCfg.id=await gistFind(); gistSaveCfg(); }
+      let rd; try{ rd=await gistRead(); }catch(e){ if(e&&e.code==="notfound"){ gistCfg.id=await gistFind(); gistSaveCfg(); rd=await gistRead(); } else throw e; }
+      const before=JSON.stringify(state);
+      if(rd.obj) mergeRemote(rd.obj);
+      if(JSON.stringify(state)!==before){ gistQuiet=true; try{ save(); }finally{ gistQuiet=false; } gistRefreshViews(); }
+      const out=JSON.stringify(state);
+      if(out!==rd.txt) await gistApi("/gists/"+gistCfg.id,{method:"PATCH",body:JSON.stringify({files:{[GIST_FILE]:{content:out}}})});
+      gistCfg.last=Date.now(); gistCfg.err=""; gistSaveCfg(); gistLastPull=Date.now(); gistNote();
+    }catch(e){
+      const c=e&&e.code;
+      gistNote(c==="auth"?"⚠ 權杖無效或已過期，請按「中斷連線」後重新貼上新權杖"
+        :c==="perm"?"⚠ 權杖沒有 Gists 讀寫權限，請重新建立權杖"
+        :c==="rate"?"⚠ GitHub 暫時限制存取，稍後會再試"
+        :"⚠ 同步失敗（"+(navigator.onLine?"網路或 GitHub 暫時無回應":"離線")+"），稍後會再試；紀錄仍存在這台裝置");
+      throw e;
+    }finally{
+      gistBusy=null;
+      if(gistAgain){ gistAgain=false; setTimeout(()=>gistSync().catch(()=>{}),1500); }
+    }
+  })();
+  return gistBusy;
+}
+// 每次存檔後 15 秒自動上傳（連續練習時合併成一次）
+function gistSchedule(){ try{ if(gistQuiet||!gistCfg||!gistCfg.token) return; gistDirty=true; clearTimeout(gistTimer); gistTimer=setTimeout(()=>gistSync().catch(()=>{}),15000); }catch(e){} }  // 載入初期（變數尚未宣告）時略過
+if(window.claude){ $("gistCard").classList.add("hidden"); }   // Claude 網頁版已有自己的雲端同步
+else {
+  gistNote();
+  setTimeout(()=>gistSync().catch(()=>{}),1500);                                      // 開啟時下載合併
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"){ if(Date.now()-gistLastPull>30000) gistSync().catch(()=>{}); }   // 切回 App 時
+    else if(gistDirty) gistSync().catch(()=>{});                                       // 離開 App 前先上傳
+  });
+  window.addEventListener("online",()=>gistSync().catch(()=>{}));
+}
+$("btnGistOn").onclick=async()=>{
+  const tok=$("gistTok").value.trim(); if(!tok){ toast("請先貼上權杖"); return; }
+  gistCfg={token:tok}; gistSaveCfg(); $("btnGistOn").disabled=true;
+  try{ await gistSync(); $("gistTok").value=""; toast("已連線，紀錄會自動同步"); }
+  catch(e){ const c=e&&e.code; if(c==="auth"||c==="perm"){ gistCfg=null; gistSaveCfg(); gistNote(c==="auth"?"⚠ 權杖無效，請確認是否完整貼上":"⚠ 權杖沒有 Gists 讀寫權限"); } }
+  finally{ $("btnGistOn").disabled=false; }
+};
+$("btnGistNow").onclick=async()=>{ try{ await gistSync(); toast("同步完成"); }catch(e){ toast("同步失敗，請看「雲端同步」的說明"); } };
+$("btnGistOff").onclick=()=>{ if(!confirm("要中斷這台裝置的雲端同步嗎？\n（只會刪除這台裝置上的權杖；學習紀錄與雲端資料都會保留）")) return;
+  gistCfg=null; gistSaveCfg(); clearTimeout(gistTimer); gistNote(); toast("已中斷這台裝置的同步"); };
+
 $("btnImport").onclick=()=>$("fImport").click();
 $("fImport").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const r=JSON.parse(await f.text()); if(!r||typeof r!=="object"||Array.isArray(r)||!["best","vocab","days","saved","savedSent","custom"].some(k=>k in r)) throw 0;
     try{ localStorage.setItem(LS_KEY+"_preimport",JSON.stringify(state)); }catch(e2){}
