@@ -160,6 +160,16 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .node.cur{background:linear-gradient(110deg,#2a5bd7,#3ea2e0 45%,#2a4fa8);color:#fff;font-weight:700}
 .node.cur .ni{background:#fff;color:#2a5bd7;box-shadow:0 0 0 6px rgba(255,255,255,.25)}
 .node.done .ni{background:var(--ok-soft);color:var(--ok)}
+/* 課程狀態：完成＝深綠、練習過未全對＝淡藍、下一課＝藍漸層（.cur）、未開始＝灰 */
+.node.done{background:#173326;color:#d3f2e0;box-shadow:0 6px 18px rgba(0,0,0,.35),inset 0 0 0 1.5px #2f6b4b}
+.node.done .ni{background:#0f4d2f;color:#4ade80}
+.node.part{background:#1c2a44;color:#dfe7ff;box-shadow:0 6px 18px rgba(0,0,0,.35),inset 0 0 0 1.5px #4c7dff}
+.node.part .ni{background:#16203a;color:#8fb0ff}
+.node .npg{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;font-weight:600;opacity:.9}
+.node .npg b{flex:1;height:5px;border-radius:9px;background:rgba(255,255,255,.14);overflow:hidden;max-width:130px}
+.node .npg b i{display:block;height:100%;border-radius:9px;background:#8fb0ff}
+.node.done .npg b i{background:#4ade80}
+.node.cur .npg b i{background:#fff}
 .node small{display:block;font-size:13px;opacity:.75;font-weight:400}
 .bubble{width:96px;height:96px;border-radius:50%;background:#1c1f26;box-shadow:inset 0 0 0 6px #262a33,0 6px 18px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:#fff;gap:2px;position:relative}
 .bubble .cardsI{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#f6a35b,#ef5a6f);display:flex;align-items:center;justify-content:center;transform:rotate(-8deg);box-shadow:6px 2px 0 #c46a52}
@@ -242,6 +252,14 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .opt{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:10px;padding:14px 16px;border-radius:16px;background:#262a33}
 .opt.on{outline:2px solid var(--pri2)}
 .opt small{display:block;color:var(--sub);font-size:13px}
+#selBar.atcard{top:var(--seltop);bottom:auto!important}
+@media (max-width:480px){
+  #selBar>.row{flex-wrap:wrap!important;gap:8px}
+  #selBar>.row>div:first-child{flex:1 1 100%}
+  #selBar>.row>.row{flex:1 1 100%}
+  #selBar>.row>.row>button{flex:1;padding-left:6px;padding-right:6px}
+  #selBar>.row>.row>#btnSelSave{flex:1.7}
+}
 .selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(540px,calc(100% - 24px));background:#1b1d23;border:1px solid var(--pri2);border-radius:20px;padding:12px 14px;z-index:35;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 /* ---- 收藏 ---- */
 .ph2{font-size:34px;font-weight:800;margin:14px 0}
@@ -271,6 +289,23 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .fc-word.ok,.fc-ex.ok{color:#5b8cff}
 .fc-ex .wd.live,.fc-word .wd.live{color:#5b8cff}
 .fc-icons{display:flex;gap:2px;flex-shrink:0}
+/* 整合單字卡：✕ 結束、⋯ 更多、底部與課程相同的 上一個／麥克風／下一個 */
+.circ.fclose{width:40px;height:40px}.circ.fclose svg{width:20px;height:20px}
+.fmore{font-size:24px;font-weight:800;line-height:1;letter-spacing:1px}
+.fctl{gap:22px;padding:4px 0 30px}
+.fctl .circ{width:62px;height:62px}.fctl .circ svg{width:28px;height:28px}
+.fctl .main{width:80px;height:80px}.fctl .main svg{width:38px;height:38px}
+.fctl .circ:disabled{opacity:.35}
+.fctl .lbl{bottom:-24px}
+.exmic{margin-top:0!important;padding:6px 10px!important}
+.exmic span{display:none}.exmic.rec span{display:inline}
+#fExBox .fc-box>.row>div:first-child{flex:1;min-width:0}
+.fexbtns{display:flex;flex-direction:column;gap:8px;align-items:center;flex-shrink:0}
+.fphon{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fphon .phx{min-height:30px;padding:2px 10px;font-size:13px;border-radius:14px;background:#262a33;color:#9fb4ff}
+#fPhonFull{margin-top:8px}
+.fsyn>summary{cursor:pointer;list-style:none}.fsyn>summary::after{content:" ▾"}.fsyn[open]>summary::after{content:" ▴"}
+.fsyn>summary::-webkit-details-marker{display:none}
 .ic{border:0;background:none;padding:8px;min-height:44px;min-width:44px;color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
 .ic svg{width:26px;height:26px;fill:currentColor}
 .ic svg.o{fill:none}
@@ -376,31 +411,32 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
     </div>
     <div class="card hidden" id="flash">
       <div class="row" style="justify-content:space-between">
-        <span class="tag" id="fTag"></span><span class="row" style="gap:8px"><button class="rateBtn" style="min-height:34px;padding:4px 12px;font-size:14px;border-radius:20px">語速 1x</button><span class="prog" id="fProg"></span></span>
+        <span class="row" style="gap:10px;flex-wrap:nowrap"><button class="circ fclose" id="btnFClose" aria-label="結束"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button><span class="tag" id="fTag"></span></span><span class="row" style="gap:8px"><button class="rateBtn" style="min-height:34px;padding:4px 12px;font-size:14px;border-radius:20px">語速 1x</button><span class="prog" id="fProg"></span></span>
       </div>
       <div class="fc-head">
         <div class="fc-word" id="fWord"></div>
         <div class="fc-icons">
           <button class="ic" id="btnFPlay" aria-label="發音"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-          <button class="ic" id="btnFCopy" aria-label="複製"><svg class="o" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h2"/></svg></button>
           <button class="ic" id="btnFSave" aria-label="收藏"><svg viewBox="0 0 24 24"><path id="saveShape" d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+          <button class="ic fmore" id="btnFMore" aria-label="更多">⋯</button>
         </div>
       </div>
-      <div class="vmicbar"><button class="vmic" id="btnFMic"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span>唸唸看</span></button><div class="vmicres" id="fMicRes"></div></div>
+      <div class="vmicbar hidden"><button class="vmic" id="btnFMicOld"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span>唸唸看</span></button></div>
       <div id="fPhon"></div>
+      <div class="vmicres" id="fMicRes"></div>
       <div class="fc-lab">翻譯</div>
       <div class="fc-zh" id="fZh"></div>
       <div id="fExpBox"><div class="fc-lab">單字解釋</div><div class="fc-exp" id="fExp"></div></div>
       <div id="fExBox">
         <div class="fc-lab">例句</div>
         <div class="fc-box"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;align-items:flex-start">
-          <div><div class="fc-ex" id="fEx"></div><div class="fc-exzh" id="fExZh"></div><button class="vmic sm" id="btnFExMic"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span>唸例句</span></button><div class="vmicres" id="fExMicRes"></div></div>
-          <button class="ic sm" id="btnFEx" aria-label="播放例句"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <div><div class="fc-ex" id="fEx"></div><div class="fc-exzh" id="fExZh"></div><div class="vmicres" id="fExMicRes"></div></div>
+          <div class="fexbtns"><button class="ic sm" id="btnFEx" aria-label="播放例句"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="vmic sm exmic" id="btnFExMic" aria-label="唸例句"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span>唸例句</span></button></div>
         </div></div>
       </div>
-      <div id="fSynBox"><div class="fc-lab">類似的字</div><div id="fSyn"></div></div>
+      <details id="fSynBox" class="fsyn"><summary class="fc-lab">類似的字</summary><div id="fSyn"></div></details>
       <div class="ratebar">
-        <div class="vnav"><button id="btnFEnd" class="vend">結束</button><button id="btnFPrev" class="vend"><svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align:-4px"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> 上一個</button><button id="btnFNext" class="pri vnext">下一個 <svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align:-4px"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="ctl fctl"><button class="circ" id="btnFPrev" aria-label="上一個"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl">上一個</span></button><button class="circ main" id="btnFMic" aria-label="唸唸看"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg><span class="lbl">唸唸看</span></button><button class="circ" id="btnFNext" aria-label="下一個"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl" id="fNextLbl">下一個</span></button></div>
         <div class="muted vnhint" id="fNextHint"></div>
       </div>
     </div>
@@ -504,7 +540,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
 <!-- 選字列 -->
 <div class="selbar hidden" id="selBar">
   <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
-    <div style="min-width:0"><span class="muted" style="font-size:13px">已選取</span><div id="selText" style="font-weight:700;font-size:18px;word-break:break-word"></div><div id="selZh" style="font-size:15px;color:#9fb4ff;margin-top:2px;word-break:break-word"></div></div>
+    <div style="min-width:0"><span class="muted" style="font-size:13px" id="selLab">已選取</span><div id="selText" style="font-weight:700;font-size:18px;word-break:break-word"></div><div id="selZh" style="font-size:15px;color:#9fb4ff;margin-top:2px;word-break:break-word"></div></div>
     <div class="row" style="flex-wrap:nowrap;gap:6px"><button id="btnSelSpeak">▶</button><button id="btnSelPhon">拆解</button><button id="btnSelClear">取消</button><button class="pri" id="btnSelSave">存入單字庫</button></div>
   </div>
   <div id="selForm" class="hidden">
@@ -3109,7 +3145,33 @@ function renderEnd(){
 let autoTimer=null;
 function clearTimers(){ clearTimeout(autoTimer); clearTimeout(cdTimer); clearTimeout(silTimer); clearTimeout(maxTimer); cdTimer=silTimer=maxTimer=null; $("btnNext").classList.remove("counting"); }
 function stopAll(){ tok++; clearTimers(); stopSpeech(); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } }
-function go(i,auto){
+// 使用者要求：練習中點單字先暫停（播放／收音／倒數），取消或點空白處再從原處繼續；改按其他按鈕則以該按鈕為準
+let hold=null;
+function holdFlow(){
+  if(hold||!document.body.classList.contains("lesson")) return;
+  const c=deck[ci]; if(!c||c.type!=="sent") return;
+  const counting=!!cdTimer&&(st==="pass"||st==="show"||st==="fail");
+  if(st!=="playing"&&st!=="listen"&&!counting) return;          // 本來就停著：不需要暫停
+  hold={prev:st,ci,counting};
+  stopAll(); st="paused"; render();
+  if(c._got&&c._got.size) liveMark(sentBox,c.s.en,"",c._got);   // 保留已唸對的藍字
+}
+function resumeFlow(){
+  const h=hold; hold=null;
+  if(!h||!document.body.classList.contains("lesson")||ci!==h.ci||st!=="paused") return;
+  const c=deck[ci]; if(!c) return;
+  if(h.prev==="playing"){ run(); return; }
+  if(h.prev==="listen"){
+    // iPhone 只能在點按當下開麥克風；不是點按觸發（例如存字後）就改為等使用者按麥克風
+    const gesture=!IS_SAFARI||!navigator.userActivation||navigator.userActivation.isActive;
+    if(dict&&gesture){ startListen(false); return; }
+    st="turn"; render(); if(c._got&&c._got.size) liveMark(sentBox,c.s.en,"",c._got);
+    const m=sentBox&&sentBox.querySelector(".msg"); if(m) m.innerHTML=`<span class="muted" style="font-size:13px">👆 點麥克風繼續（藍色的字會保留）</span>`;
+    return;
+  }
+  st=h.prev; render(); if(hfOn()) hfNext(1500); else countdown(1500);
+}
+function go(i,auto){ hold=null;
   if(safariResetDue(i)&&i!==ci){ stopAll(); micReset(i,"play","預防卡住，已自動重新整理"); return; }
   stopAll(); sel=null;
   ci=Math.max(0,Math.min(i,deck.length)); st="paused";
@@ -3243,10 +3305,10 @@ function mainBtn(){
   stopAll(); st="paused"; render();
 }
 function lessonClick(e){
-  const wd=e.target.closest(".wd"); if(wd&&deck[ci]&&deck[ci].type==="sent"){ if(st==="listen") return; pickWord(ci,+wd.dataset.k); return; }
+  const wd=e.target.closest(".wd"); if(wd&&deck[ci]&&deck[ci].type==="sent"){ if(st==="scoring") return; holdFlow(); pickWord(ci,+wd.dataset.k); return; }
   const ex=e.target.closest("[data-sayex]"); if(ex&&deck[ci]&&deck[ci].type==="word"){ clearTimers(); speak(deck[ci].v.ex,false); return; }
   const b=e.target.closest("[data-act]");
-  if(!b){ const c0=deck[ci]; if(IS_SAFARI&&dict&&!opt.nomic&&c0&&c0.type==="sent"&&(st==="turn"||st==="fail"||canMore(c0))&&!e.target.closest("button,a,[data-say],[data-sayex]")) startListen(false); return; }
+  if(!b){ const c0=deck[ci]; if(IS_SAFARI&&dict&&!opt.nomic&&c0&&c0.type==="sent"&&st!=="listen"&&(st==="turn"||st==="fail"||canMore(c0))&&!e.target.closest("button,a,[data-say],[data-sayex]")) startListen(false); return; }
   const a=b.dataset.act, c=deck[ci];
   if(a==="micreset"){ micReset(ci,"turn"); return; }
   if(a==="again") run();
@@ -3266,7 +3328,7 @@ function lessonClick(e){
   else if(a==="smartmore") startSmartReview();
   else if(a==="home"){ const mw=lesson.key==="mywords"||lesson.key==="smart"; closeLesson(); if(mw) show("vocab"); }
 }
-function closeLesson(){ document.body.classList.remove("smart","ending"); try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show("home"); }
+function closeLesson(){ hold=null; document.body.classList.remove("smart","ending"); try{ recStop(); if(recStream) recStream.getTracks().forEach(t=>t.stop()); recStream=null; }catch(e){} stopAll(); document.body.classList.remove("lesson"); show("home"); }
 
 // ===================== 選字存入「我的單字庫」 =====================
 let sel=null;
@@ -3275,21 +3337,39 @@ function selWords(){ if(!sel) return ""; const ws=queue[sel.i].en.split(/\s+/).s
   let t=ws.join(" "); if(sel.a===0 && /^[A-Z][a-z]/.test(t) && !/^I\b/.test(t)) t=t[0].toLowerCase()+t.slice(1); return t; }
 function paintSel(){
   if(sentBox) sentBox.querySelectorAll(".wd.sel").forEach(x=>x.classList.remove("sel"));
-  if(!sel){ $("selBar").classList.add("hidden"); return; }
+  if(!sel){ $("selBar").classList.add("hidden"); $("selBar").classList.remove("atcard"); return; }
   sentBox.querySelectorAll(`.sent[data-i="${sel.i}"] .wd`).forEach(x=>{ const k=+x.dataset.k; if(k>=sel.a&&k<=sel.b) x.classList.add("sel"); });
   $("selText").textContent=selWords(); $("selForm").classList.add("hidden"); $("selBar").classList.remove("hidden"); showGloss();
+  $("selLab").textContent=hold?"⏸ 已暫停・已選取":"已選取";
+  placeSel();
 }
+// 課程中：選字列放在練習卡片正下方 10px；下方空間不夠時退回畫面底部
+function placeSel(){
+  const bar=$("selBar"); if(!bar) return;
+  const card=document.body.classList.contains("lesson")&&$("pCard")&&$("pCard").querySelector(".lc");
+  if(!sel||!card){ bar.classList.remove("atcard"); return; }
+  // 不可擋住底部「上一句／主按鈕／下一句」；空間不夠時退回底部
+  const r=card.getBoundingClientRect(), top=r.bottom+10, hgt=bar.offsetHeight||90;
+  const ctl=document.querySelector("#lesson .ctl")||document.querySelector(".ctl"), lim=ctl&&ctl.offsetParent?ctl.getBoundingClientRect().top-8:window.innerHeight-12;
+  if(top+hgt<=lim){ bar.style.setProperty("--seltop",top+"px"); bar.classList.add("atcard"); }
+  else bar.classList.remove("atcard");
+}
+window.addEventListener("resize",()=>{ if(sel) placeSel(); });
+window.addEventListener("scroll",()=>{ if(sel) placeSel(); },{passive:true});
+if(window.ResizeObserver){ const ro=new ResizeObserver(()=>{ if(sel) placeSel(); }); ro.observe($("selBar")); ro.observe($("pCard")); }
 function pickWord(i,k){
   if(!sel||sel.i!==i) sel={i,a:k,b:k};
   else if(sel.a===sel.b && sel.a===k) sel=null;
   else if(k<sel.a) sel.a=k; else if(k>sel.b) sel.b=k; else sel={i,a:k,b:k};
   if(sel && sel.b-sel.a>5){ toast("一次最多選 6 個字"); sel.b=sel.a+5; }
   paintSel(); if(sel && !listening) speak(selWords(),false);
+  if(!sel) resumeFlow();
 }
-function clearSel(){ sel=null; paintSel(); }
+function clearSel(){ sel=null; paintSel(); resumeFlow(); }
 // 使用者要求：選字時點選字列以外的地方（空白處）就自動取消，不必按「取消」；點英文字仍可繼續選字
 document.addEventListener("click",e=>{ if(!sel) return; const t=e.target;
-  if(t.closest&&(t.closest("#selBar")||t.closest(".wd"))) return;
+  if(t.closest&&(t.closest("#selBar")||t.closest(".wd")||t.closest("#sheet")||t.closest("#mask")||t.closest("#wdView")||t.closest("#toast"))) return;
+  if(t.closest&&t.closest("button,a,[data-act]")) hold=null;   // 改按其他按鈕：以該按鈕的動作為準
   clearSel(); },true);
 // ===== 選字顯示中文：先查字庫（含字形還原），查不到再請 Claude 依句意翻譯（結果快取） =====
 let sampleFn=null, glossTok=0;
@@ -3392,17 +3472,26 @@ function vocabStatus(){
   const fresh=all.filter(v=>!vs[v.id]).slice(0,Math.max(0,VOCAB_DAILY-newToday));
   return {due, fresh, newToday, learned:all.filter(v=>vs[v.id]).length, mastered:all.filter(v=>vs[v.id]&&vs[v.id].b>=MASTER_BOX).length, total:all.length};
 }
-let vq=[], vpos=0, vRequeued=new Set(), vMode="daily";
-function startVocab(list,mode){ vOk.clear(); vSnap.clear();
+let vq=[], vpos=0, vRequeued=new Set(), vMode="daily", vFrom="vocab";
+// 整合單字卡：從單字列表點字，直接以該列表為牌組打開，停在點的那個字
+function openWordCard(id,ids){
+  const by=VBY(); let list=(ids&&ids.length?ids:[id]).map(x=>by[x]).filter(Boolean); let pos=list.findIndex(v=>v.id===id);
+  if(pos<0){ if(!by[id]) return; list=[by[id]]; pos=0; }
+  const from=!$("v-saved").classList.contains("hidden")?"saved":"vocab";
+  startVocab(list,"browse",pos); vFrom=from;
+}
+function openWordDetail(id){ openWordCard(id,[id]); }
+function startVocab(list,mode,pos){ vOk.clear(); vSnap.clear(); vFrom="vocab";
   if(!list){ const st=vocabStatus(); list=[...st.due.sort((a,b)=>state.vocab[a.id].d<state.vocab[b.id].d?-1:1), ...st.fresh]; mode="daily"; }
   if(!list.length){ toast("今天的單字都完成了！"); return; }
-  vq=list; vMode=mode; vpos=0; vRequeued=new Set();
+  vq=list; vMode=mode; vpos=Math.max(0,Math.min(pos||0,list.length-1)); vRequeued=new Set();
   show("vocab"); $("vocabHome").classList.add("hidden"); $("flash").classList.remove("hidden"); $("v-vocab").classList.add("studying"); document.body.classList.add("studying");
   timerOn=true; lastTick=Date.now(); renderFlash();
 }
 function endVocab(){ vmicReset();
   $("v-vocab").classList.remove("studying"); document.body.classList.remove("studying"); $("flash").classList.add("hidden"); $("vocabHome").classList.remove("hidden");
   if(timerOn){ timerOn=false; flushTime(); save(); } renderVocab();
+  if(vFrom==="saved"){ vFrom="vocab"; show("saved"); }
 }
 const ivLabel = n => n>=30 ? Math.round(n/30)+" 個月" : n+" 天";
 const SPK='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -3441,44 +3530,55 @@ async function vmicFinish(){
   m.res.className="vmicres "+(pass?"ok":"no");
   m.res.textContent=(pass?"✓ ":"💪 ")+praise(sc)+"（聽到："+said+"）";
   if(pass&&m.kind==="w"){ const v=m.v; if(v){ state.best["vw:"+v.id]=Math.max(state.best["vw:"+v.id]||0,sc); save(); } }
-  if(pass&&!m.wd){ const v=m.v; if(v){ vOk.add(v.id); const r=state.vocab[v.id]; vHint(v,r?r.b:0); } }
+  if(pass&&!m.wd){ const v=m.v; if(v){ const first=!vOk.has(v.id); vOk.add(v.id); if(vMode==="browse"&&first) rate(2,true); const r=state.vocab[v.id]; vHint(v,r?Math.max(0,r.b-(vMode==="browse"?1:0)):0); } }
 }
-function renderFlash(){
+function renderFlash(quiet){
   vmicReset(); ["fMicRes","fExMicRes"].forEach(i=>{ $(i).textContent=""; $(i).className="vmicres"; }); $("fWord").classList.remove("ok"); $("fEx").classList.remove("ok");
   const v=vq[vpos], r=state.vocab[v.id], x=VOCAB_EXT[v.id]||{exZh:v.exZh||"",exp:v.exp||"",syn:v.syn||[]};
-  $("fTag").textContent = vMode==="saved" ? "收藏複習" : r ? "複習" : (v.id.startsWith("c")?"新字・自訂":v.ph?"新片語":"新單字");
+  $("fTag").textContent = vMode==="browse" ? (isMine(v.id)?"我的單字":"查字庫") : vMode==="saved" ? "收藏複習" : r ? "複習" : (v.id.startsWith("c")?"新字・自訂":v.ph?"新片語":"新單字");
   $("fProg").textContent=(vpos+1)+" / "+vq.length;
-  $("fWord").textContent=v.w; $("fPhon").innerHTML=phonCompact(v.w); $("btnFPrev").disabled=vpos<=0;
+  $("fWord").textContent=v.w; $("btnFPrev").disabled=vpos<=0;
+  // 發音拆解預設收合：一行音節＋KK，按「拆解 ▾」才展開完整說明
+  $("fPhon").innerHTML=`<div class="fphon">${phonCompact(v.w)}<button class="phx" data-phx="1">拆解 ▾</button></div><div id="fPhonFull" class="hidden"></div>`;
   $("fZh").textContent=v.zh+(v.pos&&v.pos!=="自訂"?` (${v.pos})`:"");
   $("fExpBox").classList.toggle("hidden",!x.exp); $("fExp").textContent=x.exp||"";
   $("fExBox").classList.toggle("hidden",!v.ex); $("fEx").textContent=v.ex||""; $("fExZh").textContent=x.exZh||"";
   const syn=x.syn||[];
-  $("fSynBox").classList.toggle("hidden",!syn.length);
+  $("fSynBox").classList.toggle("hidden",!syn.length); $("fSynBox").open=false;
   $("fSyn").innerHTML=syn.map(s=>{ const on=synSaved(s.w); return `<div class="syn"><button class="ic sm synspk" data-say="${esc(s.w)}" aria-label="發音">${SPK}</button><div class="syntx" data-say="${esc(s.w)}"><b>${esc(s.w)}</b><span>${esc(s.zh)}</span></div><button class="ic sm synsv ${on?"on":""}" data-synsave="${esc(s.w)}" data-zh="${esc(s.zh)}" aria-label="儲存">${on?SV_ON:SV_ICON}</button></div>`; }).join("");
-  $("btnFSave").classList.toggle("on",isSaved(v.id)); $("saveShape").setAttribute("fill",isSaved(v.id)?"currentColor":"none");
+  $("btnFSave").classList.toggle("on",isMine(v.id)); $("saveShape").setAttribute("fill",isMine(v.id)?"currentColor":"none");
   const b=r?r.b:0;
   vHint(v,b);
-  $("btnFNext").innerHTML=(vpos<vq.length-1?"下一個":"完成")+' <svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align:-4px"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  window.scrollTo(0,0);
-  speak(v.w,false);
+  $("fNextLbl").textContent=vpos<vq.length-1?"下一個":"完成";
+  if(!quiet){ window.scrollTo(0,0); speak(v.w,false); }
+  // 自訂字缺解釋／例句：線上補查，查到後更新目前這張卡
+  const need=v.id.startsWith("c")&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine&&typeof onlineDetail==="function";
+  if(need){ const id=v.id; $("fNextHint").textContent="正在查詢解釋與例句…";
+    onlineDetail(v.w).then(d=>{ const c=state.custom.find(z=>z.id===id); if(c){ c._looked=true;
+      if(d){ if(d.exp) c.exp=d.exp; if(d.ex&&!c.ex){ c.ex=d.ex; c.exZh=d.exZh; } if(d.syn&&d.syn.length) c.syn=d.syn; if(d.pos&&(c.pos==="自訂"||!c.pos)) c.pos=d.pos; }
+      save(); }
+      if(vq[vpos]&&vq[vpos].id===id&&!vmic&&!$("flash").classList.contains("hidden")) renderFlash(true); }).catch(()=>{ const c=state.custom.find(z=>z.id===id); if(c) c._looked=true; });
+  }
 }
 // 本輪唸對過的字（唸唸看或唸例句 80 分以上）
 const vOk=new Set();
 function vHint(v,b){ const el=$("fNextHint"); if(!el) return;
   el.textContent= vOk.has(v.id) ? "✓ 已唸對，記為會了，"+ivLabel(INTERVALS[Math.min(b,INTERVALS.length-1)])+"後複習"
-    : "唸對記為會了；沒唸就按下一個，"+ivLabel(Math.max(1,Math.floor(INTERVALS[b]/2)))+"後複習"; }
+    : vMode==="browse" ? "按麥克風唸唸看，唸對自動記為會了"
+    : "唸對自動記為會了；沒唸就按下一個，"+ivLabel(Math.max(1,Math.floor(INTERVALS[b]/2)))+"後複習"; }
 const vSnap=new Map();
-function rate(g){
+function rate(g,stay){
   const v=vq[vpos], t=todayKey(), again=vSnap.has(v.id);
   if(again){ const o=vSnap.get(v.id); if(o) state.vocab[v.id]=o; else delete state.vocab[v.id]; }
   else vSnap.set(v.id,state.vocab[v.id]?{...state.vocab[v.id]}:null);
   const old=state.vocab[v.id];
-  if(!old&&!again) state.vnew[t]=(state.vnew[t]||0)+1;
+  if(!old&&!again&&vMode!=="browse") state.vnew[t]=(state.vnew[t]||0)+1;   // 瀏覽單字庫唸對不佔每日新字額度
   let b=old?old.b:0, d;
   if(g===0){ b=0; d=addDays(1); if(!vRequeued.has(v.id)){ vRequeued.add(v.id); vq.push(v); } }
   else if(g===1){ d=addDays(Math.max(1,Math.floor(INTERVALS[b]/2))); }
   else { d=addDays(INTERVALS[Math.min(b,INTERVALS.length-1)]); b=Math.min(INTERVALS.length-1,b+1); }
   state.vocab[v.id]={b,d,t:Date.now(),n:(old?.n||0)+1}; if(!again) day().n++; flushTime(); save();
+  if(stay) return;
   if(vpos<vq.length-1){ vpos++; renderFlash(); } else { toast(vMode==="saved"?"收藏複習完成！":"今天的單字完成！"); endVocab(); }
 }
 function renderVocab(){
@@ -3623,11 +3723,12 @@ function streak(){ let n=0; const d=new Date(); if(!(state.days[todayKey(d)]?.n)
 function weakList(filter){ return S.filter(s=>state.tries[s.id]&&!isPass(s)&&(!filter||filter(s))).sort((a,b)=>(state.best[a.id]||0)-(state.best[b.id]||0)); }
 function unitNodes(u,lv=state.level){
   const arts=ARTS.filter(a=>a.topic===u&&a.lv===lv);
-  const ns=arts.map((a,i)=>({key:a.id, type:"art", no:i+1, label:a.zhT, sub:a.enT, done:pctOf(a.sents)===100, open:()=>openLesson(lessonFromArt(a))}));
+  const ns=arts.map((a,i)=>{ const np=a.sents.filter(isPass).length, tried=a.sents.some(x=>state.tries[x.id]||state.best[x.id]!=null);
+    return {key:a.id, type:"art", no:i+1, label:a.zhT, sub:a.enT, done:pctOf(a.sents)===100, part:tried, np, nt:a.sents.length, open:()=>openLesson(lessonFromArt(a))}; });
   const weak=weakList(s=>s.topic===u&&s.lv===lv).length;
-  ns.push({key:"rv:"+u+lv, type:"review", label:"來複習囉", badge:weak, done:ns.every(n=>n.done)&&!weak, open:()=>openLesson(lessonReview(u))});
+  ns.push({key:"rv:"+u+lv, type:"review", label:"來複習囉", badge:weak, part:weak>0, done:ns.every(n=>n.done)&&!weak, open:()=>openLesson(lessonReview(u))});
   const ts=state.tests["ts:"+u+lv];
-  ns.push({key:"ts:"+u+lv, type:"test", label:"來實測囉", score:ts, done:(ts||0)>=80, open:()=>openLesson(lessonTest(u))});
+  ns.push({key:"ts:"+u+lv, type:"test", label:"來實測囉", score:ts, part:ts!=null, done:(ts||0)>=80, open:()=>openLesson(lessonTest(u))});
   return ns;
 }
 function allNodes(){ return UNITS.flatMap(u=>unitNodes(u)); }
@@ -3649,12 +3750,12 @@ function renderHome(){
                : `<div class="unit-sep">單元 ${ui+1}</div><div class="unit-sep2">${TOPICS[u].name}</div>`;
     h+=`<div class="path">`;
     ns.forEach((n,i)=>{
-      const cls=n.key===curKey?"cur":n.done?"done":"";
+      const cls=n.key===curKey?"cur":n.done?"done":n.part?"part":"";
       let ic= n.done&&n.key!==curKey ? CHECK : n.type==="art" ? `<span>${n.no}</span>` : n.type==="review" ? `<span>${n.badge||"↺"}</span>` : `<span>${n.score!=null?n.score:"✓"}</span>`;
       if(n.type==="test" && n.score==null && !(n.done&&n.key!==curKey)) ic=`<svg viewBox="0 0 24 24"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/></svg>`;
       const sub = n.type==="art" ? n.sub : n.type==="review" ? (n.badge?n.badge+" 句待加強":"再練一次") : (n.score!=null?"最佳："+praise(n.score):"整個單元測一次");
       const bubble = isCurUnit&&i===2 ? `<button class="bubble" data-vocab="1">${vleft?`<span class="badge">${vleft}</span>`:""}<span class="cardsI"><svg viewBox="0 0 24 24"><path d="M5 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2zM19 7v12h-1V7z"/></svg></span>今日單字</button>` : "";
-      h+=`<div class="nrow" style="padding-left:${offs[i%4]}%"><button class="node ${cls}" data-n="${n.key}"><span class="ni">${ic}</span><span>${esc(n.label)}<small>${esc(sub)}</small></span></button>${bubble}</div>`;
+      h+=`<div class="nrow" style="padding-left:${offs[i%4]}%"><button class="node ${cls}" data-n="${n.key}"><span class="ni">${ic}</span><span>${esc(n.label)}<small>${esc(sub)}</small>${n.type==="art"&&(n.part||n.done)?`<span class="npg"><b><i style="width:${Math.round(100*n.np/n.nt)}%"></i></b>${n.np}/${n.nt}</span>`:""}</span></button>${bubble}</div>`;
     });
     h+=`</div>`;
   });
@@ -3857,18 +3958,34 @@ $("btnFPlay").onclick=()=>speak(vq[vpos].w,false);
 $("btnFMic").onclick=()=>vocabMic("w");
 $("btnFExMic").onclick=()=>vocabMic("e");
 $("btnFEx").onclick=()=>speak(vq[vpos].ex,false);
-$("btnFCopy").onclick=async()=>{ const v=vq[vpos]; try{ await navigator.clipboard.writeText(v.w); toast("已複製「"+v.w+"」"); }catch(e){ toast("無法複製"); } };
-$("btnFSave").onclick=()=>{ const v=vq[vpos]; const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); renderFlash(); toast(on?"已加入收藏":"已取消收藏"); };
+$("btnFMore").onclick=()=>{ const v=vq[vpos]; if(!v) return;
+  openSheet(`<h2 style="word-break:break-word">${esc(v.w)}</h2><p class="muted" style="margin-top:-6px">${esc(v.zh)}</p>
+    <button class="opt" data-fm="copy"><b>複製單字</b></button>
+    <button class="opt" data-fm="phon"><b>完整發音拆解</b></button>
+    ${v.id.startsWith("c")?`<button class="opt" data-fm="del"><b style="color:var(--bad)">從我的單字庫刪除</b></button>`:""}`); };
+document.addEventListener("click",async e=>{ const b=e.target.closest("#sheet [data-fm]"); if(!b) return; const v=vq[vpos]; if(!v) return; const k=b.dataset.fm;
+  if(k==="copy"){ closeSheet(); try{ await navigator.clipboard.writeText(v.w); toast("已複製「"+v.w+"」"); }catch(err){ toast("無法複製"); } }
+  else if(k==="phon"){ phonSheet(v.w); }
+  else if(k==="del"){ if(!confirm("要從我的單字庫刪除「"+v.w+"」嗎？")) return; closeSheet(); delWord(v.id); toast("已刪除");
+    vq.splice(vpos,1); if(!vq.length){ endVocab(); return; } vpos=Math.min(vpos,vq.length-1); renderFlash(); } });
+$("fPhon").onclick=e=>{ const b=e.target.closest("[data-phx]"); if(!b) return; const v=vq[vpos], f=$("fPhonFull"); if(!v||!f) return;
+  const open=f.classList.toggle("hidden")===false; if(open&&!f.innerHTML) f.innerHTML=phonFull(v.w); b.textContent=open?"收合 ▴":"拆解 ▾"; };
+$("btnFSave").onclick=()=>{ const v=vq[vpos]; if(v.id.startsWith("c")){ toast("自訂字可按「⋯」刪除"); return; } const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); renderFlash(true); toast(on?"已加入收藏":"已取消收藏"); };
 $("fSyn").onclick=e=>{ const s=e.target.closest("[data-synsave]"); if(s){ toggleSynSave(s.dataset.synsave,s.dataset.zh); const on=synSaved(s.dataset.synsave); s.classList.toggle("on",on); s.innerHTML=on?SV_ON:SV_ICON; return; } const b=e.target.closest("[data-say]"); if(b) speak(b.dataset.say,false); };
-$("btnFEnd").onclick=endVocab;
+$("btnFClose").onclick=endVocab;
 // 使用者要求：背單字可以回上一個
 $("btnFPrev").onclick=()=>{ if(vpos<=0) return; vmicReset(); vpos--; renderFlash(); };
 // 使用者要求取消「不會／模糊／會了」：改為「下一個」，本張唸對就記為會了，否則記為模糊（照間隔再複習）
-$("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return; rate(vOk.has(v.id)?2:1);
+$("btnFNext").onclick=()=>{ const v=vq[vpos]; if(!v) return;
+  // 瀏覽單字庫：只換卡，不改變複習排程（唸對時已記為會了）
+  if(vMode==="browse"){ vmicReset(); if(vpos<vq.length-1){ vpos++; renderFlash(); } else endVocab(); return; }
+  rate(vOk.has(v.id)?2:1);
   // iPhone：背單字也每用麥克風 3 次就在換卡時自動重新整理，避免收音卡住；載入後自動繼續背剩下的字
-  if(SR_RESET_EVERY>0&&IS_SAFARI&&dict&&dict.kind==="web"&&SRD.st>=SR_RESET_EVERY&&!$("flash").classList.contains("hidden")&&vq[vpos]){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({vocab:1,msg:"預防卡住，已自動重新整理"})); }catch(e){} document.body.classList.add("resetting"); location.reload(); } };
+  if(SR_RESET_EVERY>0&&IS_SAFARI&&dict&&dict.kind==="web"&&SRD.st>=SR_RESET_EVERY&&vMode!=="browse"&&!$("flash").classList.contains("hidden")&&vq[vpos]){ try{ save(); sessionStorage.setItem("speak20_resume",JSON.stringify({vocab:1,msg:"預防卡住，已自動重新整理"})); }catch(e){} document.body.classList.add("resetting"); location.reload(); } };
 $("btnAddWord").onclick=addWord;
-const wordListClick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const i=m.dataset.more.indexOf("|"); svMore(m.dataset.more.slice(0,i),m.dataset.more.slice(i+1)); } };
+const wdOf=el=>el.dataset.wd.split("|").slice(1).join("|");
+function openFromList(d,box){ const ids=box?[...box.querySelectorAll("[data-wd]")].map(wdOf):[]; openWordCard(wdOf(d),ids); }
+const wordListClick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openFromList(d,e.currentTarget); return; } const m=e.target.closest("[data-more]"); if(m){ const i=m.dataset.more.indexOf("|"); svMore(m.dataset.more.slice(0,i),m.dataset.more.slice(i+1)); } };
 $("customList").onclick=wordListClick; $("searchList").onclick=wordListClick;
 $("mwChips").onclick=e=>{ const b=e.target.closest("[data-f]"); if(b){ mwFilter=b.dataset.f; renderVocab(); } };
 $("btnMwStart").onclick=()=>startSavedReview(mwFilter);
@@ -3897,7 +4014,7 @@ $("wdView").onclick=async e=>{
   else if(k==="practice"){ closeWordDetail(); startVocab([v],"saved"); }
 };
 $("svChips").onclick=e=>{ const b=e.target.closest("[data-f]"); if(b){ svFilter=b.dataset.f; renderSaved(); } };
-$("svList").onclick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openWordDetail(d.dataset.wd.split("|").slice(1).join("|")); return; } const m=e.target.closest("[data-more]"); if(m){ const [k,id]=m.dataset.more.split("|"); svMore(k,id); } };
+$("svList").onclick=e=>{ const s=e.target.closest("[data-say]"); if(s){ speak(s.dataset.say,false); return; } const d=e.target.closest("[data-wd]"); if(d){ openFromList(d,e.currentTarget); return; } const m=e.target.closest("[data-more]"); if(m){ const [k,id]=m.dataset.more.split("|"); svMore(k,id); } };
 $("btnSvSearch").onclick=()=>{ $("svQ").classList.toggle("hidden"); if(!$("svQ").classList.contains("hidden")) $("svQ").focus(); };
 $("svQ").oninput=renderSaved;
 $("btnSvStart").onclick=startSavedReview;
