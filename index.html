@@ -289,6 +289,23 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .fc-word.ok,.fc-ex.ok{color:#5b8cff}
 .fc-ex .wd.live,.fc-word .wd.live{color:#5b8cff}
 .fc-icons{display:flex;gap:2px;flex-shrink:0}
+/* 本句單字（句卡下方）與本課單字（結束卡） */
+.kwrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
+.kwc{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:3px 8px 3px 11px;border-radius:16px;background:#262a33;color:#dfe3ea;font-size:13px;border:1px solid #343946}
+.kwc b{font-weight:700}.kwc span{color:var(--sub)}
+.kwc svg{width:15px;height:15px;fill:currentColor;flex-shrink:0}
+.kwc.on{background:#1c2a44;border-color:#4c7dff;color:#cfe0ff}.kwc.on svg{color:#7ea0ff}
+.kwc.ph{border-style:dashed;border-color:#6b5aa8}.kwc.ph b{color:#d6ccff}.kwc.ph.on{border-style:solid;border-color:#8b6cf6;background:#261f3d}
+.kwe .ph{font-size:11px;color:#b9a8ff;border:1px solid #4b3f78;border-radius:8px;padding:0 5px;margin-left:6px;font-weight:600;vertical-align:1px}
+.kwend{margin:14px 0 6px;text-align:left;background:#1b1e25;border-radius:16px;padding:10px 12px}
+.kwend-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.kwend-h button{min-height:32px;padding:3px 12px;font-size:13px;border-radius:14px;background:#2a3150;color:#c9d4ff}
+.kwend-list{max-height:220px;overflow:auto}
+.kwe{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #262a33}
+.kwe .tx{flex:1;min-width:0}.kwe .tx b{display:block;font-size:15px}.kwe .tx span{display:block;font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kwe .spk{width:34px;height:34px;min-height:34px;padding:0;border-radius:50%;background:#262a33;display:inline-flex;align-items:center;justify-content:center}
+.kwe .spk svg{width:18px;height:18px;fill:currentColor}
+.kwe .ic.on{color:#7ea0ff}
 /* 整合單字卡：✕ 結束、⋯ 更多、底部與課程相同的 上一個／麥克風／下一個 */
 .circ.fclose{width:40px;height:40px}.circ.fclose svg{width:20px;height:20px}
 .fmore{font-size:24px;font-weight:800;line-height:1;letter-spacing:1px}
@@ -368,6 +385,69 @@ button.rec{background:var(--bad);color:#fff}
 .dlab{display:flex;gap:4px;font-size:11px;color:var(--sub)}
 .dlab span{flex:1;text-align:center}
 details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
+
+/* =====================================================================
+   設計規範（2026-11-20 使用者要求全面統一畫面、排版、字級；標準字級）
+   字級 6 級：頁標題 28／區塊標題 18／內文 16／輔助 14／小字 12／練習英文句 26
+   圓角：大卡片 20、練習卡 28、按鈕與輸入框 14、標籤 999；間距以 8 的倍數
+   顏色：藍＝主要／進行中、綠＝完成、淡藍＝練習過、紫＝片語、紅＝錄音、黃＝暫停
+   ===================================================================== */
+:root{--fs-h1:28px;--fs-h2:18px;--fs-b:16px;--fs-s:14px;--fs-xs:12px;--fs-en:26px;--r-lg:20px;--r-md:14px}
+body{font-size:var(--fs-b);-webkit-text-size-adjust:100%;letter-spacing:.1px}
+.ph2{font-size:var(--fs-h1);font-weight:800;margin:16px 0 16px;letter-spacing:-.3px;line-height:1.25}
+h2{font-size:var(--fs-h2)}
+.muted{font-size:var(--fs-s)}
+.card{border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+button{border-radius:var(--r-md)}
+button.big{font-size:17px;border-radius:var(--r-md);min-height:52px;padding:12px 16px}
+input,textarea,select{border-radius:var(--r-md)}
+.tag{font-size:var(--fs-xs);font-weight:600}
+.fold summary{font-size:var(--fs-h2);align-items:center}
+.fold summary>span{flex:1;min-width:0}
+.fold summary small{display:block;font-weight:500;font-size:var(--fs-xs);color:var(--sub);margin-top:2px}
+.toast{font-size:var(--fs-s);border-radius:var(--r-md)}
+/* 首頁：頂部一列（級別／今日分鐘／連續天數）、單元標題、課程按鈕統一寬度且英文一行 */
+.chip{min-height:46px;padding:8px 16px;font-size:var(--fs-b)}
+.chip svg{width:20px;height:20px}
+.toprow{display:flex;gap:8px;align-items:center}
+.unit-h{margin:20px 0 4px}.unit-h small{font-size:var(--fs-s)}.unit-h b{font-size:24px}
+.unit-sep{font-size:var(--fs-s);margin:32px 0 4px}.unit-sep2{font-size:20px}
+.node{width:74%;min-height:76px;font-size:17px;border-radius:20px 40px 40px 20px;padding:12px 16px;gap:12px}
+.node>span:last-child{flex:1;min-width:0}
+.node small{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .ni{width:46px;height:46px;font-size:17px}
+@media (max-width:420px){.node{width:74%;font-size:16px}.node .ni{width:44px!important;height:44px!important}}
+.bubble{width:88px;height:88px}
+.hero{border-radius:var(--r-lg);padding:16px}
+.hero .hstat{border-radius:var(--r-md)}.hero .hstat b{font-size:22px}.hero .hstat span{font-size:var(--fs-xs)}
+/* 課程播放器 */
+.lh b{font-size:var(--fs-h2)}
+body.lesson .segs{margin-top:30px}     /* 「無法說話？」標籤不再壓到進度條 */
+.nomicBtn .nmlab{font-size:var(--fs-xs)}
+.lc{border-radius:28px;padding:20px}
+.lc .en{font-size:var(--fs-en);line-height:1.32}
+.lc .en.long{font-size:22px}
+.lc .zh{font-size:17px;margin-top:10px}
+.lc .msg{font-size:13px}
+.lc-word{font-size:36px}
+.lc-wzh{font-size:17px}.lc-wzh .pos{color:var(--sub);font-weight:500;margin-right:6px}
+.lc-bot button{font-size:16px;border-radius:999px;padding:10px 20px}
+.st{font-size:15px;border-radius:999px;padding:6px 14px}
+/* 列表 */
+.svrow{padding:12px 0;gap:12px}
+.svrow .tx b{font-size:17px}.svrow .tx span{font-size:var(--fs-s)}
+.svrow .spk svg{width:26px;height:26px}
+/* 單字卡 */
+.fc-word{font-size:34px}
+.fc-lab{font-size:var(--fs-s)}
+.fc-zh{font-size:var(--fs-h2)}
+/* 我的：設定分組 */
+.setgrp{font-size:var(--fs-xs);color:var(--sub);font-weight:700;letter-spacing:.5px;padding:14px 0 2px;border-bottom:0}
+.setrow{font-size:var(--fs-b);min-height:52px}
+.setrow small{font-size:var(--fs-xs)!important;margin-top:2px;line-height:1.4}
+.me-big b{font-size:26px}
+/* iPhone 主畫面：底部選單避開底部橫條 */
+nav{bottom:max(14px,env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
@@ -377,7 +457,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
   <section id="v-home">
     <div class="top">
       <button class="chip" id="btnLevel"><span id="lvLabel">課程</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
-      <div class="chip" id="streakChip" title="連續練習天數"><svg viewBox="0 0 24 24"><path fill="#f59e0b" d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-3 1.5-4.5 2.5-6 .5 2 1.5 3 2.5 3 0-3-1-5 0-8z"/><path fill="#fb7185" d="M12 13c1.5 1.5 2.5 2.6 2.5 4a2.5 2.5 0 0 1-5 0c0-1.4 1-2.5 2.5-4z"/></svg><b id="streakN">0</b></div>
+      <div class="toprow"><div class="chip" id="minChip" title="今日練習分鐘"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="#7ea0ff" stroke-width="2.2"/><path d="M12 9v4l3 2M9 2h6" fill="none" stroke="#7ea0ff" stroke-width="2.2" stroke-linecap="round"/></svg><b id="minN">0</b><small style="font-size:12px;color:var(--sub);font-weight:500">分</small></div><div class="chip" id="streakChip" title="連續練習天數"><svg viewBox="0 0 24 24"><path fill="#f59e0b" d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-3 1.5-4.5 2.5-6 .5 2 1.5 3 2.5 3 0-3-1-5 0-8z"/><path fill="#fb7185" d="M12 13c1.5 1.5 2.5 2.6 2.5 4a2.5 2.5 0 0 1-5 0c0-1.4 1-2.5 2.5-4z"/></svg><b id="streakN">0</b></div></div>
     </div>
     <div class="bar" style="height:5px"><i id="lvBar"></i></div>
     <div class="hero" id="hero"></div>
@@ -407,7 +487,14 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
     <!-- 使用者要求：拿掉統計格與說明（畫面太雜），只保留開始按鈕；統計元素隱藏保留供程式更新 -->
     <div id="vocabHome" style="margin:0 0 14px">
       <div class="hidden"><b id="vNew"></b><b id="vDue"></b><b id="vLearned"></b><b id="vMastered"></b></div>
-      <button class="pri big" id="btnVocab">開始背單字</button>
+      <div class="hero vtoday">
+        <div class="muted" style="color:#b8bfcc">今日單字</div>
+        <div style="font-size:22px;font-weight:800;margin-top:2px" id="vtUnit">本單元</div>
+        <div class="muted" style="font-size:13px;margin-top:2px;color:#9aa6bd" id="vtLessons"></div>
+        <div class="hrow"><div class="hstat"><b id="vtMin">0</b><span>今日分鐘</span></div><div class="hstat"><b id="vtDone">0</b><span>今天已背</span></div><div class="hstat"><b id="vtLeft">0</b><span>待背單字</span></div></div>
+        <button class="pri big" id="btnVocab" style="width:100%">開始背單字</button>
+        <div class="muted" id="vPlanNote" style="font-size:13px;margin-top:8px;text-align:center"></div>
+      </div>
     </div>
     <div class="card hidden" id="flash">
       <div class="row" style="justify-content:space-between">
@@ -452,7 +539,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <div class="muted" style="font-size:15px;margin:4px 0 2px">最近的</div>
       <div id="customList"></div>
       <button class="pri big smartBtn" id="btnSmart" style="margin-top:10px">✨ 智慧複習</button>
-      <button class="big" id="btnMwStart" style="margin-top:8px">開始複習</button>
+      <button class="big hidden" id="btnMwStart" style="margin-top:8px">開始複習</button>
       <details id="addBox"><summary>手動新增</summary>
         <input id="nW" placeholder="英文單字或片語"><input id="nZh" placeholder="中文意思"><input id="nEx" placeholder="例句（可不填）">
         <button style="margin-top:8px" id="btnAddWord">新增</button>
@@ -519,10 +606,13 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <button class="pri big" id="btnWeak" style="margin-top:10px">複習弱點句子</button>
     </div>
     <div class="card setlist">
+      <div class="setrow setgrp">學習設定</div>
       <button class="setrow" id="btnMeLevel"><span>課程級別</span><b id="meLevel"></b><i>›</i></button>
+      <button class="setrow" id="btnVmin"><span>每日背單字時間<small class="muted" style="display:block">依時間自動安排本單元的新字與複習</small></span><b id="vminVal" style="color:#7ea0ff">20 分鐘</b></button>
+      <div class="setrow setgrp">聲音與收音</div>
       <div class="setrow"><span>發音語速</span><button class="rateBtn">語速 1x</button></div>
       <button class="setrow voiceBtn"><span>發音人聲</span><b>選擇</b><i>›</i></button>
-      <button class="setrow" id="btnSrx"><span>iPhone 收音模式<small class="muted" style="display:block;font-size:12px">連續：停頓 3.5 秒或按停止才評分；標準：一停頓就評分。收不到音時可換另一種試試</small></span><b id="srxVal">連續</b></button>
+      <button class="setrow" id="btnSrx"><span>iPhone 收音模式<small class="muted" style="display:block">連續：停頓或按停止才評分；標準：一停頓就評分</small></span><b id="srxVal">連續</b></button>
       <button class="setrow" id="btnMicTest"><span>麥克風收音測試</span><b>測試</b><i>›</i></button>
       <div class="hidden"><div id="levelSeg"></div><p id="levelDesc"></p></div>
     </div>
@@ -533,7 +623,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:14px;margin-top:10px}
       <p class="muted" style="margin-top:10px">學習紀錄自動存在這台裝置。換裝置時，先在舊裝置「匯出」，再到新裝置「匯入」。iPhone 的 Safari 分頁和主畫面 App 資料是分開的，第一次改用主畫面 App 時也要匯出、匯入一次。匯入會合併，不會刪除現有紀錄。</p>
       <div class="row" style="gap:8px"><button class="pri" id="btnExport">匯出學習進度（.json）</button><button id="btnImport">匯入還原紀錄</button><input type="file" id="fImport" accept=".json,application/json" class="hidden"></div>
     </details>
-    <details class="card fold" id="gistCard"><summary>雲端同步（GitHub）<small id="gistSum" style="display:block;font-weight:500;font-size:13px;color:var(--sub);margin-top:2px">尚未設定・紀錄只存在這台裝置</small></summary>
+    <details class="card fold" id="gistCard"><summary><span>雲端同步（GitHub）<small id="gistSum">尚未設定・紀錄只存在這台裝置</small></span></summary>
       <div id="gistOff">
         <p class="muted" style="margin-top:10px">電腦和手機各設定一次，之後開啟 App、練習後會自動同步並合併紀錄。權杖只存在這台裝置的瀏覽器，不會寫進程式，也不會隨「匯出」一起輸出。請勿在公用電腦設定。</p>
         <input id="gistTok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="貼上 GitHub 權杖（github_pat_ 開頭）">
@@ -2697,6 +2787,215 @@ const LIFE_ORDER = (()=>{ const by={}; LV.forEach(v=>(by[v.topic]=by[v.topic]||[
   while(more){ more=false; for(const k of ks){ if(by[k]&&by[k][i]){ out.push(by[k][i]); more=true; } } i++; } return out; })();
 const VOCAB_ORDER = (()=>{ const out=[]; let i=0,j=0; while(i<LIFE_ORDER.length||j<OLD_ORDER.length){ for(let k=0;k<7&&i<LIFE_ORDER.length;k++) out.push(LIFE_ORDER[i++]); for(let k=0;k<3&&j<OLD_ORDER.length;k++) out.push(OLD_ORDER[j++]); } return out; })();
 
+// ===== 課程片語（使用者要求：除了單字也要片語；先做中級，由 Claude 依課程句子撰寫）=====
+// 格式：課程id|片語|中文|句中寫法（片語變化形，例如 catching a cold；省略＝同片語）
+// 例句自動取該課第一個含此片語的句子；字庫已有的片語不重複加入
+const COURSE_PH_TXT=`
+d2-1|learn to play|學彈（樂器）|learning to play
+d2-1|at first|一開始；起初
+d2-1|a few|幾個；一些
+d2-1|forget about|忘掉；不再想
+d2-1|work stress|工作壓力
+d2-2|stay home|待在家|stayed home
+d2-2|say hello|打招呼；問候
+d2-2|take care|保重
+d2-2|get sick|生病
+d2-2|just what I need|正是我需要的
+d2-2|go to bed early|早點睡|went to bed early
+t2-1|report the problem|通報問題
+t2-1|fill out a form|填寫表格
+t2-1|the next morning|隔天早上
+t2-1|convenience store|便利商店
+t2-1|pay for|支付…的費用|paid for
+t2-1|carry-on bag|隨身行李
+t2-2|how to get to|怎麼去（某地）
+t2-2|go straight|直走
+t2-2|turn left|左轉
+t2-2|far from here|離這裡遠
+t2-2|on foot|步行
+t2-2|near the entrance|入口附近
+m2-1|blood pressure|血壓
+m2-1|after breakfast|早餐後
+m2-1|feel dizzy|頭暈
+m2-1|for a while|一會兒
+m2-1|at the same time|在同一時間
+m2-1|stop taking|停止服用（藥物）
+m2-2|wash your hands|洗手
+m2-2|tilt your head back|頭往後仰
+m2-2|lower eyelid|下眼瞼
+m2-2|eye drops|眼藥水
+m2-2|throw away|丟掉
+w2-1|quick update|簡短的最新進度報告
+w2-1|behind schedule|進度落後
+w2-1|key supplier|主要供應商
+w2-1|backup supplier|備用供應商
+w2-1|let me know|告訴我；讓我知道
+w2-2|make it to|趕得上；能出席
+w2-2|training course|訓練課程
+w2-2|move the meeting|會議改期（移到…）
+w2-2|updated agenda|更新後的議程
+w2-2|sorry for the inconvenience|造成不便很抱歉
+w2-2|book the room|預訂會議室
+f2-1|beef noodles|牛肉麵
+f2-1|to go|外帶|noodles to go
+f2-1|less spicy|少辣一點
+f2-1|have a seat|請坐
+f2-1|side dishes|小菜
+f2-1|dried tofu|豆干
+f2-1|separate bag|分開的袋子
+f2-2|exchange it for|把它換成…
+f2-2|larger size|大一號的尺寸
+f2-2|here it is|在這裡（給你）
+f2-2|get a refund|退款
+f2-2|try it on|試穿
+f2-2|make sure|確定；確認
+g2-1|train station|火車站
+g2-1|in a hurry|趕時間
+g2-1|fastest route|最快的路線
+g2-1|keep the change|不用找零
+g2-1|turn down|調低（音量、冷氣）
+g2-1|avoid the traffic|避開車潮
+g2-2|the traffic is terrible|交通很糟（塞車）
+g2-2|start the meeting without me|不用等我，會議先開始
+g2-2|as soon as|一…就…
+g2-2|parking space|停車位
+g2-2|meeting notes|會議紀錄
+g2-2|make everyone wait|讓大家久等|making everyone wait
+h2-1|are you free|你有空嗎
+h2-1|bring your family along|帶家人一起來
+h2-1|look forward to|期待|looking forward to
+h2-1|food allergies|食物過敏
+h2-1|grilled vegetables|烤蔬菜
+h2-1|free parking|免費停車
+h2-1|across the street|對街
+h2-2|do the dishes|洗碗
+h2-2|do the laundry|洗衣服|does the laundry
+h2-2|take out the trash|倒垃圾|takes out the trash
+h2-2|clean the house|打掃房子
+h2-2|help out|幫忙
+l2-1|catch a cold|感冒|catching a cold
+l2-1|runny nose|流鼻水
+l2-1|slight fever|微燒
+l2-1|get some rest|休息一下
+l2-1|sore throat|喉嚨痛
+l2-1|wear a mask|戴口罩
+l2-1|take a day off|請一天假
+l2-2|free time|空閒時間
+l2-2|take photos|拍照|taking photos
+l2-2|photography club|攝影社
+l2-2|give each other advice|互相給建議
+l2-2|camera lens|相機鏡頭
+l2-2|save money|存錢|saving money
+c2-1|book a haircut|預約剪頭髮
+c2-1|an opening|空檔（可預約的時段）
+c2-1|under the name|用…的名字（登記）
+c2-1|change the time|改時間
+c2-1|pay a deposit|付訂金
+c2-1|color my hair|染頭髮|coloring my hair
+c2-2|change my appointment|更改預約
+c2-2|something came up|臨時有事
+c2-2|work for you|對你方便嗎
+c2-2|text message|簡訊
+c2-2|check in|報到；辦理登記
+e2-1|hotter than|比…更熱
+e2-1|stay inside|待在室內
+e2-1|plenty of water|大量的水
+e2-1|can't wait for|迫不及待
+e2-1|turn on the fan|開電扇
+e2-1|save electricity|省電
+e2-1|hot day|大熱天
+e2-2|weather forecast|天氣預報
+e2-2|chance of rain|降雨機率
+e2-2|just in case|以防萬一
+e2-2|the temperature will drop|氣溫會下降
+e2-2|warm jacket|保暖外套
+e2-2|extra umbrella|多一把傘
+o2-1|get enough sleep|睡眠充足|getting enough sleep
+o2-1|if I were you|如果我是你
+o2-1|take a few days off|休幾天假
+o2-1|take care of yourself|照顧好自己
+o2-1|things will get better|事情會好轉
+o2-2|canceled because of|因…而取消
+o2-2|a little disappointed|有點失望
+o2-2|announce a new date|公布新日期
+o2-2|book a hotel|訂飯店|booked a hotel
+o2-2|without a fee|免手續費
+o2-2|short trip|短程旅行
+b2-1|log in to|登入
+b2-1|forgot my password|忘記密碼
+b2-1|stronger password|更安全的密碼
+b2-1|two-step verification|兩步驟驗證
+b2-1|in a safe place|在安全的地方
+b2-1|shop online|網路購物
+b2-2|cheapest way|最便宜的方式
+b2-2|sea mail|海運
+b2-2|air mail|航空郵件
+b2-2|birthday present|生日禮物
+b2-2|sent overseas|寄到國外
+b2-2|track the package|追蹤包裹
+f2-3|fresh bread|新鮮麵包
+f2-3|a loaf of|一條（麵包）
+f2-3|whole wheat bread|全麥麵包
+f2-3|less sugar|少糖
+f2-3|one of each|每種各一個
+f2-3|stay fresh|保持新鮮
+g2-3|round-trip ticket|來回票
+g2-3|buy tickets online|網路購票|buying tickets online
+g2-3|non-reserved seats|自由座
+g2-3|change my ticket|改票
+g2-3|later train|晚一點的班次
+g2-3|lunch box|便當
+g2-3|get on the train|上車
+h2-3|surprise birthday party|驚喜生日派對
+h2-3|keep it a secret|保密
+h2-3|hide behind the door|躲在門後
+h2-3|turn off the lights|關燈
+h2-3|walk in|走進來|walks in
+l2-3|go swimming|去游泳
+l2-3|twice a week|一週兩次
+l2-3|easy on my knees|對膝蓋負擔小
+l2-3|swimming cap|泳帽
+l2-3|less crowded|比較不擁擠
+l2-3|useful tips|實用的訣竅
+d2-3|my name is|我的名字是
+d2-3|for many years|好多年
+d2-3|nice to meet you|很高興認識你
+d2-3|where are you from|你來自哪裡
+d2-3|keep in touch|保持聯絡
+d2-3|in college|在讀大學
+t2-3|aisle seat|靠走道的座位
+t2-3|for free|免費
+t2-3|power bank|行動電源
+t2-3|checked luggage|托運行李
+t2-3|get through security|通過安檢
+t2-3|duty-free shops|免稅店
+m2-3|affected area|患部
+m2-3|a thin layer|薄薄一層
+m2-3|twice a day|一天兩次
+m2-3|broken skin|破皮的皮膚
+m2-3|stop using|停止使用
+m2-3|cool, dry place|陰涼乾燥處
+m2-3|out of reach of children|放在兒童拿不到的地方
+w2-3|take two days off|請兩天假
+w2-3|attend the ceremony|參加典禮
+w2-3|cover my shifts|幫我代班
+w2-3|urgent work|緊急的工作
+w2-3|while I'm away|我不在的時候
+w2-3|contact my deputy|聯絡我的代理人
+w2-3|back in the office|回到辦公室
+`;
+function addCoursePhrases(){
+  const seen=new Set(VOCAB_ORDER.map(v=>norm(v.w).join(" "))), ids=new Set();
+  for(const line of COURSE_PH_TXT.trim().split("\n")){
+    const [aid,w,zh,m]=line.split("|").map(x=>(x||"").trim()); const a=ARTS.find(x=>x.id===aid); if(!a||!w||!zh) continue;
+    const b=norm(w).join(" "), key=norm(m||w).join(" "); if(!b) continue;
+    if(seen.has(b)){ const ex=VOCAB_ORDER.find(v=>!v.cp&&norm(v.w).join(" ")===b); if(ex&&m&&!ex.m) ex.m=m; continue; }
+    const s=a.sents.find(s=>(" "+norm(s.en).join(" ")+" ").includes(" "+key+" ")); if(!s) continue;
+    const id="cp:"+b.replace(/[^a-z0-9]+/g,"-"); if(ids.has(id)) continue;
+    seen.add(b); ids.add(id);
+    VOCAB_ORDER.push({id,w,zh,pos:"片語",ph:true,m:m||"",ex:s.en,exZh:s.zh,topic:a.topic,cp:aid});
+  }
+}
 const LS_KEY = "speak20_state_v1";
 const passOf = s => LEVELS[(s.lv||2)-1].pass;
 const isPass = s => (state.best[s.id]||0) >= passOf(s);
@@ -2713,7 +3012,7 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
 // 資料防呆：任何版本的舊資料都保留，缺少的新欄位自動補預設值；絕不清空已儲存的單字與進度
 // 日後新增欄位：只要在 defState() 加上預設值即可，migrate() 會自動補到舊資料
 const STATE_SCHEMA = 2;
-function defState(){ return {v:1,schema:STATE_SCHEMA,updatedAt:0,level:2,days:{},best:{},tries:{},vocab:{},vnew:{},saved:{},savedSent:{},tests:{},custom:[],customDel:[]}; }
+function defState(){ return {v:1,schema:STATE_SCHEMA,updatedAt:0,level:2,days:{},best:{},tries:{},vocab:{},vnew:{},saved:{},savedSent:{},tests:{},custom:[],customDel:[],lessonLog:{}}; }
 function migrate(src){
   const d=defState();
   if(!src||typeof src!=="object"||Array.isArray(src)) return d;
@@ -2736,6 +3035,7 @@ function migrate(src){
   try{ localStorage.setItem(LS_KEY+"_corrupt_"+Date.now(),raw); }catch(e){}
   try{ const b=JSON.parse(localStorage.getItem(LS_KEY+"_bak")||"null"); if(b&&typeof b==="object") state=migrate(b); }catch(e){}
 })();
+state=migrate(state);   // 新裝置（尚無資料）也補齊所有欄位
 if(!(state.level>=1&&state.level<=4)) state.level=2;
 // 使用者要求跳過初級：一次性把初級改為中級（之後仍可手動切回）
 if(!state.skipBasic){ state.skipBasic=true; if(state.level===1) state.level=2; }
@@ -2770,6 +3070,7 @@ function mergeRemote(r){
   for(const [k,v] of Object.entries(r.tests||{})) state.tests[k]=Math.max(state.tests[k]||0,v);
   for(const key of ["saved","savedSent","vocab"]) for(const [k,v] of Object.entries(r[key]||{})) if(!state[key][k]||(v.t||0)>(state[key][k].t||0)) state[key][k]=v;
   for(const [k,v] of Object.entries(r.vnew||{})) state.vnew[k]=Math.max(state.vnew[k]||0,v);
+  for(const [k,v] of Object.entries(r.lessonLog||{})) if(!state.lessonLog[k]||v>state.lessonLog[k]) state.lessonLog[k]=v;
   const del=new Set([...(state.customDel||[]),...(r.customDel||[])]); state.customDel=[...del];
   const cs=new Map(); for(const c of [...(state.custom||[]),...(r.custom||[])]) if(!del.has(c.id)&&!cs.has(c.id)) cs.set(c.id,c);
   state.custom=[...cs.values()].sort((a,b)=>b.id<a.id?-1:1);
@@ -3006,6 +3307,7 @@ let st="paused", tok=0, cdTimer=null, silTimer=null, maxTimer=null, finalText=""
 let opt=Object.assign({slow:false, auto:false, zh:true}, state.opt||{});
 opt.auto=false; if(opt.flow===undefined) opt.flow=true; if(!state.optV2){ state.optV2=true; }  // 使用者要求：預設不自動前進，手動上一句／下一句
 let sess={};   // 本次每句最後得分
+addCoursePhrases();   // 需在 norm() 相關常數宣告後執行
 const KW = Object.keys(VOCAB_EXT).map(id=>{ const v=[...LV,...VW,...VP].find(x=>x.id===id); return v; }).filter(Boolean)
   .map(v=>({v, forms:(()=>{ const b=norm(v.w).join(" "); const f=[b]; if(!v.ph){ f.push(b+"s",b+"es",b+"ed",b+"d",b+"ing",b.replace(/e$/,"")+"ing"); if(/y$/.test(b)) f.push(b.replace(/y$/,"ies"),b.replace(/y$/,"ied")); } return f; })()}))
   .filter(k=>k.v.ph || k.v.w.length>=5).sort((a,b)=>b.v.w.length-a.v.w.length);
@@ -3014,6 +3316,32 @@ function keyWord(s, used){
   for(const k of KW){ if(used.has(k.v.id)) continue; if(k.forms.some(f=>t.includes(" "+f+" "))){ used.add(k.v.id); return k.v; } }
   return null;
 }
+// ===== 課程單字：找出句子裡字庫有的單字／片語（每句最多 4 個，片語優先） =====
+let ALLKW=null; const SW_CACHE=new Map();
+function allKw(){
+  if(ALLKW) return ALLKW; const seen=new Set();
+  ALLKW=VOCAB_ORDER.map(v=>{ const b=norm(v.w).join(" "); if(!b||seen.has(b)) return null; seen.add(b);
+      const ph=b.includes(" "), mm=v.m?norm(v.m).join(" "):"";
+      const f = v.cp&&mm ? [mm] : [b]; if(!v.cp&&mm&&mm!==b) f.push(mm);   // 課程片語有指定句中寫法時只比對該寫法（避免 to go with 誤判為外帶）
+      if(!ph){ f.push(b+"s",b+"es",b+"ed",b+"d",b+"ing",b.replace(/e$/,"")+"ing"); if(/y$/.test(b)) f.push(b.replace(/y$/,"ies"),b.replace(/y$/,"ied")); }
+      return {v,b,ph,forms:f}; })
+    .filter(k=>k&&(k.ph||(k.b.length>=4&&!STOPW.has(k.b)))).sort((a,b)=>b.b.length-a.b.length);
+  return ALLKW;
+}
+function sentWords(s){
+  if(!s||!s.en) return []; if(SW_CACHE.has(s.id)) return SW_CACHE.get(s.id);
+  const t=" "+norm(s.en).join(" ")+" ", out=[];
+  for(const k of allKw()){
+    if(out.length>=5) break;
+    const f=k.forms.find(f=>t.includes(" "+f+" ")); if(!f) continue;
+    if(!k.ph&&out.some(o=>o.ph&&(" "+o.b+" ").includes(" "+k.b+" "))) continue;   // 已被片語涵蓋
+    out.push({...k,at:t.indexOf(" "+f+" ")});
+  }
+  const r=out.sort((a,b)=>a.at-b.at).map(k=>k.v); SW_CACHE.set(s.id,r); return r;
+}
+function wordsOfSents(sents){ const m=new Map(); for(const s of sents) for(const v of sentWords(s)) if(!m.has(v.id)) m.set(v.id,v); return [...m.values()]; }
+const zhShort=z=>String(z||"").split(/[、，,;；/]/)[0].slice(0,8);
+function toggleSaveWord(id){ const on=!isSaved(id); state.saved[id]={on,t:Date.now()}; save(); return on; }
 function buildDeck(sents,{intro,words}){
   const d=[]; if(intro) d.push({type:"intro",...intro});
   const used=new Set();
@@ -3022,6 +3350,7 @@ function buildDeck(sents,{intro,words}){
 }
 function openLesson(L,startAt){
   lesson=L; sess={}; L._t0=L._t0||Date.now();
+  if(L.kind==="art"&&L.key){ state.lessonLog[L.key]=todayKey(); save(); }   // 記錄上課日期，供每日單字挑「最近上過」的課
   deck=buildDeck(L.sents,{intro:L.intro, words:L.words});
   queue=deck.map(c=>c.type==="sent"?c.s:{id:"_",en:c.type==="word"?c.v.w:"",lv:2});
   ci=0; show("practice"); document.body.classList.add("lesson"); document.body.classList.toggle("smart",!!L.smart); syncHF();
@@ -3077,10 +3406,10 @@ const isSavedSent = id => !!(state.savedSent[id]&&state.savedSent[id].on);
 const isSaved = id => !!(state.saved[id]&&state.saved[id].on);
 // 類似字儲存：字庫有的字存入收藏；沒有的就新增成自訂字（我的單字庫）
 function synFind(w){ const lw=w.toLowerCase(); return allVocab().find(v=>v.w.toLowerCase()===lw); }
-function synSaved(w){ const v=synFind(w); return !!v&&(v.id.startsWith("c")||isSaved(v.id)); }
+function synSaved(w){ const v=synFind(w); return !!v&&(isCustomId(v.id)||isSaved(v.id)); }
 function toggleSynSave(w,zh){
   const v=synFind(w), cur=vq[vpos];
-  if(v&&v.id.startsWith("c")){ delWord(v.id); toast("已從我的單字庫移除「"+w+"」"); }
+  if(v&&isCustomId(v.id)){ delWord(v.id); toast("已從我的單字庫移除「"+w+"」"); }
   else if(v){ const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); toast(on?"已存入我的單字庫「"+w+"」":"已移除「"+w+"」"); }
   else { state.custom.unshift({id:"c"+Date.now(),w,zh,ex:cur?cur.ex||"":"",exZh:"",pos:w.includes(" ")?"片語":"自訂",ph:w.includes(" ")}); save(); toast("已存入我的單字庫「"+w+"」"); }
 }
@@ -3093,6 +3422,8 @@ function statusHtml(){
   if(m&&st==="listen") return `<button class="st ${m[0]} stbtn" data-act="micstop">${m[1]}</button>`;
   return m?`<span class="st ${m[0]}">${m[1]}</span>`:"<span></span>";
 }
+function kwChip(v){ const on=isSaved(v.id); return `<button class="kwc ${on?"on":""} ${v.ph?"ph":""}" data-kw="${esc(v.id)}" aria-label="${on?"取消儲存":"儲存單字"}"><b>${esc(v.w)}</b><span>${esc(zhShort(v.zh))}</span>${on?SV_ON:SV_ICON}</button>`; }
+function kwRowHtml(s){ const ws=sentWords(s); return ws.length?`<div class="kwrow">${ws.map(kwChip).join("")}</div>`:""; }
 function render(){
   // 進度條（3 段）
   const frac=deck.length>1?Math.min(1,ci/(deck.length-1)):1;
@@ -3108,12 +3439,12 @@ function render(){
   } else if(c.type==="word"){
     const v=c.v, x=VOCAB_EXT[v.id]||{};
     h=`<div class="lc"><div class="lc-top"><span class="muted">重點${v.ph?"片語":"單字"}</span><span></span><button class="ic ${isSaved(v.id)?"on":""}" data-act="saveword" aria-label="收藏">${isSaved(v.id)?SV_ON:SV_ICON}</button></div>
-      <div class="lc-mid"><div class="lc-word">${esc(v.w)}</div>${phonCompact(v.w)}<div class="lc-pos">${esc(v.pos||"")}</div><div class="lc-wzh"><b>${esc(v.zh)}</b></div>${x.exp?`<div class="lc-pos" style="margin-top:8px;font-size:16px">${esc(x.exp)}</div>`:""}${v.ex?`<div class="lc-ex" data-sayex="1"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;align-items:flex-start;gap:10px"><div><b>${esc(v.ex)}</b><span>${esc(x.exZh||"")}</span></div><button class="exspk" aria-label="播放例句">${SPK}</button></div></div>`:""}</div>
+      <div class="lc-mid"><div class="lc-word">${esc(v.w)}</div>${phonCompact(v.w)}<div class="lc-wzh">${v.pos?`<span class="pos">${esc(v.pos)}</span>`:""}<b>${esc(v.zh)}</b></div>${x.exp?`<div class="lc-pos" style="margin-top:8px;font-size:16px">${esc(x.exp)}</div>`:""}${v.ex?`<div class="lc-ex" data-sayex="1"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;align-items:flex-start;gap:10px"><div><b>${esc(v.ex)}</b><span>${esc(x.exZh||"")}</span></div><button class="exspk" aria-label="播放例句">${SPK}</button></div></div>`:""}</div>
       <div class="lc-bot"><button data-act="sayword">${ICON.again.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 再聽一次</button></div></div>`;
   } else {
     const s=c.s;
     h=`<div class="lc sent ${st==="listen"?"listen":""} ${st==="pass"&&!sess["self:"+s.id]?"passed":""} ${st==="pass"&&(sess[s.id]??0)>=100&&!sess["self:"+s.id]?"perfect":""}" data-i="${ci}"><div class="lc-top"><span class="muted" style="min-width:40px;text-align:left">${deckSentNo()}</span>${statusHtml()}<button class="ic ${isSavedSent(s.id)?"on":""}" data-act="savesent" aria-label="收藏句子">${isSavedSent(s.id)?SV_ON:SV_ICON}</button></div>
-      <div class="lc-mid"><div class="en${s.en.split(/\s+/).length<=3?" short":""}">${wordsHtml(s.en, lesson.cloze&&dict&&!opt.nomic&&st!=="pass"&&st!=="self"&&st!=="quiet"?clozeIdx(s.en):null)}</div>${opt.zh?`<div class="zh">${esc(s.zh)}</div>`:""}<div class="heard"></div><div class="msg">${st==="self"?`<span class="muted" style="font-size:13px">${NOMIC_MSG}</span>`:st==="turn"&&!micEver?`<span class="muted" style="font-size:13px">按下方藍色麥克風開始說；第一次會詢問是否允許使用麥克風，請按允許。</span>`:""}</div></div>
+      <div class="lc-mid"><div class="en${s.en.split(/\s+/).length<=3?" short":s.en.split(/\s+/).length>=13?" long":""}">${wordsHtml(s.en, lesson.cloze&&dict&&!opt.nomic&&st!=="pass"&&st!=="self"&&st!=="quiet"?clozeIdx(s.en):null)}</div>${opt.zh?`<div class="zh">${esc(s.zh)}</div>`:""}${!lesson.cloze&&lesson.kind!=="mywords"?kwRowHtml(s):""}<div class="heard"></div><div class="msg">${st==="self"?`<span class="muted" style="font-size:13px">${NOMIC_MSG}</span>`:st==="turn"&&!micEver?`<span class="muted" style="font-size:13px">按下方麥克風開始說</span>`:""}</div></div>
       ${(st==="pass"||st==="fail")&&!sess["self:"+s.id]?`<div class="lc-aud"><button data-act="model">${SPK} 例子</button><button data-act="mine"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/><path d="M18 5a6 6 0 0 1 0 8M20.5 2.5a9.5 9.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> 您唸的</button></div>`:""}
       <div class="lc-bot">${st==="quiet"?`<button class="pri" data-act="selfok">✓ 通過</button>`:""}${st==="self"?`<button class="pri" data-act="trymic">${MIC.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 口說練習</button>`:""}<button data-act="again">${ICON.again.replace("<svg","<svg width='18' height='18' style='vertical-align:-3px;fill:currentColor'")} 再來一次</button></div></div>`;
   }
@@ -3128,6 +3459,13 @@ function render(){
   if(sel) paintSel();
 }
 function deckSentNo(){ const all=deck.filter(c=>c.type==="sent"); const n=deck.slice(0,ci+1).filter(c=>c.type==="sent").length; return n+" / "+all.length; }
+function kwEndRow(v){ const on=isSaved(v.id); return `<div class="kwe"><button class="spk" data-say="${esc(v.w)}" aria-label="播放">${SPK}</button><div class="tx"><b>${esc(v.w)}${v.ph?'<em class="ph">片語</em>':""}</b><span>${esc(v.zh)}</span></div><button class="ic sm ${on?"on":""}" data-kw="${esc(v.id)}" aria-label="${on?"取消儲存":"儲存"}">${on?SV_ON:SV_ICON}</button></div>`; }
+function kwEndHtml(sents){
+  if(lesson.cloze||lesson.kind==="mywords"){ lesson._kw=[]; return ""; }
+  const ws=wordsOfSents(sents).slice(0,24); lesson._kw=ws; if(!ws.length) return "";
+  return `<div class="kwend"><div class="kwend-h"><b>本課單字（${ws.length}）</b><button data-kwall="1" id="kwAllBtn"></button></div><div class="kwend-list">${ws.map(kwEndRow).join("")}</div></div>`;
+}
+function updKwAll(){ const b=$("kwAllBtn"); if(!b) return; const ws=lesson._kw||[]; const off=ws.filter(v=>!isSaved(v.id)).length; b.textContent=off?`全部存入（${off}）`:"全部取消"; }
 function renderEnd(){
   const sents=deck.filter(c=>c.type==="sent").map(c=>c.s);
   const ok=sents.filter(s=>(sess[s.id]??-1)>=passOf(s)||(lesson.kind!=="test"&&isPass(s))).length;
@@ -3148,11 +3486,13 @@ function renderEnd(){
       <div class="ecard"><div><b>${mins}</b><span>學習分鐘數</span></div><i style="background:#2fc49a">🕒</i></div>
       <div class="ecard"><div><b>${perfect} / ${sents.length}</b><span>完美的句子（全部變綠）</span></div><i style="background:#3d5afe">✓</i></div>
     </div>
+    ${kwEndHtml(sents)}
     <button class="pri big" data-act="${next&&!toVocab?"next":lesson.key==="smart"?"smartmore":"home"}">${next&&!toVocab?"繼續："+esc(next.label):lesson.key==="smart"?"再來一組智慧複習":"繼續"}</button>
     <div class="end-links">${ok<sents.length?`<button data-act="retry">重練沒唸好的句子（${sents.length-ok}）</button>`:""}<button data-act="home">${toVocab?"回單字頁":"回首頁"}</button></div>
   </div>`;
   $("btnMain").innerHTML=ICON.again; $("btnMain").classList.remove("rec");
   [...$("segs").children].forEach(seg=>seg.firstChild.style.width="100%");
+  updKwAll();
 }
 let autoTimer=null;
 function clearTimers(){ clearTimeout(autoTimer); clearTimeout(cdTimer); clearTimeout(silTimer); clearTimeout(maxTimer); cdTimer=silTimer=maxTimer=null; $("btnNext").classList.remove("counting"); }
@@ -3317,7 +3657,18 @@ function mainBtn(){
   stopAll(); st="paused"; render();
 }
 function lessonClick(e){
+  // 本句單字／本課單字：點一下儲存，再點一下取消
+  const kw=e.target.closest("[data-kw]");
+  if(kw){ const v=VBY()[kw.dataset.kw]; if(!v) return; const on=toggleSaveWord(v.id);
+    document.querySelectorAll(`#pCard [data-kw="${CSS.escape(v.id)}"]`).forEach(el=>{ el.outerHTML=el.classList.contains("kwc")?kwChip(v):kwEndRow(v); });
+    if(!on) toast("已取消儲存「"+v.w+"」"); else toast("已存入單字：「"+v.w+"」"); updKwAll(); return; }
+  const kwa=e.target.closest("[data-kwall]");
+  if(kwa){ const ws=lesson._kw||[]; const off=ws.filter(v=>!isSaved(v.id)); const t=Date.now();
+    if(off.length){ off.forEach(v=>state.saved[v.id]={on:true,t}); toast("已存入 "+off.length+" 個單字"); }
+    else { ws.forEach(v=>state.saved[v.id]={on:false,t}); toast("已全部取消儲存"); }
+    save(); const box=$("pCard").querySelector(".kwend-list"); if(box) box.innerHTML=ws.map(kwEndRow).join(""); updKwAll(); return; }
   const wd=e.target.closest(".wd"); if(wd&&deck[ci]&&deck[ci].type==="sent"){ if(st==="scoring") return; holdFlow(); pickWord(ci,+wd.dataset.k); return; }
+  const sy=e.target.closest("#pCard .kwe [data-say]"); if(sy){ speak(sy.dataset.say,false); return; }
   const ex=e.target.closest("[data-sayex]"); if(ex&&deck[ci]&&deck[ci].type==="word"){ clearTimers(); speak(deck[ci].v.ex,false); return; }
   const b=e.target.closest("[data-act]");
   if(!b){ const c0=deck[ci]; if(IS_SAFARI&&dict&&!opt.nomic&&c0&&c0.type==="sent"&&st!=="listen"&&(st==="turn"||st==="fail"||canMore(c0))&&!e.target.closest("button,a,[data-say],[data-sayex]")) startListen(false); return; }
@@ -3455,7 +3806,7 @@ async function openSelForm(){
   if(/^查詢/.test($("selZh").textContent||"")&&glossP){ toast("查詢中文中，請稍候…"); try{ await glossP; }catch(e){} if(selWords()!==w) return; }
   const hit=localEntry(w);
   if(hit){
-    if(hit.id.startsWith("c")){ toast("「"+hit.w+"」已在我的單字庫"); clearSel(); return; }
+    if(isCustomId(hit.id)){ toast("「"+hit.w+"」已在我的單字庫"); clearSel(); return; }
     state.saved[hit.id]={on:true,t:Date.now()}; save(); toast("已存入我的單字庫：「"+hit.w+"」"+hit.zh); clearSel(); return;
   }
   // 使用者反映：已顯示中文還要自己輸入 → 有中文就直接存入，查不到中文才開輸入框
@@ -3477,13 +3828,43 @@ const VOCAB_DAILY = 20, INTERVALS = [1,3,7,14,30,60], MASTER_BOX = 4;
 function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return todayKey(d); }
 function allVocab(){ return [...state.custom.filter(c=>!state.customDel.includes(c.id)), ...VOCAB_ORDER]; }
 const VBY = () => Object.fromEntries(allVocab().map(v=>[v.id,v]));
-function vocabStatus(){
-  const t=todayKey(), all=allVocab(), vs=state.vocab;
-  const due=all.filter(v=>vs[v.id] && vs[v.id].d<=t);
-  const newToday=state.vnew[t]||0;
-  const fresh=all.filter(v=>!vs[v.id]).slice(0,Math.max(0,VOCAB_DAILY-newToday));
-  return {due, fresh, newToday, learned:all.filter(v=>vs[v.id]).length, mastered:all.filter(v=>vs[v.id]&&vs[v.id].b>=MASTER_BOX).length, total:all.length};
+// 使用者要求：每日單字跟著課程走，總時間約 opt.vmin 分鐘（預設 20）
+// 新字約 60 秒／張、複習約 25 秒／張；先排到期複習，再依序補：收藏的字 → 本單元（整個單元所有課，打散）→ 下一單元 → 最近 3 天上過的課 → 生活常用字
+const SEC_NEW=60, SEC_REV=25;
+let vSrcMap=new Map(), vSrcSess=new Map();
+// 使用者要求：從「整個單元」（目前級別、該單元所有課）挑單字與片語，並打散順序，複習才不單調
+function seededShuffle(arr,seedStr){ let h=1779033703^seedStr.length; for(let i=0;i<seedStr.length;i++){ h=Math.imul(h^seedStr.charCodeAt(i),3432918353); h=h<<13|h>>>19; }
+  const rnd=()=>{ h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); return ((h^=h>>>16)>>>0)/4294967296; };
+  const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function unitPools(){
+  const all=allNodes(), cur=all.find(n=>n.type==="art"&&!n.done); const a0=cur&&ARTS.find(x=>x.id===cur.key);
+  const ui=a0?UNITS.indexOf(a0.topic):0, out=[];
+  for(let k=0;k<2&&ui+k<UNITS.length;k++){ const u=UNITS[ui+k]; const arts=ARTS.filter(a=>a.topic===u&&a.lv===state.level);
+    out.push({label:(k?"下一單元・":"本單元・")+TOPICS[u].name, name:TOPICS[u].name, lessons:arts.map(a=>a.zhT), words:seededShuffle(wordsOfSents(arts.flatMap(a=>a.sents)),todayKey()+u)}); }
+  return out;
 }
+function upcomingArts(){ const out=[]; for(const n of allNodes()){ if(n.type!=="art"||n.done) continue; const a=ARTS.find(x=>x.id===n.key); if(a) out.push(a); if(out.length>=6) break; } return out; }
+function recentArts(days=3){ const lim=addDays(-days); return Object.entries(state.lessonLog||{}).filter(([k,d])=>d>=lim).sort((a,b)=>a[1]<b[1]?1:-1).map(([k])=>ARTS.find(x=>x.id===k)).filter(Boolean); }
+function vocabStatus(extraSec=0){
+  const t=todayKey(), all=allVocab(), vs=state.vocab, budget=(opt.vmin||20)*60+extraSec;
+  const newToday=state.vnew[t]||0;
+  const doneToday=Object.values(vs).filter(r=>r&&r.t&&todayKey(new Date(r.t))===t).length;
+  let left=budget-newToday*SEC_NEW-Math.max(0,doneToday-newToday)*SEC_REV;
+  const dueAll=all.filter(v=>vs[v.id]&&vs[v.id].d<=t).sort((a,b)=>vs[a.id].d<vs[b.id].d?-1:1);
+  const due=[]; for(const v of dueAll){ if(left<SEC_REV) break; due.push(v); left-=SEC_REV; }
+  const src=new Map(), fresh=[], by=VBY();
+  const add=(v,lab)=>{ if(!v||vs[v.id]||src.has(v.id)||left<SEC_NEW) return; src.set(v.id,lab); fresh.push(v); left-=SEC_NEW; };
+  favWordIds().forEach(id=>add(by[id],"收藏"));
+  const pools=unitPools(); pools.forEach(p=>p.words.forEach(v=>add(by[v.id]||v,p.label)));
+  recentArts().forEach(a=>wordsOfSents(a.sents).forEach(v=>add(by[v.id]||v,"最近上過・"+a.zhT)));
+  for(const v of all){ if(left<SEC_NEW) break; add(v,"生活常用字"); }
+  vSrcMap=src;
+  const mins=Math.round((due.length*SEC_REV+fresh.length*SEC_NEW)/60);
+  const cnt=lab=>[...src.values()].filter(x=>x===lab).length;
+  const unit=pools.find(p=>cnt(p.label)>0)||pools[0]||null;
+  return {due, fresh, newToday, mins, done:doneToday, unit, learned:all.filter(v=>vs[v.id]).length, mastered:all.filter(v=>vs[v.id]&&vs[v.id].b>=MASTER_BOX).length, total:all.length};
+}
+function favWordIds(){ const del=new Set(state.customDel||[]); return [...Object.entries(state.saved||{}).filter(([k,v])=>v&&v.on).sort((a,b)=>(b[1].t||0)-(a[1].t||0)).map(([k])=>k), ...state.custom.filter(c=>!del.has(c.id)).map(c=>c.id)]; }
 let vq=[], vpos=0, vRequeued=new Set(), vMode="daily", vFrom="vocab";
 // 整合單字卡：從單字列表點字，直接以該列表為牌組打開，停在點的那個字
 function openWordCard(id,ids){
@@ -3494,7 +3875,14 @@ function openWordCard(id,ids){
 }
 function openWordDetail(id){ openWordCard(id,[id]); }
 function startVocab(list,mode,pos){ vOk.clear(); vSnap.clear(); vFrom="vocab";
-  if(!list){ const st=vocabStatus(); list=[...st.due.sort((a,b)=>state.vocab[a.id].d<state.vocab[b.id].d?-1:1), ...st.fresh]; mode="daily"; }
+  if(!list){
+    let st=vocabStatus();
+    // 使用者要求：隨時都可以點。今天的量背完後，再安排一組約 10 分鐘
+    if(!st.due.length&&!st.fresh.length) st=vocabStatus(600);
+    list=seededShuffle([...st.due, ...st.fresh],"mix"+todayKey()+":"+(st.done||0));
+    // 本單元與其他字都背過了：改複習本單元最久沒複習的字
+    if(!list.length){ const vs=state.vocab, by=VBY(); list=unitPools().flatMap(p=>p.words).map(v=>by[v.id]||v).filter(v=>vs[v.id]).sort((a,b)=>vs[a.id].d<vs[b.id].d?-1:1).slice(0,15); }
+    mode="daily"; vSrcSess=new Map(vSrcMap); }   // 新字與複習字交錯出現
   if(!list.length){ toast("今天的單字都完成了！"); return; }
   vq=list; vMode=mode; vpos=Math.max(0,Math.min(pos||0,list.length-1)); vRequeued=new Set();
   show("vocab"); $("vocabHome").classList.add("hidden"); $("flash").classList.remove("hidden"); $("v-vocab").classList.add("studying"); document.body.classList.add("studying");
@@ -3547,7 +3935,7 @@ async function vmicFinish(){
 function renderFlash(quiet){
   vmicReset(); ["fMicRes","fExMicRes"].forEach(i=>{ $(i).textContent=""; $(i).className="vmicres"; }); $("fWord").classList.remove("ok"); $("fEx").classList.remove("ok");
   const v=vq[vpos], r=state.vocab[v.id], x=VOCAB_EXT[v.id]||{exZh:v.exZh||"",exp:v.exp||"",syn:v.syn||[]};
-  $("fTag").textContent = vMode==="browse" ? (isMine(v.id)?"我的單字":"查字庫") : vMode==="saved" ? "收藏複習" : r ? "複習" : (v.id.startsWith("c")?"新字・自訂":v.ph?"新片語":"新單字");
+  $("fTag").textContent = vMode==="browse" ? (isMine(v.id)?"我的單字":"查字庫") : vMode==="saved" ? "收藏複習" : r ? "複習" : (vMode==="daily"&&vSrcSess.get(v.id)?"新字・"+vSrcSess.get(v.id):isCustomId(v.id)?"新字・自訂":v.ph?"新片語":"新單字");
   $("fProg").textContent=(vpos+1)+" / "+vq.length;
   $("fWord").textContent=v.w; $("btnFPrev").disabled=vpos<=0;
   // 發音拆解預設收合：一行音節＋KK，按「拆解 ▾」才展開完整說明
@@ -3564,7 +3952,7 @@ function renderFlash(quiet){
   $("fNextLbl").textContent=vpos<vq.length-1?"下一個":"完成";
   if(!quiet){ window.scrollTo(0,0); speak(v.w,false); }
   // 自訂字缺解釋／例句：線上補查，查到後更新目前這張卡
-  const need=v.id.startsWith("c")&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine&&typeof onlineDetail==="function";
+  const need=isCustomId(v.id)&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine&&typeof onlineDetail==="function";
   if(need){ const id=v.id; $("fNextHint").textContent="正在查詢解釋與例句…";
     onlineDetail(v.w).then(d=>{ const c=state.custom.find(z=>z.id===id); if(c){ c._looked=true;
       if(d){ if(d.exp) c.exp=d.exp; if(d.ex&&!c.ex){ c.ex=d.ex; c.exZh=d.exZh; } if(d.syn&&d.syn.length) c.syn=d.syn; if(d.pos&&(c.pos==="自訂"||!c.pos)) c.pos=d.pos; }
@@ -3598,16 +3986,23 @@ function renderVocab(){
   $("vNew").textContent=st.newToday+" / "+VOCAB_DAILY; $("vDue").textContent=st.due.length;
   $("vLearned").textContent=st.learned+" / "+st.total; $("vMastered").textContent=st.mastered;
   const left=st.due.length+st.fresh.length;
-  $("btnVocab").disabled=!left; $("btnVocab").textContent=`開始背單字（${left} 張）`;
-  // 使用者要求：今天的單字都完成時，不顯示這個按鈕
-  $("vocabHome").style.display= left ? "" : "none";
+  // 今日單字卡：顯示整個單元（例如「飲食與購物」的所有課），不是單一課
+  $("vtUnit").textContent=st.unit?"本單元・"+st.unit.name:"今日單字";
+  $("vtLessons").textContent=st.unit?"範圍："+st.unit.lessons.join("、")+"（單字＋片語打散）":"";
+  $("vtMin").textContent=Math.floor((day().sec+(typeof pendingSec!=="undefined"?pendingSec:0))/60); $("vtDone").textContent=st.done; $("vtLeft").textContent=left;
+  // 使用者要求：按鈕隨時都可以點；今天的量完成後改為「再背一組」
+  $("btnVocab").disabled=false; $("btnVocab").classList.remove("hidden");
+  $("btnVocab").textContent= left ? `開始背單字・約 ${Math.max(1,st.mins)} 分鐘` : "再背一組・約 10 分鐘";
+  $("vPlanNote").textContent=left?`新字 ${st.fresh.length}・複習 ${st.due.length}・每日約 ${opt.vmin||20} 分鐘`:"✓ 今天的量完成了！想多練可以按「再背一組」，會繼續從本單元安排";
   const all=savedAll(), mw=all.filter(x=>x.kind!=="s"), ns=all.length-mw.length;
   const l=all.filter(x=> mwFilter==="w"?x.kind!=="s" : mwFilter==="s"?x.kind==="s" : mwFilter==="new"?!x.rev : mwFilter==="rev"?x.rev : true);
   $("customCount").textContent=`單字 ${mw.length}・句子 ${ns}`;
   [...$("mwChips").children].forEach(b=>b.classList.toggle("on",b.dataset.f===mwFilter));
   $("customList").innerHTML = l.length ? l.map(x=>wordRow(x.en,x.zh,x.kind+"|"+x.id)).join("")
     : `<p class="muted">${all.length?"這個分類目前沒有內容。":"還沒有收藏任何內容。課程中點選單字存入，或按句子右上角的書籤即可。"}</p>`;
-  $("btnSmart").disabled=!all.length; $("btnSmart").textContent= all.length ? `✨ 智慧複習（${Math.min(SMART_N,all.length)} 張）` : "✨ 智慧複習";
+  const fl={w:"單字",s:"句子",new:"新儲存",rev:"已複習"}[mwFilter];
+  $("btnSmart").disabled= mwFilter==="all" ? !all.length : !l.length;
+  $("btnSmart").textContent= mwFilter==="all" ? (all.length?`開始複習（${Math.min(SMART_N,all.length)} 個）`:"開始複習") : `複習「${fl}」（${l.length} 個）`;
   $("btnMwStart").disabled=!l.length; $("btnMwStart").textContent= l.length ? (mwFilter==="all"?`全部複習（${l.length} 個）`:`複習「${{w:"單字",s:"句子",new:"新儲存",rev:"已複習"}[mwFilter]}」（${l.length} 個）`) : "全部複習";
   renderSearch();
 }
@@ -3750,7 +4145,7 @@ const CHAT='<svg viewBox="0 0 24 24"><path d="M4 4h16v11H8l-4 4z"/></svg>';
 function renderHome(){
   const lv=state.level;
   $("lvLabel").textContent="課程・"+LEVELS[lv-1].n;
-  $("streakN").textContent=streak();
+  $("streakN").textContent=streak(); $("minN").textContent=Math.floor((day().sec+(typeof pendingSec!=="undefined"?pendingSec:0))/60);
   $("lvBar").style.width=levelPct(lv)+"%";
   const all=allNodes(); const curKey=(all.find(n=>!n.done)||{}).key;
   const vs=vocabStatus(), vleft=vs.due.length+vs.fresh.length;
@@ -3773,7 +4168,8 @@ function renderHome(){
   });
   $("path").innerHTML=h;
   const cn=all.find(n=>n.key===curKey);
-  $("hero").innerHTML=`<div class="muted" style="color:#b8bfcc">今日學習</div><div style="font-size:22px;font-weight:800;margin-top:2px">${cn?esc(cn.label):"本級課程都完成了！"}</div>
+  // 使用者要求：首頁不放「今日學習」方框（太雜），內容整合到「單字」頁的今日單字卡
+  $("hero").classList.add("hidden"); if(false) $("hero").innerHTML=`<div class="muted" style="color:#b8bfcc">今日學習</div><div style="font-size:22px;font-weight:800;margin-top:2px">${cn?esc(cn.label):"本級課程都完成了！"}</div>
     <div class="hrow"><div class="hstat"><b>${Math.floor((day().sec+pendingSec)/60)}</b><span>今日分鐘</span></div><div class="hstat"><b>${day().n}</b><span>練習次數</span></div><div class="hstat"><b>${vleft}</b><span>待背單字</span></div></div>
     <div class="row" style="flex-wrap:nowrap">${cn?`<button class="pri big" data-n="${cn.key}" style="flex:2">繼續學習</button>`:`<button class="pri big" data-lvup="1" style="flex:2">挑戰下一級</button>`}<button class="big" data-vocab="1" style="flex:1">背單字</button></div>`;
 }
@@ -3847,10 +4243,12 @@ function wdHtml(v,loading){
     <div class="vmicres" id="wdMicRes" style="margin-top:8px"></div>
   </div>`;
 }
-function isMine(id){ return id.startsWith("c")||isSaved(id); }
+// 自訂字 id 為 "c"+時間戳；課程片語 id 為 "cp:…"，不可只用開頭 c 判斷
+function isCustomId(id){ return /^c\d/.test(String(id||"")); }
+function isMine(id){ return isCustomId(id)||isSaved(id); }
 async function openWordDetail(id){
   const v=VBY()[id]; if(!v) return; wdId=id; const my=++wdTok;
-  const need=id.startsWith("c")&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine;
+  const need=isCustomId(id)&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine;
   $("wdView").innerHTML=wdHtml(v,need); $("wdView").classList.remove("hidden"); $("wdView").scrollTop=0; document.body.classList.add("wdopen");
   speak(v.w,false);
   if(need){ const d=await onlineDetail(v.w); const c=state.custom.find(z=>z.id===id); if(c){ c._looked=true;
@@ -3960,7 +4358,7 @@ $("btnHF").onclick=()=>{ opt.hf=!opt.hf; state.opt={...opt}; save(); syncHF();
   if(!opt.hf){ clearTimeout(cdTimer); cdTimer=null; $("btnNext").classList.remove("counting"); }
   else { const c=deck[ci]; if(c&&(st==="pass"||st==="show"||st==="quiet")) hfNext(1500); else if(c&&st==="turn"&&dict&&!opt.nomic) startListen(true); } };
 syncHF();
-$("btnSmart").onclick=startSmartReview;
+$("btnSmart").onclick=()=>{ if(mwFilter==="all") startSmartReview(); else startSavedReview(mwFilter); };   // 兩個複習按鈕合併為一個
 $("btnMain").onclick=mainBtn;
 $("btnPrev").onclick=()=>go(ci-1,true);
 $("btnNext").onclick=()=>go(ci+1,true);
@@ -3974,7 +4372,7 @@ $("btnFMore").onclick=()=>{ const v=vq[vpos]; if(!v) return;
   openSheet(`<h2 style="word-break:break-word">${esc(v.w)}</h2><p class="muted" style="margin-top:-6px">${esc(v.zh)}</p>
     <button class="opt" data-fm="copy"><b>複製單字</b></button>
     <button class="opt" data-fm="phon"><b>完整發音拆解</b></button>
-    ${v.id.startsWith("c")?`<button class="opt" data-fm="del"><b style="color:var(--bad)">從我的單字庫刪除</b></button>`:""}`); };
+    ${isCustomId(v.id)?`<button class="opt" data-fm="del"><b style="color:var(--bad)">從我的單字庫刪除</b></button>`:""}`); };
 document.addEventListener("click",async e=>{ const b=e.target.closest("#sheet [data-fm]"); if(!b) return; const v=vq[vpos]; if(!v) return; const k=b.dataset.fm;
   if(k==="copy"){ closeSheet(); try{ await navigator.clipboard.writeText(v.w); toast("已複製「"+v.w+"」"); }catch(err){ toast("無法複製"); } }
   else if(k==="phon"){ phonSheet(v.w); }
@@ -3982,7 +4380,7 @@ document.addEventListener("click",async e=>{ const b=e.target.closest("#sheet [d
     vq.splice(vpos,1); if(!vq.length){ endVocab(); return; } vpos=Math.min(vpos,vq.length-1); renderFlash(); } });
 $("fPhon").onclick=e=>{ const b=e.target.closest("[data-phx]"); if(!b) return; const v=vq[vpos], f=$("fPhonFull"); if(!v||!f) return;
   const open=f.classList.toggle("hidden")===false; if(open&&!f.innerHTML) f.innerHTML=phonFull(v.w); b.textContent=open?"收合 ▴":"拆解 ▾"; };
-$("btnFSave").onclick=()=>{ const v=vq[vpos]; if(v.id.startsWith("c")){ toast("自訂字可按「⋯」刪除"); return; } const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); renderFlash(true); toast(on?"已加入收藏":"已取消收藏"); };
+$("btnFSave").onclick=()=>{ const v=vq[vpos]; if(isCustomId(v.id)){ toast("自訂字可按「⋯」刪除"); return; } const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); renderFlash(true); toast(on?"已加入收藏":"已取消收藏"); };
 $("fSyn").onclick=e=>{ const s=e.target.closest("[data-synsave]"); if(s){ toggleSynSave(s.dataset.synsave,s.dataset.zh); const on=synSaved(s.dataset.synsave); s.classList.toggle("on",on); s.innerHTML=on?SV_ON:SV_ICON; return; } const b=e.target.closest("[data-say]"); if(b) speak(b.dataset.say,false); };
 $("btnFClose").onclick=endVocab;
 // 使用者要求：背單字可以回上一個
@@ -4020,7 +4418,7 @@ $("wdView").onclick=async e=>{
   const k=a.dataset.wdact;
   if(k==="close") closeWordDetail();
   else if(k==="copy"){ try{ await navigator.clipboard.writeText(v.w); toast("已複製「"+v.w+"」"); }catch(err){ toast("無法複製"); } }
-  else if(k==="save"){ if(v.id.startsWith("c")){ if(!confirm("要從我的單字庫刪除「"+v.w+"」嗎？")) return; delWord(v.id); toast("已刪除"); closeWordDetail(); return; }
+  else if(k==="save"){ if(isCustomId(v.id)){ if(!confirm("要從我的單字庫刪除「"+v.w+"」嗎？")) return; delWord(v.id); toast("已刪除"); closeWordDetail(); return; }
     const on=!isSaved(v.id); state.saved[v.id]={on,t:Date.now()}; save(); toast(on?"已加入我的單字庫":"已從我的單字庫移除"); $("wdView").innerHTML=wdHtml(v,false); }
   else if(k==="mic") vocabMic("w",{v,btn:a,res:$("wdMicRes"),box:$("wdView").querySelector("h1")});
   else if(k==="practice"){ closeWordDetail(); startVocab([v],"saved"); }
@@ -4034,6 +4432,9 @@ $("btnMeLevel").onclick=levelSheet;
 function syncSrx(){ $("srxVal").textContent=opt.srm==="std"?"標準":"連續"; $("srxVal").style.color="#7ea0ff"; }
 $("btnSrx").onclick=()=>{ opt.srm=opt.srm==="std"?"cont":"std"; state.opt={...opt}; save(); syncSrx(); toast(opt.srm==="std"?"已改為標準模式（一停頓就評分）":"已改為連續模式（停頓 3.5 秒或按停止才評分）"); };
 syncSrx();
+function syncVmin(){ $("vminVal").textContent=(opt.vmin||20)+" 分鐘"; }
+$("btnVmin").onclick=()=>{ const l=[10,20,30]; opt.vmin=l[(l.indexOf(opt.vmin||20)+1)%l.length]; state.opt={...opt}; save(); syncVmin(); renderVocab(); renderHome(); toast("每日背單字改為約 "+opt.vmin+" 分鐘"); };
+syncVmin();
 // 收音測試（除錯用）：每按一次建立新的辨識，記錄所有事件，可連按數次檢查第二次以後是否還能收音
 $("btnMicTest").onclick=()=>{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   openSheet(`<h2>麥克風收音測試</h2><p class="muted" style="margin-top:0">按「開始」後說 hello，再按「停止」；連續測 3 次。完成後截圖這個畫面。</p>
