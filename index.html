@@ -609,6 +609,7 @@ nav{bottom:max(14px,env(safe-area-inset-bottom,0px))}
       <div class="setrow setgrp">學習設定</div>
       <button class="setrow" id="btnMeLevel"><span>課程級別</span><b id="meLevel"></b><i>›</i></button>
       <button class="setrow" id="btnVmin"><span>每日背單字時間<small class="muted" style="display:block">依時間自動安排本單元的新字與複習</small></span><b id="vminVal" style="color:#7ea0ff">20 分鐘</b></button>
+      <button class="setrow" id="btnPassLv"><span>及格分數<small class="muted" style="display:block">發音標準卻常沒過時，可改為 70 分（較寬鬆）</small></span><b id="passVal" style="color:#7ea0ff">80 分</b></button>
       <div class="setrow setgrp">聲音與收音</div>
       <div class="setrow"><span>發音語速</span><button class="rateBtn">語速 1x</button></div>
       <button class="setrow voiceBtn"><span>發音人聲</span><b>選擇</b><i>›</i></button>
@@ -2997,7 +2998,7 @@ function addCoursePhrases(){
   }
 }
 const LS_KEY = "speak20_state_v1";
-const passOf = s => LEVELS[(s.lv||2)-1].pass;
+const passOf = s => LEVELS[(s.lv||2)-1].pass - (opt.pass===70?10:0);   // 「我的 → 及格分數」選 70 時，各級別及格分數降 10 分
 const isPass = s => (state.best[s.id]||0) >= passOf(s);
 
 // ===================== 狀態 =====================
@@ -3118,9 +3119,9 @@ function wsDict(){
       const mk=(first,res,rej)=>{
         let r; try{ r=new SR(); }catch(e){ ses.want=false; if(first){ isUserListening=false; rej({code:"error"}); } else idle(); return; }
         // iPhone 收音模式（opt.srm）：連續（預設，收音直到停頓 3.5 秒或按停止）／標準（Safari 一停頓就結束）
-        rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI||opt.srm!=="std"; r.maxAlternatives=1;
+        rec=r; r.lang="en-US"; r.interimResults=true; r.continuous=!IS_SAFARI||opt.srm!=="std"; r.maxAlternatives=5;
         r.onstart=()=>{ running=true; if(cur!==ses) return; SRD.on++; micPill("on"); if(!ses.ok){ ses.ok=true; h.s&&h.s({state:"listening"}); res&&res(); } };
-        r.onresult=e=>{ if(cur!==ses) return; SRD.res++; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal){ const t=x[0].transcript.trim(); if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } } else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
+        r.onresult=e=>{ if(cur!==ses) return; SRD.res++; let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const x=e.results[i]; if(x.isFinal){ const t=bestAlt(x); if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } } else interim+=x[0].transcript; } ses.interim=interim; h.p&&h.p({text:interim}); };
         r.onerror=ev=>{ if(ev.error==="no-speech"||ev.error==="aborted"){ if(ses.ok||!first) return; } SRD.err=ev.error||"error"; const c=(ev.error==="not-allowed"||ev.error==="service-not-allowed")?"not_granted":ev.error||"error"; if(c==="not_granted"||c==="audio-capture") ses.want=false; if(!ses.ok&&first){ ses.want=false; isUserListening=false; rej({code:c}); } };
         r.onend=()=>{ running=false; if(cur!==ses) return; SRD.end++;
           if(ses.interim){ const t=ses.interim.trim(); ses.interim=""; if(t&&t.toLowerCase()!==ses.lastF){ ses.lastF=t.toLowerCase(); h.f&&h.f({text:t}); } }
@@ -3242,32 +3243,75 @@ async function speakCore(text,slow){
   }
   await speakFallback(text, slow?0.7:curRate()*0.95);
 }
+// 辨識引擎會給多個候選答案：挑與目前要唸的句子最接近的一個
+function srTarget(){ try{ if(typeof vmic!=="undefined"&&vmic) return vmic.target;
+  if(document.body.classList.contains("lesson")){ const c=deck[ci]; return c&&c.s?c.s.en:(c&&c.v?c.v.w:""); }
+  if(typeof pcur!=="undefined"&&pcur>=0&&queue[pcur]) return queue[pcur].en; }catch(e){} return ""; }
+function bestAlt(x){ const alts=[]; for(let j=0;j<x.length;j++){ const t=(x[j]&&x[j].transcript||"").trim(); if(t) alts.push(t); }
+  if(alts.length<2) return alts[0]||""; const en=srTarget(); if(!en) return alts[0];
+  const tg=norm(en); let best=alts[0], bs=-1;
+  alts.forEach(a=>{ const sc=lcsMatch(tg,norm(a)).filter(Boolean).length; if(sc>bs){ bs=sc; best=a; } }); return best; }
 function stopSpeech(){ try{ tts&&tts.stop(); }catch(e){} try{ window.speechSynthesis&&speechSynthesis.cancel(); }catch(e){} }
 
 // ===================== 評分 =====================
 const CONTR = {"i'm":"i am","i'd":"i would","i'll":"i will","i've":"i have","you're":"you are","you've":"you have","you'll":"you will","it's":"it is","that's":"that is","what's":"what is","let's":"let us","don't":"do not","doesn't":"does not","didn't":"did not","can't":"cannot","won't":"will not","isn't":"is not","aren't":"are not","wasn't":"was not","haven't":"have not","hasn't":"has not","wouldn't":"would not","couldn't":"could not","there's":"there is","we're":"we are","we've":"we have","we'll":"we will","we'd":"we would","they're":"they are","he's":"he is","she's":"she is","how's":"how is","where's":"where is","who's":"who is","here's":"here is"};
 const NUM = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
-const TENS = {30:"thirty",40:"forty",50:"fifty",60:"sixty"};
+const TENS = {20:"twenty",30:"thirty",40:"forty",50:"fifty",60:"sixty",70:"seventy",80:"eighty",90:"ninety"};
 function norm(s){
   return s.toLowerCase().replace(/[’‘]/g,"'").replace(/%/g," percent").replace(/-/g," ").replace(/[^a-z0-9' ]+/g," ").split(/\s+/).filter(Boolean)
     .flatMap(w=>{ w=w.replace(/^'+|'+$/g,""); if(CONTR[w]) return CONTR[w].split(" ");
-      if(/^\d+$/.test(w)){ const n=+w; if(n<NUM.length) return [NUM[n]]; if(TENS[n]) return [TENS[n]]; }
+      if(/^\d+$/.test(w)){ const n=+w; if(n<NUM.length) return [NUM[n]]; if(TENS[n]) return [TENS[n]]; if(n<100) return [TENS[n-n%10],NUM[n%10]]; if(n===100) return ["one","hundred"]; }
       if(w==="ok") return ["okay"]; return w?[w]:[]; });
 }
+// 使用者回報「發音標準卻一直不過」：語音辨識常把正確發音寫成同音字、單複數或時態不同的字，
+// 評分改為寬鬆比對（只影響「算不算唸對」，不改變辨識本身）
+const HOMO=[["to","two","too"],["for","four","fore"],["right","write"],["no","know"],["new","knew"],["here","hear"],["see","sea"],["by","buy","bye"],
+ ["wait","weight"],["week","weak"],["hour","our"],["one","won"],["eight","ate"],["whole","hole"],["meet","meat"],["pair","pear"],["flour","flower"],
+ ["peace","piece"],["sun","son"],["mail","male"],["sale","sail"],["cent","sent","scent"],["road","rode"],["blue","blew"],["through","threw"],
+ ["weather","whether"],["would","wood"],["i","eye"],["be","bee"],["dear","deer"],["fair","fare"],["cell","sell"],["there","their"],["then","than"],
+ ["break","brake"],["plain","plane"],["steal","steel"],["tail","tale"],["waste","waist"],["wear","where"],["which","witch"],["role","roll"],["sore","soar"],
+ ["higher","hire"],["allowed","aloud"],["bored","board"],["missed","mist"],["passed","past"],["guessed","guest"],["ok","okay"],["mister","mr"],["doctor","dr"]];
+const HMAP=new Map(); HOMO.forEach(g=>g.forEach(w=>HMAP.set(w,g[0])));
+function stemW(w){
+  if(w.length<=3) return w;
+  if(/ies$/.test(w)&&w.length>4) w=w.slice(0,-3)+"y";
+  else if(/ing$/.test(w)&&w.length>5) w=w.slice(0,-3);
+  else if(/ed$/.test(w)&&w.length>4) w=w.slice(0,-2);
+  else if(/es$/.test(w)&&w.length>4) w=w.slice(0,-2);
+  else if(/s$/.test(w)&&!/ss$/.test(w)) w=w.slice(0,-1);
+  return w.replace(/(.)\1$/,"$1").replace(/e$/,"");
+}
+const canonW=w=>stemW(HMAP.get(w)||w);
+function near1(a,b){ if(Math.abs(a.length-b.length)>1) return false; let i=0,j=0,d=0;
+  while(i<a.length&&j<b.length){ if(a[i]===b[j]){i++;j++;continue;} if(++d>1) return false;
+    if(a.length>b.length) i++; else if(b.length>a.length) j++; else {i++;j++;} }
+  return d+(a.length-i)+(b.length-j)<=1; }
+function wEq(a,b){ if(a===b) return true; const ca=canonW(a), cb=canonW(b); if(ca===cb) return true; return a.length>=5&&b.length>=5&&near1(a,b); }
+// 複合字：takeout ↔ take out、check in ↔ checkin
+function fixCompound(t,sp){ const T=new Set(t), out=[];
+  for(let i=0;i<sp.length;i++){ const w=sp[i];
+    if(!T.has(w)&&i+1<sp.length&&T.has(w+sp[i+1])){ out.push(w+sp[i+1]); i++; continue; }
+    if(!T.has(w)){ let k=-1; for(let j=0;j+1<t.length;j++) if(t[j]+t[j+1]===w){ k=j; break; } if(k>=0){ out.push(t[k],t[k+1]); continue; } }
+    out.push(w); }
+  return out; }
 function lcsMatch(a,b){
+  b=fixCompound(a,b);
   const n=a.length,m=b.length,dp=Array.from({length:n+1},()=>new Array(m+1).fill(0));
-  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--) dp[i][j]= a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--) dp[i][j]= wEq(a[i],b[j])?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
   const hit=new Array(n).fill(false); let i=0,j=0;
-  while(i<n&&j<m){ if(a[i]===b[j]){hit[i]=true;i++;j++;} else if(dp[i+1][j]>=dp[i][j+1]) i++; else j++; }
+  while(i<n&&j<m){ if(wEq(a[i],b[j])){hit[i]=true;i++;j++;} else if(dp[i+1][j]>=dp[i][j+1]) i++; else j++; }
   return hit;
 }
+// 縮寫（I'd、we'll、you're、it's）常被辨識成只剩前半，前半唸對就算對；否定縮寫（don't）仍要完整
+const softContr=w=>/'(d|ll|ve|re|s|m)$/i.test(String(w).replace(/[^a-z'’]/gi,"").replace(/’/g,"'"));
+function unitOk(w,hitSlice){ return hitSlice.length>0&&(hitSlice.every(Boolean)||(softContr(w)&&hitSlice[0])); }
 // 回傳 {sc, html}
 // got：之前幾次已唸對的字（索引集合），會累計保留成藍色
 function scoreText(en, spoken, got){
   const disp=en.split(/\s+/), units=disp.map(w=>norm(w));
   const target=units.flat(), hit=lcsMatch(target,norm(spoken));
   const okIdx=new Set(got||[]); let k=0, total=0;
-  disp.forEach((w,idx)=>{ const n=units[idx].length; if(n>0){ total++; if(hit.slice(k,k+n).every(Boolean)) okIdx.add(idx); } k+=n; });
+  disp.forEach((w,idx)=>{ const n=units[idx].length; if(n>0){ total++; if(unitOk(w,hit.slice(k,k+n))) okIdx.add(idx); } k+=n; });
   const html=disp.map((w,idx)=>{ const ok=units[idx].length===0||okIdx.has(idx); return `<span class="w wd ${ok?"ok":"no"}" data-k="${idx}">${esc(w)}</span>`; }).join(" ");
   const okN=[...okIdx].filter(i=>units[i]&&units[i].length>0).length;
   return {sc:Math.round(100*okN/Math.max(1,total)), html, okIdx};
@@ -3278,7 +3322,7 @@ function recordScore(s,sc){
 // 收音中即時標示：已唸對的字轉藍色（只標對的，不即時標錯）
 function liveMark(box,en,said,got){ if(!box) return; const el=box.querySelector(".en"); if(!el) return;
   const disp=en.split(/\s+/), units=disp.map(w=>norm(w)), hit=lcsMatch(units.flat(),norm(said||""));
-  let k=0; el.querySelectorAll(".wd").forEach((sp,idx)=>{ const n=(units[idx]||[]).length; const ok=(n>0&&hit.slice(k,k+n).every(Boolean))||(got&&got.has(idx)); k+=n; sp.classList.toggle("live",!!ok); }); }
+  let k=0; el.querySelectorAll(".wd").forEach((sp,idx)=>{ const n=(units[idx]||[]).length; const ok=(n>0&&unitOk(disp[idx],hit.slice(k,k+n)))||(got&&got.has(idx)); k+=n; sp.classList.toggle("live",!!ok); }); }
 // 複習挖空（比照 Speak Review）：挑句中較長的實詞遮成灰框，唸對才顯示
 const STOPW=new Set("the a an to of in on at for and or but is are was were be been am i you he she it we they my your his her our their this that with from by as do does did not no so very".split(" "));
 function clozeIdx(en){ return new Set(); // 使用者要求：複習時單字不要遮起來
@@ -3917,7 +3961,7 @@ function vocabMic(kind,o){
   vmic.max=setTimeout(vmicFinish, 7000+1000*target.split(/\s+/).length);
 }
 function vmicHeard(){ if(!vmic) return; const t=(finalText+" "+partialText).trim(); vmic.res.className="vmicres"; vmic.res.textContent="聽到："+t;
-  liveMark({querySelector:()=>vmic.box},vmic.target,t); clearTimeout(vmic.sil); let full=false; try{ full=scoreText(vmic.target,t).sc===100; }catch(e){} vmic.sil=setTimeout(vmicFinish,full?600:3000); }
+  liveMark({querySelector:()=>vmic.box},vmic.target,t); clearTimeout(vmic.sil); let full=false; try{ full=scoreText(vmic.target,t).sc===100; }catch(e){} vmic.sil=setTimeout(vmicFinish,full?600:3500); }
 async function vmicFinish(){
   const m=vmic; if(!m) return; clearTimeout(m.sil); clearTimeout(m.max);
   if(listening){ listening=false; try{ await dict.stop(); }catch(e){} }
@@ -3925,7 +3969,7 @@ async function vmicFinish(){
   const said=(finalText+" "+partialText).trim();
   if(!said){ m.res.className="vmicres no"; m.res.textContent="沒有聽到聲音，請再按一次麥克風"+srDiag(); return; }
   const {sc,html}=scoreText(m.target,said); m.box.innerHTML=html;
-  const pass=sc>=80;
+  const pass=sc>=(opt.pass===70?70:80);
   m.box.classList.toggle("ok",pass);
   m.res.className="vmicres "+(pass?"ok":"no");
   m.res.textContent=(pass?"✓ ":"💪 ")+praise(sc)+"（聽到："+said+"）";
@@ -4432,6 +4476,9 @@ $("btnMeLevel").onclick=levelSheet;
 function syncSrx(){ $("srxVal").textContent=opt.srm==="std"?"標準":"連續"; $("srxVal").style.color="#7ea0ff"; }
 $("btnSrx").onclick=()=>{ opt.srm=opt.srm==="std"?"cont":"std"; state.opt={...opt}; save(); syncSrx(); toast(opt.srm==="std"?"已改為標準模式（一停頓就評分）":"已改為連續模式（停頓 3.5 秒或按停止才評分）"); };
 syncSrx();
+function syncPass(){ $("passVal").textContent=(opt.pass===70?"70 分（寬鬆）":"80 分（標準）"); }
+$("btnPassLv").onclick=()=>{ opt.pass=opt.pass===70?80:70; state.opt={...opt}; save(); syncPass(); renderHome(); toast("及格分數改為 "+(opt.pass===70?"70":"80")+" 分（進階級 "+(opt.pass===70?"75":"85")+" 分）"); };
+syncPass();
 function syncVmin(){ $("vminVal").textContent=(opt.vmin||20)+" 分鐘"; }
 $("btnVmin").onclick=()=>{ const l=[10,20,30]; opt.vmin=l[(l.indexOf(opt.vmin||20)+1)%l.length]; state.opt={...opt}; save(); syncVmin(); renderVocab(); renderHome(); toast("每日背單字改為約 "+opt.vmin+" 分鐘"); };
 syncVmin();
