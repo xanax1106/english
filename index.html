@@ -307,6 +307,9 @@ body.ending #v-practice .ctl,body.ending #segs,body.ending #btnNoMic,body.ending
 .kwe .spk svg{width:18px;height:18px;fill:currentColor}
 .kwe .ic.on{color:#7ea0ff}
 /* 整合單字卡：✕ 結束、⋯ 更多、底部與課程相同的 上一個／麥克風／下一個 */
+.fauto{min-height:34px;padding:4px 10px;font-size:13px;border-radius:20px;background:#262a33;color:var(--sub);font-weight:700}
+.fauto.on{background:#1c2a44;color:#9fb4ff;box-shadow:inset 0 0 0 1.5px #4c7dff}
+.fauto.on::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:5px;vertical-align:1px}
 .circ.fclose{width:40px;height:40px}.circ.fclose svg{width:20px;height:20px}
 .fmore{font-size:24px;font-weight:800;line-height:1;letter-spacing:1px}
 .fctl{gap:22px;padding:4px 0 30px}
@@ -498,7 +501,7 @@ nav{bottom:max(14px,env(safe-area-inset-bottom,0px))}
     </div>
     <div class="card hidden" id="flash">
       <div class="row" style="justify-content:space-between">
-        <span class="row" style="gap:10px;flex-wrap:nowrap"><button class="circ fclose" id="btnFClose" aria-label="結束"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button><span class="tag" id="fTag"></span></span><span class="row" style="gap:8px"><button class="rateBtn" style="min-height:34px;padding:4px 12px;font-size:14px;border-radius:20px">語速 1x</button><span class="prog" id="fProg"></span></span>
+        <span class="row" style="gap:10px;flex-wrap:nowrap"><button class="circ fclose" id="btnFClose" aria-label="結束"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button><span class="tag" id="fTag"></span></span><span class="row" style="gap:6px"><button class="fauto" id="btnFAuto" aria-label="自動連續模式">自動</button><button class="rateBtn" style="min-height:34px;padding:4px 12px;font-size:14px;border-radius:20px">語速 1x</button><span class="prog" id="fProg"></span></span>
       </div>
       <div class="fc-head">
         <div class="fc-word" id="fWord"></div>
@@ -3941,8 +3944,20 @@ const ivLabel = n => n>=30 ? Math.round(n/30)+" 個月" : n+" 天";
 const SPK='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 // ===== 單字卡：收音判讀（單字或例句）=====
 let vmic=null; // {target, btn, res, box, timer}
-function vmicReset(){ if(vmic){ clearTimeout(vmic.sil); clearTimeout(vmic.max); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } vmic.btn.classList.remove("rec"); vmic.btn.querySelector("span").textContent=vmic.label; } vmic=null; }
-function vocabMic(kind,o){
+function vmicReset(){ vAutoTok++;  if(vmic){ clearTimeout(vmic.sil); clearTimeout(vmic.max); if(listening&&dict){ listening=false; dict.stop().catch(()=>{}); } vmic.btn.classList.remove("rec"); vmic.btn.querySelector("span").textContent=vmic.label; } vmic=null; }
+// ===== 背單字自動連續模式（使用者要求：系統唸一遍 → 自動收音 → 判讀 → 唸對自動換下一張）=====
+// 沒唸對：再示範一次、再收一次（最多 2 次）後停在該張；沒出聲會暫停自動流程；點其他按鈕即以使用者操作為準
+let vAutoTok=0, vAutoTry=0, vAutoPaused=false, vAutoArmed=!IS_SAFARI;
+function vAutoOn(){ if(opt.vauto===false||opt.nomic) return false; if(!dict){ try{ const w=wsDict(); if(w) wireDict(w); }catch(e){} } return !!dict; }
+function vAutoSync(){ const b=$("btnFAuto"); if(b){ b.classList.toggle("on",opt.vauto!==false); b.textContent=opt.vauto!==false?"自動":"手動"; } }
+function vAutoAfterSpeak(tok){
+  if(tok!==vAutoTok||!vAutoOn()||vAutoPaused||$("flash").classList.contains("hidden")||vmic) return;
+  if(!vAutoArmed){ $("fMicRes").className="vmicres"; $("fMicRes").textContent="👆 點一下麥克風開始自動練習（之後會自動收音、唸對自動換下一張）"; return; }
+  setTimeout(()=>{ if(tok===vAutoTok&&!vmic&&!vAutoPaused) vocabMic("w",null,true); },300);
+}
+function vAutoPause(msg){ vAutoPaused=true; vAutoTok++; const r=$("fMicRes"); if(r){ r.className="vmicres"; r.textContent=msg||"⏸ 已暫停自動練習・點麥克風繼續"; } }
+function vocabMic(kind,o,auto){
+  if(!auto&&kind==="w"&&!o){ vAutoArmed=true; vAutoPaused=false; }   // 手動點麥克風＝開始／繼續自動流程（iPhone 需由點按開啟麥克風）
   const v=o?o.v:vq[vpos]; if(!v) return;
   if(vmic&&vmic.kind===kind&&listening){ vmicFinish(); return; }
   vmicReset();
@@ -3957,7 +3972,7 @@ function vocabMic(kind,o){
   const p=dict.start();
   // 4 秒後仍沒聽到任何聲音：提示檢查麥克風
   p.then(()=>{ const m=vmic; setTimeout(()=>{ if(vmic===m&&m&&listening&&!finalText&&!partialText){ m.res.className="vmicres"; m.res.textContent="聆聽中…請大聲唸："+m.target+"（若一直沒反應，請確認 Safari 已允許麥克風，並開啟 Siri 與聽寫）"; } },4000); }).catch(()=>{});
-  p.catch(e=>{ const m=vmic; vmicReset(); if(m){ m.res.className="vmicres no"; m.res.innerHTML=(e&&e.code==="not_granted"?"麥克風未被允許。":"無法開始收音，請再按一次。")+(e&&e.code==="not_granted"?NOMIC_MSG:""); } });
+  p.catch(e=>{ const m=vmic; vmicReset(); if(auto&&!(e&&e.code==="not_granted")){ vAutoArmed=false; vAutoPause("👆 點一下麥克風繼續（iPhone 需要點按才能開麥克風）"); return; } if(m){ m.res.className="vmicres no"; m.res.innerHTML=(e&&e.code==="not_granted"?"麥克風未被允許。":"無法開始收音，請再按一次。")+(e&&e.code==="not_granted"?NOMIC_MSG:""); } });
   vmic.max=setTimeout(vmicFinish, 7000+1000*target.split(/\s+/).length);
 }
 function vmicHeard(){ if(!vmic) return; const t=(finalText+" "+partialText).trim(); vmic.res.className="vmicres"; vmic.res.textContent="聽到："+t;
@@ -3967,7 +3982,8 @@ async function vmicFinish(){
   if(listening){ listening=false; try{ await dict.stop(); }catch(e){} }
   m.btn.classList.remove("rec"); m.btn.querySelector("span").textContent=m.label; vmic=null;
   const said=(finalText+" "+partialText).trim();
-  if(!said){ m.res.className="vmicres no"; m.res.textContent="沒有聽到聲音，請再按一次麥克風"+srDiag(); return; }
+  if(!said){ if(m.kind==="w"&&!m.wd&&vAutoOn()){ vAutoPause("⏸ 沒有聽到聲音，已暫停自動練習・點麥克風繼續"); return; }
+    m.res.className="vmicres no"; m.res.textContent="沒有聽到聲音，請再按一次麥克風"+srDiag(); return; }
   const {sc,html}=scoreText(m.target,said); m.box.innerHTML=html;
   const pass=sc>=(opt.pass===70?70:80);
   m.box.classList.toggle("ok",pass);
@@ -3975,6 +3991,13 @@ async function vmicFinish(){
   m.res.textContent=(pass?"✓ ":"💪 ")+praise(sc)+"（聽到："+said+"）";
   if(pass&&m.kind==="w"){ const v=m.v; if(v){ state.best["vw:"+v.id]=Math.max(state.best["vw:"+v.id]||0,sc); save(); } }
   if(pass&&!m.wd){ const v=m.v; if(v){ const first=!vOk.has(v.id); vOk.add(v.id); if(vMode==="browse"&&first) rate(2,true); const r=state.vocab[v.id]; vHint(v,r?Math.max(0,r.b-(vMode==="browse"?1:0)):0); } }
+  // 自動連續模式：唸對 0.8 秒後換下一張；沒唸對再示範＋收音，最多 2 次
+  if(m.kind==="w"&&!m.wd&&vAutoOn()&&!vAutoPaused){
+    const tok=++vAutoTok, id=m.v&&m.v.id;
+    if(pass){ setTimeout(()=>{ if(tok===vAutoTok&&vq[vpos]&&vq[vpos].id===id&&!$("flash").classList.contains("hidden")) $("btnFNext").click(); },800); }
+    else if(++vAutoTry<=2){ m.res.textContent+="　→ 再聽一次示範"; setTimeout(()=>{ if(tok!==vAutoTok) return; Promise.resolve(speak(m.target,false)).then(()=>vAutoAfterSpeak(tok)); },900); }
+    else { m.res.textContent+="　→ 可再按麥克風試試，或按「下一個」"; }
+  }
 }
 function renderFlash(quiet){
   vmicReset(); ["fMicRes","fExMicRes"].forEach(i=>{ $(i).textContent=""; $(i).className="vmicres"; }); $("fWord").classList.remove("ok"); $("fEx").classList.remove("ok");
@@ -3994,7 +4017,8 @@ function renderFlash(quiet){
   const b=r?r.b:0;
   vHint(v,b);
   $("fNextLbl").textContent=vpos<vq.length-1?"下一個":"完成";
-  if(!quiet){ window.scrollTo(0,0); speak(v.w,false); }
+  vAutoSync();
+  if(!quiet){ window.scrollTo(0,0); vAutoTry=0; const tok=++vAutoTok; Promise.resolve(speak(v.w,false)).then(()=>vAutoAfterSpeak(tok)); }
   // 自訂字缺解釋／例句：線上補查，查到後更新目前這張卡
   const need=isCustomId(v.id)&&!v.exp&&!v.ex&&!v._looked&&navigator.onLine&&typeof onlineDetail==="function";
   if(need){ const id=v.id; $("fNextHint").textContent="正在查詢解釋與例句…";
@@ -4410,6 +4434,8 @@ $("pCard").onclick=lessonClick;
 $("btnVocab").onclick=()=>startVocab();
 $("btnFPlay").onclick=()=>speak(vq[vpos].w,false);
 $("btnFMic").onclick=()=>vocabMic("w");
+$("btnFAuto").onclick=()=>{ opt.vauto=opt.vauto===false; state.opt={...opt}; save(); vAutoSync(); vAutoTok++; vAutoPaused=false;
+  toast(opt.vauto!==false?"自動連續模式：唸一遍→收音→唸對自動下一張":"已改為手動模式"); if(opt.vauto!==false&&!vmic) vAutoAfterSpeak(vAutoTok); };
 $("btnFExMic").onclick=()=>vocabMic("e");
 $("btnFEx").onclick=()=>speak(vq[vpos].ex,false);
 $("btnFMore").onclick=()=>{ const v=vq[vpos]; if(!v) return;

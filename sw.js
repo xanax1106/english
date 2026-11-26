@@ -3,7 +3,7 @@
  * 更新程式後，把下面的 CACHE_VERSION 改成新的版本號再上傳
  * （網路優先，所以不改也會抓到新版；改版本號可順便清掉舊快取）
  * ============================================================ */
-const CACHE_VERSION = "v2026.11.25-1";
+const CACHE_VERSION = "v2026.11.25-2";
 
 const CACHE_PREFIX = "speak20-";
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
